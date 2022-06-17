@@ -8,6 +8,4 @@ public class BarleyCropBlock extends BrewchemyCropBlock {
         super(properties);
     }
 
-
-
 }

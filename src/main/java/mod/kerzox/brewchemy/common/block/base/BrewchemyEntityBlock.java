@@ -22,10 +22,6 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
         this.type = type;
     }
 
-    public BrewchemyEntityBlock(Properties properties) {
-        super(properties);
-    }
-
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
