@@ -1,6 +1,6 @@
 package mod.kerzox.brewchemy.common.blockentity;
 
-import mod.kerzox.brewchemy.common.block.BrewchemyBlock;
+import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;

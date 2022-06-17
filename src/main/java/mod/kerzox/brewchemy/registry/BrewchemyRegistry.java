@@ -1,7 +1,8 @@
 package mod.kerzox.brewchemy.registry;
 
-import mod.kerzox.brewchemy.common.block.BrewchemyEntityBlock;
-import mod.kerzox.brewchemy.common.blockentity.BrewchemyBlockEntity;
+import mod.kerzox.brewchemy.common.block.BarleyCropBlock;
+import mod.kerzox.brewchemy.common.block.base.BrewchemyBlock;
+import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.BrewingPotBlockEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -45,6 +46,7 @@ public class BrewchemyRegistry {
         public static void init(){}
 
         public static final makeBlock<BrewchemyEntityBlock<BrewingPotBlockEntity>> BREWING_POT_BLOCK = makeBlock.build("brewing_pot_block", p -> new BrewchemyEntityBlock<>(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL));
+        public static final makeBlock<BarleyCropBlock> BARLEY_CROP_BLOCK = makeBlock.build("barley_crop", BarleyCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT));
 
     }
 
@@ -53,7 +55,6 @@ public class BrewchemyRegistry {
         public static void init(){}
 
         public static final makeBlockEntity<BrewingPotBlockEntity> BREWING_POT = makeBlockEntity.build("brewing_pot_be", BrewingPotBlockEntity::new, BREWING_POT_BLOCK);
-
     }
 
     public static class makeBlockEntity<T extends BlockEntity> implements Supplier<BlockEntityType<T>> {
@@ -62,9 +63,16 @@ public class BrewchemyRegistry {
 
         public static <T extends BlockEntity> makeBlockEntity<T> build(
                 String name,
-                BlockEntityType.BlockEntitySupplier<T> resource_name,
+                BlockEntityType.BlockEntitySupplier<T> blockEntitySupplier,
                 Supplier<? extends Block> valid) {
-            return new makeBlockEntity<T>(BLOCK_ENTITIES.register(name, () -> BlockEntityType.Builder.of(resource_name, valid.get()).build(null)));
+            return new makeBlockEntity<T>(BLOCK_ENTITIES.register(name, () -> BlockEntityType.Builder.of(blockEntitySupplier, valid.get()).build(null)));
+        }
+
+        public static <T extends BlockEntity> makeBlockEntity<T> buildEntityAndBlock(
+                String name,
+                BlockEntityType.BlockEntitySupplier<T> blockEntitySupplier,
+                makeBlock<?> valid) {
+            return new makeBlockEntity<T>(BLOCK_ENTITIES.register(name, () -> BlockEntityType.Builder.of(blockEntitySupplier, valid.get()).build(null)));
         }
 
         public makeBlockEntity(RegistryObject<BlockEntityType<T>> type) {
@@ -87,7 +95,10 @@ public class BrewchemyRegistry {
 
         private final RegistryObject<T> block;
 
-        private makeBlock(RegistryObject<T> block) {
+        private final String name;
+
+        private makeBlock(String name, RegistryObject<T> block) {
+            this.name = name;
             this.block = block;
             ENTRIES.add(this);
         }
@@ -95,12 +106,16 @@ public class BrewchemyRegistry {
         public static <T extends Block> makeBlock<T> build(String name, Function<BlockBehaviour.Properties, T> block, BlockBehaviour.Properties prop) {
             RegistryObject<T> ret = BLOCKS.register(name, () -> block.apply(prop));
             ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS)));
-            return new makeBlock<>(ret);
+            return new makeBlock<>(name, ret);
         }
 
         @Override
         public T get() {
             return this.block.get();
+        }
+
+        public String getName() {
+            return name;
         }
     }
 

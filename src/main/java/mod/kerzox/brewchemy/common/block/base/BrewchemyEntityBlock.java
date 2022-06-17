@@ -1,16 +1,15 @@
-package mod.kerzox.brewchemy.common.block;
+package mod.kerzox.brewchemy.common.block.base;
 
+import mod.kerzox.brewchemy.common.blockentity.BrewingPotBlockEntity;
 import mod.kerzox.brewchemy.common.util.IClientTickable;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +20,10 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
     public BrewchemyEntityBlock(RegistryObject<BlockEntityType<T>> type, Properties properties) {
         super(properties);
         this.type = type;
+    }
+
+    public BrewchemyEntityBlock(Properties properties) {
+        super(properties);
     }
 
     @Nullable

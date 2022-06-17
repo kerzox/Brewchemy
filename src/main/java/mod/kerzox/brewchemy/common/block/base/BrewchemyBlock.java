@@ -1,4 +1,4 @@
-package mod.kerzox.brewchemy.common.block;
+package mod.kerzox.brewchemy.common.block.base;
 
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;

@@ -3,6 +3,7 @@ package mod.kerzox.brewchemy;
 import com.mojang.logging.LogUtils;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -40,4 +41,5 @@ public class Brewchemy
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
     }
+
 }
