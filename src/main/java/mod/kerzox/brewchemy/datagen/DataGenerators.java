@@ -14,7 +14,6 @@ public class DataGenerators {
         DataGenerator gen = event.getGenerator();
         ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
         gen.addProvider(true, new GenerateBlockModels(gen, existingFileHelper));
-        System.out.println("am i running");
     }
 
 

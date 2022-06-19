@@ -1,0 +1,20 @@
+{
+  "textures": {
+    "all": "brewchemy:block/rope",
+    "particle": "brewchemy:block/rope"
+  },
+  "elements": [
+    {
+      "from": [7, 7, 7],
+      "to": [9, 9, 9],
+      "faces": {
+        "north": {"uv": [0, 0, 2, 2], "texture": "#all"},
+        "east": {"uv": [0, 0, 2, 2], "texture": "#all"},
+        "south": {"uv": [0, 0, 2, 2], "texture": "#all"},
+        "west": {"uv": [0, 0, 2, 2], "texture": "#all"},
+        "up": {"uv": [0, 0, 2, 2], "texture": "#all"},
+        "down": {"uv": [0, 0, 2, 2], "texture": "#all"}
+      }
+    }
+  ]
+}

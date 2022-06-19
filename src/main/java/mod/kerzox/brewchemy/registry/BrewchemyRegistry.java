@@ -2,17 +2,18 @@ package mod.kerzox.brewchemy.registry;
 
 import mod.kerzox.brewchemy.common.block.BarleyCropBlock;
 import mod.kerzox.brewchemy.common.block.HopsCropBlock;
+import mod.kerzox.brewchemy.common.block.rope.RopeBlock;
 import mod.kerzox.brewchemy.common.block.SupportStickBlock;
-import mod.kerzox.brewchemy.common.block.TwineBlock;
-import mod.kerzox.brewchemy.common.block.base.BrewchemyBlock;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.BrewingPotBlockEntity;
+import mod.kerzox.brewchemy.common.blockentity.RopeBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.SupportStickEntityBlock;
-import mod.kerzox.brewchemy.common.blockentity.TwineEntityBlock;
+import mod.kerzox.brewchemy.common.item.TwineItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -29,10 +30,11 @@ import java.util.function.Supplier;
 
 import static mod.kerzox.brewchemy.Brewchemy.MODID;
 import static mod.kerzox.brewchemy.registry.BrewchemyRegistry.BlockEntities.BREWING_POT;
-import static mod.kerzox.brewchemy.registry.BrewchemyRegistry.BlockEntities.TWINE;
 import static mod.kerzox.brewchemy.registry.BrewchemyRegistry.Blocks.*;
 
 public class BrewchemyRegistry {
+
+
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -42,8 +44,16 @@ public class BrewchemyRegistry {
         BLOCK_ENTITIES.register(bus);
         ITEMS.register(bus);
 
+        Items.init();
         Blocks.init();
         BlockEntities.init();
+
+    }
+
+    public static final class Items {
+        public static void init(){}
+
+        //public static RegistryObject<TwineItem> TWINE = ITEMS.register("twine_item", () -> new TwineItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
     }
 
@@ -51,11 +61,11 @@ public class BrewchemyRegistry {
 
         public static void init(){}
 
-        public static final makeBlock<BrewchemyEntityBlock<BrewingPotBlockEntity>> BREWING_POT_BLOCK = makeBlock.build("brewing_pot_block", p -> new BrewchemyEntityBlock<>(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL));
-        public static final makeBlock<BarleyCropBlock> BARLEY_CROP_BLOCK = makeBlock.build("barley_crop", BarleyCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT));
-        public static final makeBlock<HopsCropBlock> HOPS_CROP_BLOCK = makeBlock.build("hops_crop", HopsCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT));
-        public static final makeBlock<SupportStickBlock> SUPPORT_STICK_BLOCK = makeBlock.build("support_stick_block", SupportStickBlock::new, BlockBehaviour.Properties.of(Material.WOOD));
-        public static final makeBlock<TwineBlock> TWINE_BLOCK = makeBlock.build("twine_block", TwineBlock::new, BlockBehaviour.Properties.of(Material.WOOD));
+        public static final makeBlock<BrewchemyEntityBlock<BrewingPotBlockEntity>> BREWING_POT_BLOCK = makeBlock.build("brewing_pot_block", p -> new BrewchemyEntityBlock<>(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
+        public static final makeBlock<BarleyCropBlock> BARLEY_CROP_BLOCK = makeBlock.build("barley_crop", BarleyCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
+        public static final makeBlock<HopsCropBlock> HOPS_CROP_BLOCK = makeBlock.build("hops_crop", HopsCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
+        public static final makeBlock<SupportStickBlock> SUPPORT_STICK_BLOCK = makeBlock.build("support_stick_block", SupportStickBlock::new, BlockBehaviour.Properties.of(Material.WOOD), true);
+        public static final makeBlock<RopeBlock> ROPE_BLOCK = makeBlock.build("rope_block", RopeBlock::new, BlockBehaviour.Properties.of(Material.AIR).sound(SoundType.WOOL), true);
 
     }
 
@@ -65,7 +75,7 @@ public class BrewchemyRegistry {
 
         public static final makeBlockEntity<BrewingPotBlockEntity> BREWING_POT = makeBlockEntity.build("brewing_pot_be", BrewingPotBlockEntity::new, BREWING_POT_BLOCK);
         public static final makeBlockEntity<SupportStickEntityBlock> SUPPORT_STICK = makeBlockEntity.build("support_stick_be", SupportStickEntityBlock::new, SUPPORT_STICK_BLOCK);
-        public static final makeBlockEntity<TwineEntityBlock> TWINE = makeBlockEntity.build("twine_be", TwineEntityBlock::new, TWINE_BLOCK);
+        public static final makeBlockEntity<RopeBlockEntity> ROPE = makeBlockEntity.build("rope_be", RopeBlockEntity::new, ROPE_BLOCK);
 
 
     }
@@ -116,9 +126,9 @@ public class BrewchemyRegistry {
             ENTRIES.add(this);
         }
 
-        public static <T extends Block> makeBlock<T> build(String name, Function<BlockBehaviour.Properties, T> block, BlockBehaviour.Properties prop) {
+        public static <T extends Block> makeBlock<T> build(String name, Function<BlockBehaviour.Properties, T> block, BlockBehaviour.Properties prop, boolean asItem) {
             RegistryObject<T> ret = BLOCKS.register(name, () -> block.apply(prop));
-            ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS)));
+            if (asItem) ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS)));
             return new makeBlock<>(name, ret);
         }
 

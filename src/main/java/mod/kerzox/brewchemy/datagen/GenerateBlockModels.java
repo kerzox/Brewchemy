@@ -24,12 +24,12 @@ public class GenerateBlockModels extends BlockStateProvider {
     protected void registerStatesAndModels() {
         for (BrewchemyRegistry.makeBlock<?> block : BrewchemyRegistry.makeBlock.ENTRIES) {
             if (block.get() instanceof BrewchemyCropBlock crop) {
-                CropModelBuilder blockstate = new CropModelBuilder(block.getName(), 7);
-                for (var i = 0; i < 7; i++) {
+                CropModelBuilder blockstate = new CropModelBuilder(block.getName(), crop.getMaxAge() + 1);
+                for (var i = 0; i < crop.getMaxAge() + 1; i++) {
                     String textureName = "block/"+block.getName()+"_stage"+i;
                     ResourceLocation cropModel = modLoc(textureName);
                     BlockModelBuilder builder = models().getBuilder(modLoc(textureName).getPath())
-                            .parent(models().getExistingFile(mcLoc("crop")))
+                            .parent(models().getExistingFile(modLoc("brewchemycrops")))
                             .texture("crop", cropModel);
                     registeredBlocks.put(crop, blockstate);
 
