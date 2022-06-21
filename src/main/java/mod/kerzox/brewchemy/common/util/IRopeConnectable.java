@@ -16,9 +16,9 @@ import static mod.kerzox.brewchemy.common.block.rope.RopeBlock.*;
 public interface IRopeConnectable {
 
 
-    boolean canConnectTo(Direction connectingFrom);
+    boolean canConnectTo(BlockState state, Direction connectingFrom);
 
-    default BlockState attachValidToNeighbours(BlockState ourState, LevelAccessor level, BlockPos pos) {
+    default BlockState attachValidToNeighbours(BlockState ourState, LevelAccessor level, BlockPos pos, boolean ignoreVertical) {
         HashMap<Direction, RopeConnections> newSides = new HashMap<>(Map.of(
                 Direction.NORTH, RopeConnections.NONE,
                 Direction.SOUTH, RopeConnections.NONE,
@@ -29,22 +29,35 @@ public interface IRopeConnectable {
         for (Direction direction : Direction.values()) {
             BlockState state = level.getBlockState(pos.relative(direction));
             if (state.getBlock() instanceof IRopeConnectable connectable) {
-                if (connectable.canConnectTo(direction.getOpposite()))
+                if (connectable.canConnectTo(ourState, direction.getOpposite()))
                 newSides.put(direction, RopeConnections.CONNECTED);
             }
         }
-        BlockState test = ourState
-                .setValue(NORTH, newSides.get(Direction.NORTH))
-                .setValue(EAST, newSides.get(Direction.EAST))
-                .setValue(SOUTH, newSides.get(Direction.SOUTH))
-                .setValue(WEST, newSides.get(Direction.WEST))
-                .setValue(UP, newSides.get(Direction.UP))
-                .setValue(DOWN, newSides.get(Direction.DOWN));
+
+        BlockState test = null;
+
+        if (!ignoreVertical) {
+            test = ourState
+                    .setValue(NORTH, newSides.get(Direction.NORTH))
+                    .setValue(EAST, newSides.get(Direction.EAST))
+                    .setValue(SOUTH, newSides.get(Direction.SOUTH))
+                    .setValue(WEST, newSides.get(Direction.WEST))
+                    .setValue(UP, newSides.get(Direction.UP))
+                    .setValue(DOWN, newSides.get(Direction.DOWN));
+        } else {
+            test = ourState
+                    .setValue(NORTH, newSides.get(Direction.NORTH))
+                    .setValue(EAST, newSides.get(Direction.EAST))
+                    .setValue(SOUTH, newSides.get(Direction.SOUTH))
+                    .setValue(WEST, newSides.get(Direction.WEST));
+        }
+
+
 
         return test;
     }
 
-    default BlockState attachValidToNeighbours(BlockState ourState, Level level, BlockPos pos) {
+    default BlockState attachValidToNeighbours(BlockState ourState, Level level, BlockPos pos, boolean ignoreVertical) {
         HashMap<Direction, RopeConnections> newSides = new HashMap<>(Map.of(
                 Direction.NORTH, RopeConnections.NONE,
                 Direction.SOUTH, RopeConnections.NONE,
@@ -58,13 +71,24 @@ public interface IRopeConnectable {
                 newSides.put(direction, RopeConnections.CONNECTED);
             }
         }
-        BlockState test = ourState
-                .setValue(NORTH, newSides.get(Direction.NORTH))
-                .setValue(EAST, newSides.get(Direction.EAST))
-                .setValue(SOUTH, newSides.get(Direction.SOUTH))
-                .setValue(WEST, newSides.get(Direction.WEST))
-                .setValue(UP, newSides.get(Direction.UP))
-                .setValue(DOWN, newSides.get(Direction.DOWN));
+
+        BlockState test = null;
+
+        if (!ignoreVertical) {
+            test = ourState
+                    .setValue(NORTH, newSides.get(Direction.NORTH))
+                    .setValue(EAST, newSides.get(Direction.EAST))
+                    .setValue(SOUTH, newSides.get(Direction.SOUTH))
+                    .setValue(WEST, newSides.get(Direction.WEST))
+                    .setValue(UP, newSides.get(Direction.UP))
+                    .setValue(DOWN, newSides.get(Direction.DOWN));
+        } else {
+            test = ourState
+                    .setValue(NORTH, newSides.get(Direction.NORTH))
+                    .setValue(EAST, newSides.get(Direction.EAST))
+                    .setValue(SOUTH, newSides.get(Direction.SOUTH))
+                    .setValue(WEST, newSides.get(Direction.WEST));
+        }
 
         return test;
     }

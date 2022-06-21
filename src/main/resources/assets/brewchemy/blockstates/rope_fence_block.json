@@ -1,0 +1,48 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "brewchemy:block/rope_bound"
+      }
+    },
+    {
+      "apply": {
+        "model": "brewchemy:block/rope_bound_connected",
+        "uvlock": true
+      },
+      "when": {
+        "north_rope": "connected"
+      }
+    },
+    {
+      "apply": {
+        "model": "brewchemy:block/rope_bound_connected",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east_rope": "connected"
+      }
+    },
+    {
+      "apply": {
+        "model": "brewchemy:block/rope_bound_connected",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "south_rope": "connected"
+      }
+    },
+    {
+      "apply": {
+        "model": "brewchemy:block/rope_bound_connected",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "west_rope": "connected"
+      }
+    }
+  ]
+}

@@ -1,7 +1,10 @@
 package mod.kerzox.brewchemy;
 
+import ca.weblite.objc.Client;
 import com.mojang.logging.LogUtils;
+import mod.kerzox.brewchemy.client.ClientStartupEvents;
 import mod.kerzox.brewchemy.common.capabilities.BrewchemyCapabilities;
+import mod.kerzox.brewchemy.common.events.CommonEvents;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -16,6 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -55,9 +59,11 @@ public class Brewchemy
     }
 
     private void clientLoad(final FMLClientSetupEvent event) {
+        ClientStartupEvents.init();
         ItemBlockRenderTypes.setRenderLayer(BARLEY_CROP_BLOCK.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(HOPS_CROP_BLOCK.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(ROPE_BLOCK.get(), RenderType.cutout());
     }
 
 }
+

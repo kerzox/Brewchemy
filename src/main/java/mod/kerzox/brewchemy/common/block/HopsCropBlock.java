@@ -9,6 +9,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -18,6 +24,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -31,14 +38,14 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
     private final int extraGrowth = 3;
     private static final IntegerProperty growthStages = IntegerProperty.create("age", 0, maturationAge);
     public final VoxelShape[] currentShapeByGrowth = new VoxelShape[]{
-            Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D),
-            Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D),
-            Block.box(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D),
-            Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D),
-            Block.box(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D),
-            Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D),
-            Block.box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D),
-            Block.box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
+            Block.box(5.0D, 0.0D, 5.0D, 11.0D, 2.0D, 11.0D),
+            Block.box(5.0D, 0.0D, 5.0D, 11.0D, 4.0D, 11.0D),
+            Block.box(5.0D, 0.0D, 5.0D, 11.0D, 6.0D, 11.0D),
+            Block.box(5.0D, 0.0D, 5.0D, 11.0D, 8.0D, 11.0D),
+            Block.box(5.0D, 0.0D, 5.0D, 11.0D, 10.0D, 11.0D),
+            Block.box(5.0D, 0.0D, 5.0D, 11.0D, 12.0D, 11.0D),
+            Block.box(5.0D, 0.0D, 5.0D, 11.0D, 14.0D, 11.0D),
+            Block.box(5.0D, 0.0D, 5.0D, 11.0D, 16.0D, 11.0D)};
 
 
 
@@ -48,14 +55,15 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
                 .setValue(HAS_TRELLIS, false));
     }
 
-    private boolean isSupported() {
-        return false;
+    private boolean isSupported(BlockState state) {
+        return state.getValue(HAS_TRELLIS);
     }
 
     @Override
     public IntegerProperty getAgeProperty() {
         return growthStages;
     }
+
 
     @Override
     protected int getAge(BlockState pState) {
@@ -67,10 +75,8 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
         /* TODO
             Hops must have upwards facing twine to grow as trellis. Needs light level higher than 10.
          */
-        //if (!isSupported(pState)) return false;
-       // isSupported(pState) && ((pLevel.getRawBrightness(pPos, 0) >= 8 || pLevel.canSeeSky(pPos)))
+        if (!isSupported(pState)) return false;
         if (!(pLevel.getBlockState(pPos.below()).is(Blocks.FARMLAND) || (pLevel.getBlockState(pPos.below()).is(this)))) {
-            System.out.println("Something isn't right " + pLevel.getBlockState(pPos.below()).getBlock());
             return false;
         }
         return true;
@@ -101,6 +107,10 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return currentShapeByGrowth[pState.getValue(this.getAgeProperty())];
+    }
+
+    private boolean isFruiting(BlockState state) {
+        return getAge(state) == getMaxAge();
     }
 
     @Override
@@ -146,27 +156,47 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
          */
         int currentAge = this.getAge(pState) + this.getBonemealAgeIncrease(pLevel);
         int maxAge = this.getMaxAge();
+
         if (currentAge > maxAge) {
             currentAge = maxAge;
         }
 
-        if (currentAge == maxAge) {
-            if (pLevel.getBlockEntity(pPos.above()) instanceof RopeBlockEntity ropeBlockEntity) {
-                pLevel.setBlockAndUpdate(pPos.above(), this.getStateForAge(2).setValue(HAS_TRELLIS, true));
-            }
-        }
-
         pLevel.setBlock(pPos, pState.setValue(growthStages, currentAge), 2);
 
+        if (currentAge != maxAge) return;
+
+        // add a new plant above
+        if (pLevel.getBlockEntity(pPos.above()) instanceof RopeBlockEntity ropeBlockEntity) {
+            if (!ropeBlockEntity.hasHorizontalConnections()) growBine(pPos.above(), pLevel);
+        }
     }
 
-    private void growBine(BlockPos pos, Level pLevel, BlockState pState) {
-        pLevel.setBlockAndUpdate(pos, pState);
+    @Override
+    protected void harvest(Level level, BlockPos pos, BlockState state) {
+        ItemStack drop = new ItemStack(this.asItem(), level.random.nextInt(1, 3));
+        level.setBlockAndUpdate(pos, this.getStateForAge(4).setValue(HAS_TRELLIS, true));
+        ItemEntity entity = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), drop);
+        level.addFreshEntity(entity);
+    }
+
+    @Override
+    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+        if (isFruiting(pState)) {
+            if (!pLevel.isClientSide) {
+                harvest(pLevel, pPos, pState);
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
+    }
+
+    private void growBine(BlockPos pos, Level pLevel) {
+        pLevel.setBlockAndUpdate(pos, this.getStateForAge(2).setValue(HAS_TRELLIS, true));
     }
 
 
     @Override
-    public boolean canConnectTo(Direction connectingFrom) {
+    public boolean canConnectTo(BlockState state, Direction connectingFrom) {
         return connectingFrom == Direction.UP || connectingFrom == Direction.DOWN;
     }
 }

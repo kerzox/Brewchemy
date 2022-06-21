@@ -29,12 +29,12 @@ import static mod.kerzox.brewchemy.registry.BrewchemyRegistry.BlockEntities.ROPE
 
 public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements IRopeConnectable {
 
-    public static final EnumProperty<RopeConnections> NORTH = EnumProperty.create("north", RopeConnections.class);
-    public static final EnumProperty<RopeConnections> SOUTH = EnumProperty.create("south", RopeConnections.class);
-    public static final EnumProperty<RopeConnections> WEST = EnumProperty.create("west", RopeConnections.class);
-    public static final EnumProperty<RopeConnections> EAST = EnumProperty.create("east", RopeConnections.class);
-    public static final EnumProperty<RopeConnections> UP = EnumProperty.create("up", RopeConnections.class);
-    public static final EnumProperty<RopeConnections> DOWN = EnumProperty.create("down", RopeConnections.class);
+    public static final EnumProperty<RopeConnections> NORTH = EnumProperty.create("north_rope", RopeConnections.class);
+    public static final EnumProperty<RopeConnections> SOUTH = EnumProperty.create("south_rope", RopeConnections.class);
+    public static final EnumProperty<RopeConnections> WEST = EnumProperty.create("west_rope", RopeConnections.class);
+    public static final EnumProperty<RopeConnections> EAST = EnumProperty.create("east_rope", RopeConnections.class);
+    public static final EnumProperty<RopeConnections> UP = EnumProperty.create("up_rope", RopeConnections.class);
+    public static final EnumProperty<RopeConnections> DOWN = EnumProperty.create("down_rope", RopeConnections.class);
 
     public static final BooleanProperty HAS_TRELLIS = BooleanProperty.create("trellis");
 
@@ -69,6 +69,7 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
         initializeShapeCache();
     }
 
+
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return cache.get(pState);
@@ -77,14 +78,14 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext pContext) {
         BlockState state = super.getStateForPlacement(pContext);
-        return attachValidToNeighbours(state, pContext.getLevel(), pContext.getClickedPos());
+        return attachValidToNeighbours(state, pContext.getLevel(), pContext.getClickedPos(), false);
     }
 
     @Override
     public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState, LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pNeighborPos) {
         BlockState state = super.updateShape(pState, pDirection, pNeighborState, pLevel, pCurrentPos, pNeighborPos);
         initializeShapeCache();
-        return attachValidToNeighbours(state, pLevel, pCurrentPos);
+        return attachValidToNeighbours(state, pLevel, pCurrentPos, false);
     }
 
     @Override
@@ -126,7 +127,7 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
     }
 
     @Override
-    public boolean canConnectTo(Direction connectingFrom) {
+    public boolean canConnectTo(BlockState state, Direction connectingFrom) {
         return true;
     }
 }

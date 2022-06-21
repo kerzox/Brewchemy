@@ -2,13 +2,15 @@ package mod.kerzox.brewchemy.registry;
 
 import mod.kerzox.brewchemy.common.block.BarleyCropBlock;
 import mod.kerzox.brewchemy.common.block.HopsCropBlock;
+import mod.kerzox.brewchemy.common.block.RopeTiedFenceBlock;
 import mod.kerzox.brewchemy.common.block.rope.RopeBlock;
 import mod.kerzox.brewchemy.common.block.SupportStickBlock;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.BrewingPotBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.RopeBlockEntity;
+import mod.kerzox.brewchemy.common.blockentity.RopeTiedFenceBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.SupportStickEntityBlock;
-import mod.kerzox.brewchemy.common.item.TwineItem;
+import mod.kerzox.brewchemy.common.item.RopeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -53,7 +55,7 @@ public class BrewchemyRegistry {
     public static final class Items {
         public static void init(){}
 
-        //public static RegistryObject<TwineItem> TWINE = ITEMS.register("twine_item", () -> new TwineItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+        public static RegistryObject<RopeItem> ROPE = ITEMS.register("rope_item", () -> new RopeItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
     }
 
@@ -66,6 +68,8 @@ public class BrewchemyRegistry {
         public static final makeBlock<HopsCropBlock> HOPS_CROP_BLOCK = makeBlock.build("hops_crop", HopsCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
         public static final makeBlock<SupportStickBlock> SUPPORT_STICK_BLOCK = makeBlock.build("support_stick_block", SupportStickBlock::new, BlockBehaviour.Properties.of(Material.WOOD), true);
         public static final makeBlock<RopeBlock> ROPE_BLOCK = makeBlock.build("rope_block", RopeBlock::new, BlockBehaviour.Properties.of(Material.AIR).sound(SoundType.WOOL), true);
+        public static final makeBlock<RopeTiedFenceBlock> ROPE_FENCE_BLOCK = makeBlock.build("rope_fence_block", RopeTiedFenceBlock::new, BlockBehaviour.Properties.of(Material.WOOD), false);
+
 
     }
 
@@ -76,7 +80,7 @@ public class BrewchemyRegistry {
         public static final makeBlockEntity<BrewingPotBlockEntity> BREWING_POT = makeBlockEntity.build("brewing_pot_be", BrewingPotBlockEntity::new, BREWING_POT_BLOCK);
         public static final makeBlockEntity<SupportStickEntityBlock> SUPPORT_STICK = makeBlockEntity.build("support_stick_be", SupportStickEntityBlock::new, SUPPORT_STICK_BLOCK);
         public static final makeBlockEntity<RopeBlockEntity> ROPE = makeBlockEntity.build("rope_be", RopeBlockEntity::new, ROPE_BLOCK);
-
+        public static final makeBlockEntity<RopeTiedFenceBlockEntity> ROPE_FENCE = makeBlockEntity.build("rope_fence_be", RopeTiedFenceBlockEntity::new, ROPE_FENCE_BLOCK);
 
     }
 

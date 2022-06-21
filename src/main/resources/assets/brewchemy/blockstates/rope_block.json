@@ -7,7 +7,7 @@
     },
     {
       "when": {
-        "north": "connected"
+        "north_rope": "connected"
       },
       "apply": {
         "model": "brewchemy:block/twine_connected"
@@ -15,7 +15,7 @@
     },
     {
       "when": {
-        "south": "connected"
+        "south_rope": "connected"
       },
       "apply": {
         "model": "brewchemy:block/twine_connected",
@@ -24,7 +24,7 @@
     },
     {
       "when": {
-        "west": "connected"
+        "west_rope": "connected"
       },
       "apply": {
         "model": "brewchemy:block/twine_connected",
@@ -33,7 +33,7 @@
     },
     {
       "when": {
-        "up": "connected"
+        "up_rope": "connected"
       },
       "apply": {
         "model": "brewchemy:block/twine_connected",
@@ -42,7 +42,7 @@
     },
     {
       "when": {
-        "down": "connected"
+        "down_rope": "connected"
       },
       "apply": {
         "model": "brewchemy:block/twine_connected",
@@ -52,7 +52,7 @@
     },
     {
       "when": {
-        "east": "connected"
+        "east_rope": "connected"
       },
       "apply": {
         "model": "brewchemy:block/twine_connected",
