@@ -2,7 +2,7 @@
   "ambientocclusion": false,
   "textures": {
     "particle": "#crop",
-    "all": "brewchemy:block/rope"
+    "all": "brewchemy:block/rope_text"
   },
   "elements": [
     {   "from": [ 4, -1, 0 ],
@@ -42,12 +42,12 @@
       "to": [ 9, 16, 9 ],
       "shade": true,
       "faces": {
-        "north": {"uv": [2, 16, 0, 0], "texture": "#all"},
-        "east": {"uv": [2, 16, 0, 0], "texture": "#all"},
-        "south": {"uv": [2, 16, 0, 0], "texture": "#all"},
-        "west": {"uv": [2, 16, 0, 0], "texture": "#all"},
-        "up": {"uv": [2, 16, 0, 0], "texture": "#all"},
-        "down": {"uv": [2, 16, 0, 0], "texture": "#all"}
+        "north": {"uv": [0, 2, 1, 12], "texture": "#all"},
+        "east": {"uv": [0, 2, 1, 12], "texture": "#all"},
+        "south": {"uv": [0, 2, 1, 12], "texture": "#all"},
+        "west": {"uv": [0, 2, 1, 12], "texture": "#all"},
+        "up": {"uv": [0, 2, 1, 12], "texture": "#all"},
+        "down": {"uv": [0, 2, 1, 12], "texture": "#all"}
       }
     }
   ]

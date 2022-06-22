@@ -1,0 +1,11 @@
+{
+  "type": "brewchemy:millstone_recipe_serializer",
+  "duration": 30,
+  "ingredient": {
+    "item": "brewchemy:malted_barley_item"
+  },
+  "result": {
+    "count": 1,
+    "item": "brewchemy:milled_barley_item"
+  }
+}

@@ -1,5 +1,7 @@
 package mod.kerzox.brewchemy.common.blockentity;
 
+import mod.kerzox.brewchemy.Brewchemy;
+import mod.kerzox.brewchemy.client.gui.menu.MillstoneMenu;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
@@ -8,6 +10,11 @@ import mod.kerzox.brewchemy.common.util.IServerTickable;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,25 +26,34 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public class MillStoneBlockEntity extends BrewchemyBlockEntity implements IServerTickable {
+public class MillStoneBlockEntity extends BrewchemyBlockEntity implements IServerTickable, MenuProvider {
 
     private final ItemStackInventory inventory = new ItemStackInventory(1, 1);
-    private final LazyOptional<ItemStackInventory> lazyOptionalOfInventory = LazyOptional.of(() -> inventory);
 
     private int recipeDuration;
-    private final int revolutions = 5; // how many times a crank will rotate before recipe finishes.
     private boolean running;
 
     public MillStoneBlockEntity(BlockPos pWorldPosition, BlockState pBlockState) {
         super(BrewchemyRegistry.BlockEntities.MILL_STONE.get(), pWorldPosition, pBlockState);
+        this.inventory.addInput(Direction.WEST, Direction.EAST);
+        this.inventory.addOutput(Direction.DOWN);
     }
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
         if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return lazyOptionalOfInventory.cast();
+            return this.inventory.getHandler(side);
         }
         return super.getCapability(cap, side);
+    }
+
+
+    public int updateProgress() {
+        if (running) {
+            System.out.println(this.recipeDuration);
+            this.recipeDuration--;
+        }
+        return this.recipeDuration;
     }
 
     @Override
@@ -70,9 +86,30 @@ public class MillStoneBlockEntity extends BrewchemyBlockEntity implements IServe
                 recipeDuration = recipe.getDuration();
                 running = true;
             }
-
+            if (recipeDuration <= 0) {
+                running = false;
+                ItemStack simulation = this.inventory.getInputHandler().forceExtractItem(0, 1, true);
+                if (!simulation.isEmpty()) {
+                    if (this.inventory.getOutputHandler().forceInsertItem(0, result, true).isEmpty()) {
+                        this.inventory.getInputHandler().getStackInSlot(0).shrink(1);
+                        this.inventory.getOutputHandler().forceInsertItem(0, result, false);
+                    }
+                }
+            }
         }
 
+    }
+
+
+    @Override
+    public @NotNull Component getDisplayName() {
+        return Component.translatable(String.format("menu.%s.millstone", Brewchemy.MODID));
+    }
+
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int pContainerId, Inventory pInventory, Player pPlayer) {
+        return new MillstoneMenu(pContainerId, pInventory, pPlayer, this);
     }
 
 }

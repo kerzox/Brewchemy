@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class MillstoneRecipe extends AbstractRecipe {
@@ -150,7 +151,7 @@ public class MillstoneRecipe extends AbstractRecipe {
 
             private JsonObject serializeItemStacks(ItemStack stack) {
                 JsonObject json = new JsonObject();
-                json.addProperty("item", ForgeRegistries.ITEMS.getKey(stack.getItem()).getPath());
+                json.addProperty("item", Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(stack.getItem())).toString());
                 if (stack.getCount() != 0) {
                     json.addProperty("count", stack.getCount());
                 }

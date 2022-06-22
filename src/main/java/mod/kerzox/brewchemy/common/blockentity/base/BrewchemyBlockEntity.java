@@ -45,6 +45,11 @@ public abstract class BrewchemyBlockEntity extends BlockEntity {
         read(pTag);
     }
 
+    /** DON"T OVERRIDE THIS USE WRITE
+     *
+     * @param pTag
+     */
+
     @Override
     protected void saveAdditional(CompoundTag pTag) {
         super.saveAdditional(pTag);
@@ -75,5 +80,4 @@ public abstract class BrewchemyBlockEntity extends BlockEntity {
     protected void addToUpdateTag(CompoundTag tag) {
 
     }
-
 }

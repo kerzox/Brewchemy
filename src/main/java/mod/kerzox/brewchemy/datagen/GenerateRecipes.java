@@ -23,7 +23,7 @@ public class GenerateRecipes extends RecipeProvider {
 
         MillstoneRecipe.DatagenBuilder.MillstoneRecipe(new ResourceLocation(Brewchemy.MODID, "milled_barley_from_malted_barley"),
                 new ItemStack(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get()),
-                Ingredient.of(BrewchemyRegistry.Items.MALTED_BARLEY_ITEM.get()),200)
+                Ingredient.of(BrewchemyRegistry.Items.MALTED_BARLEY_ITEM.get()),30)
                 .build(pFinishedRecipeConsumer);
 
     }

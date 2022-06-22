@@ -3,6 +3,8 @@ package mod.kerzox.brewchemy;
 import ca.weblite.objc.Client;
 import com.mojang.logging.LogUtils;
 import mod.kerzox.brewchemy.client.ClientStartupEvents;
+import mod.kerzox.brewchemy.client.gui.screen.MillstoneScreen;
+import mod.kerzox.brewchemy.client.render.MillstoneCrankBlockEntityRenderer;
 import mod.kerzox.brewchemy.common.capabilities.BrewchemyCapabilities;
 import mod.kerzox.brewchemy.common.events.CommonEvents;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
@@ -18,6 +20,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -50,6 +53,7 @@ public class Brewchemy
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonLoad);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientLoad);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onEntityRenderRegister);
         FMLJavaModLoadingContext.get().getModEventBus().register(new BrewchemyCapabilities());
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -63,6 +67,12 @@ public class Brewchemy
         ItemBlockRenderTypes.setRenderLayer(BARLEY_CROP_BLOCK.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(HOPS_CROP_BLOCK.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(ROPE_BLOCK.get(), RenderType.cutout());
+        MenuScreens.register(BrewchemyRegistry.Menus.MILLSTONE_GUI.get(), MillstoneScreen::new);
+    }
+
+    private void onEntityRenderRegister(EntityRenderersEvent.RegisterRenderers e) {
+        System.out.println("Registering Entity Renderers");
+        e.registerBlockEntityRenderer(BrewchemyRegistry.BlockEntities.MILL_STONE_CRANK.get(), MillstoneCrankBlockEntityRenderer::new);
     }
 
 }
