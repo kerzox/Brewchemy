@@ -37,6 +37,8 @@ public class RopeTiedFenceBlockEntity extends BrewchemyBlockEntity {
     public void setFenceToMimic(BlockState mimic) {
         this.mimic = mimic;
         this.setChanged();
+
+        // update block
         level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
     }
 

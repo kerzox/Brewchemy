@@ -13,7 +13,8 @@ public class DataGenerators {
     public static void doDataGeneration(GatherDataEvent event) {
         DataGenerator gen = event.getGenerator();
         ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
-        gen.addProvider(true, new GenerateBlockModels(gen, existingFileHelper));
+        gen.addProvider(event.includeServer(), new GenerateRecipes(gen));
+        gen.addProvider(event.includeClient(), new GenerateBlockModels(gen, existingFileHelper));
     }
 
 

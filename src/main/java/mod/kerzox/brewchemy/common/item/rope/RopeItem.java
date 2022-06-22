@@ -1,4 +1,4 @@
-package mod.kerzox.brewchemy.common.item;
+package mod.kerzox.brewchemy.common.item.rope;
 
 import mod.kerzox.brewchemy.common.blockentity.RopeTiedFenceBlockEntity;
 import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
