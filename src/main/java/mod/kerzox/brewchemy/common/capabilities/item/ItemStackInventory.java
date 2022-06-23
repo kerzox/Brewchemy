@@ -26,6 +26,13 @@ public class ItemStackInventory extends CombinedInvWrapper implements IStrictSid
         super(inputHandler, outputHandler);
     }
 
+    public ItemStack getStackFromInputHandler(int slot) {
+        return getInputHandler().getStackInSlot(slot);
+    }
+
+    public ItemStack getStackFromOutputHandler(int slot) {
+        return getOutputHandler().getStackInSlot(slot);
+    }
 
     public <T> LazyOptional<T> getHandler(Direction side) {
         if (getInputs().contains(side) && getOutputs().contains(side) || side == null) {

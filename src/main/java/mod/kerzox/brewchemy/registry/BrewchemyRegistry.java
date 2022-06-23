@@ -1,11 +1,13 @@
 package mod.kerzox.brewchemy.registry;
 
 import mod.kerzox.brewchemy.Brewchemy;
+import mod.kerzox.brewchemy.client.gui.menu.GerminationChamberMenu;
 import mod.kerzox.brewchemy.client.gui.menu.MillstoneMenu;
 import mod.kerzox.brewchemy.common.block.*;
 import mod.kerzox.brewchemy.common.block.rope.RopeBlock;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.*;
+import mod.kerzox.brewchemy.common.crafting.recipes.GerminationRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipes.MillstoneRecipe;
 import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
 import mod.kerzox.brewchemy.common.item.rope.RopeItem;
@@ -72,6 +74,12 @@ public class BrewchemyRegistry {
             return new MillstoneMenu(windowId, inv, inv.player, (MillStoneBlockEntity) level.getBlockEntity(pos));
         }));
 
+        public static final RegistryObject<MenuType<GerminationChamberMenu>> GERMINATION_CHAMBER_GUI = MENUS.register("germination", () -> IForgeMenuType.create((windowId, inv, data) -> {
+            BlockPos pos = data.readBlockPos();
+            Level level = inv.player.getLevel();
+            return new GerminationChamberMenu(windowId, inv, inv.player, (GerminationChamberBlockEntity) level.getBlockEntity(pos));
+        }));
+
     }
 
     public static final class Recipes {
@@ -79,6 +87,10 @@ public class BrewchemyRegistry {
 
         public static final RegistryObject<RecipeType<MillstoneRecipe>> MILLSTONE_RECIPE = RECIPE_TYPES.register("millstone",() -> RecipeType.simple(new ResourceLocation(MODID, "millstone")));
         public static final RegistryObject<MillstoneRecipe.Serializer> MILLSTONE_RECIPE_SERIALIZER = RECIPES.register("millstone_recipe_serializer", MillstoneRecipe.Serializer::new);
+        public static final RegistryObject<RecipeType<GerminationRecipe>> GERMINATION_RECIPE = RECIPE_TYPES.register("germination",() -> RecipeType.simple(new ResourceLocation(MODID, "germination")));
+        public static final RegistryObject<GerminationRecipe.Serializer> GERMINATION_RECIPE_SERIALIZER = RECIPES.register("germination_recipe_serializer", GerminationRecipe.Serializer::new);
+
+
     }
 
     public static final class Items {
@@ -106,7 +118,7 @@ public class BrewchemyRegistry {
         public static final makeBlock<RopeTiedFenceBlock> ROPE_FENCE_BLOCK = makeBlock.build("rope_fence_block", RopeTiedFenceBlock::new, BlockBehaviour.Properties.of(Material.WOOD), false);
         public static final makeBlock<FermentsJarBlock> FERMENTS_JAR_BLOCK = makeBlock.build("ferments_jar_block", FermentsJarBlock::new, BlockBehaviour.Properties.of(Material.GLASS), true);
         public static final makeBlock<MillstoneCrankBlock> MILLSTONE_CRANK_BLOCK = makeBlock.build("millstone_crank_block", MillstoneCrankBlock::new, BlockBehaviour.Properties.of(Material.METAL).noCollission(), true);
-
+        public static final makeBlock<BrewchemyEntityBlock<GerminationChamberBlockEntity>> GERMINATION_CHAMBER_BLOCK = makeBlock.build("germination_chamber_block", p -> new BrewchemyEntityBlock<>(GERMINATION_CHAMBER.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
     }
 
     public static final class BlockEntities {
@@ -120,7 +132,7 @@ public class BrewchemyRegistry {
         public static final makeBlockEntity<SupportStickEntityBlock> SUPPORT_STICK = makeBlockEntity.build("support_stick_be", SupportStickEntityBlock::new, SUPPORT_STICK_BLOCK);
         public static final makeBlockEntity<RopeBlockEntity> ROPE = makeBlockEntity.build("rope_be", RopeBlockEntity::new, ROPE_BLOCK);
         public static final makeBlockEntity<RopeTiedFenceBlockEntity> ROPE_FENCE = makeBlockEntity.build("rope_fence_be", RopeTiedFenceBlockEntity::new, ROPE_FENCE_BLOCK);
-
+        public static final makeBlockEntity<GerminationChamberBlockEntity> GERMINATION_CHAMBER = makeBlockEntity.build("germination_chamber_be", GerminationChamberBlockEntity::new, GERMINATION_CHAMBER_BLOCK);
     }
 
     public static class makeBlockEntity<T extends BlockEntity> implements Supplier<BlockEntityType<T>> {
