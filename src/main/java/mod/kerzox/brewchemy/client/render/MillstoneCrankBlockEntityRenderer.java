@@ -27,6 +27,8 @@ public class MillstoneCrankBlockEntityRenderer implements BlockEntityRenderer<Mi
     public static ResourceLocation CRANK_MODEL = new ResourceLocation(Brewchemy.MODID, "block/crank");
     public static ResourceLocation CRANK_TEXTURE = new ResourceLocation(Brewchemy.MODID, "block/crank_texture");
 
+    private boolean wasClicked;
+
     @Override
     public void render(MillstoneCrankBlockEntity pBlockEntity, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
 
@@ -35,10 +37,11 @@ public class MillstoneCrankBlockEntityRenderer implements BlockEntityRenderer<Mi
         pPoseStack.pushPose();
 
         if (pBlockEntity.getInUse() != 0) {
-            pBlockEntity.setRotation(performAnimation(pPartialTick, pPoseStack, pBlockEntity));
+            pBlockEntity.setRotation(performAnimation(pPartialTick, pBlockEntity));
         }
 
         if (pBlockEntity.getRotation() != null) {
+            pBlockEntity.setPrevRotation(pBlockEntity.getRotation());
             // translate to origin
             pPoseStack.translate(0.5f, 0.5f, 0.5f);
             // do rotation animation
@@ -60,11 +63,8 @@ public class MillstoneCrankBlockEntityRenderer implements BlockEntityRenderer<Mi
 
     }
 
-    private Quaternion performAnimation(float pPartialTick, PoseStack pPoseStack, MillstoneCrankBlockEntity pBlockEntity) {
-        int timeLeft = pBlockEntity.getInUse();
-        Quaternion rotation;
-        rotation = Vector3f.YP.rotationDegrees((float) Mth.lerp( (float) ((pBlockEntity.getLevel().getGameTime() + pPartialTick) * 0.075), 0, 360));
-        return rotation;
+    private Quaternion performAnimation(float pPartialTick, MillstoneCrankBlockEntity pBlockEntity) {
+        return Vector3f.YP.rotationDegrees((float) Mth.lerp((float) ((pBlockEntity.getLevel().getGameTime() + pPartialTick) * 0.075), 0, 360));
     }
 
 }

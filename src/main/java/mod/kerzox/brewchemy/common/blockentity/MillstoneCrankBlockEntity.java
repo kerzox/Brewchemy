@@ -19,6 +19,8 @@ public class MillstoneCrankBlockEntity extends BrewchemyBlockEntity implements I
     protected int prevProgress = 0;
     public int inUse;
     private Quaternion rotation;
+    private Quaternion prevRotation;
+    private boolean clicked;
 
     public MillstoneCrankBlockEntity(BlockPos pWorldPosition, BlockState pBlockState) {
         super(BrewchemyRegistry.BlockEntities.MILL_STONE_CRANK.get(), pWorldPosition, pBlockState);
@@ -36,7 +38,12 @@ public class MillstoneCrankBlockEntity extends BrewchemyBlockEntity implements I
     public void onServer() {
         if (inUse > 0) {
             inUse--;
-            if (millstone != null && !millstone.isRemoved()) this.millstone.updateProgress();
+            if (inUse == 0) {
+                clicked = false;
+            }
+            if (level.getBlockEntity(getBlockPos().below()) instanceof MillStoneBlockEntity mill) {
+                mill.updateProgress();
+            }
         }
     }
 
@@ -44,6 +51,9 @@ public class MillstoneCrankBlockEntity extends BrewchemyBlockEntity implements I
     public void onClient() {
         if (inUse > 0) {
             inUse--;
+            if (inUse == 0) {
+                clicked = false;
+            }
         }
     }
 
@@ -52,8 +62,8 @@ public class MillstoneCrankBlockEntity extends BrewchemyBlockEntity implements I
     }
 
     public InteractionResult action(Player pPlayer) {
-        if (millstone == null || millstone.isRemoved()) return InteractionResult.PASS;
-        inUse = 10;
+        inUse = 4;
+        clicked = true;
         syncBlockEntity();
         return InteractionResult.CONSUME;
     }
@@ -73,12 +83,14 @@ public class MillstoneCrankBlockEntity extends BrewchemyBlockEntity implements I
         }
         this.progress = pTag.getInt("progress");
         this.inUse = pTag.getInt("use");
+        this.clicked = pTag.getBoolean("clicked");
     }
 
     @Override
     protected void addToUpdateTag(CompoundTag tag) {
         tag.putInt("progress", this.progress);
         tag.putInt("use", this.inUse);
+        tag.putBoolean("clicked", this.clicked);
     }
 
     public int getProgress() {
@@ -87,6 +99,10 @@ public class MillstoneCrankBlockEntity extends BrewchemyBlockEntity implements I
 
     public int getPrevProgress() {
         return prevProgress;
+    }
+
+    public boolean clicked() {
+        return clicked;
     }
 
     public void setPrevProgress(int prevProgress) {
@@ -105,5 +121,13 @@ public class MillstoneCrankBlockEntity extends BrewchemyBlockEntity implements I
 
     public Quaternion getRotation() {
         return rotation;
+    }
+
+    public void setPrevRotation(Quaternion prevRotation) {
+        this.prevRotation = prevRotation;
+    }
+
+    public Quaternion getPrevRotation() {
+        return prevRotation;
     }
 }

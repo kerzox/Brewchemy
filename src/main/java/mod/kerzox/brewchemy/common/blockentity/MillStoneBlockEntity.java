@@ -50,7 +50,6 @@ public class MillStoneBlockEntity extends BrewchemyBlockEntity implements IServe
 
     public int updateProgress() {
         if (running) {
-            System.out.println(this.recipeDuration);
             this.recipeDuration--;
         }
         return this.recipeDuration;

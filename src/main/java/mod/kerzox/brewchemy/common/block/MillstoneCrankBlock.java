@@ -55,7 +55,9 @@ public class MillstoneCrankBlock extends BrewchemyEntityBlock<MillstoneCrankBloc
     @Override
     public void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
         if (pLevel.getBlockEntity(pPos) instanceof MillstoneCrankBlockEntity crank) {
-            if (pLevel.getBlockEntity(pPos.below()) instanceof MillStoneBlockEntity mill) crank.setMillstone(mill);
+            if (pLevel.getBlockEntity(pPos.below()) instanceof MillStoneBlockEntity mill) {
+                crank.setMillstone(mill);
+            }
             else {
                 System.out.println("Millstone not found");
                 // remove this block
