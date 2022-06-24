@@ -3,10 +3,12 @@ package mod.kerzox.brewchemy.common.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
+import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class SomeJsonUtil {
@@ -35,6 +37,23 @@ public class SomeJsonUtil {
             } else {
                 ingredients = new Ingredient[1];
                 ingredients[0] = Ingredient.fromJson(json.get("ingredient").getAsJsonObject());
+            }
+        }
+        return ingredients;
+    }
+
+    public static FluidIngredient[] deserializeFluidIngredients(JsonObject json) {
+        FluidIngredient[] ingredients = null;
+        if (json.has("ingredient")) {
+            if (json.get("ingredient").isJsonArray()) {
+                JsonArray arr = (JsonArray) json.get("ingredient");
+                ingredients = new FluidIngredient[arr.size()];
+                for (int i = 0; i < arr.size(); i++) {
+                    ingredients[i] = FluidIngredient.deserialize(arr.get(i));
+                }
+            } else {
+                ingredients = new FluidIngredient[1];
+                ingredients[0] = FluidIngredient.deserialize(json.get("ingredient").getAsJsonObject());
             }
         }
         return ingredients;

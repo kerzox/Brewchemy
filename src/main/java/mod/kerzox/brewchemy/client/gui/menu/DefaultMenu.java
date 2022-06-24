@@ -107,7 +107,7 @@ public abstract class DefaultMenu<T extends BrewchemyBlockEntity> extends Abstra
             ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
 
-            // try to shift back into the inventory
+            // try to shift back into the inventory+hotbar
             if (slot instanceof SlotItemHandler) {
                 if (!this.moveItemStackTo(itemstack1, 0, 35, false)) {
                     return ItemStack.EMPTY;
@@ -116,17 +116,17 @@ public abstract class DefaultMenu<T extends BrewchemyBlockEntity> extends Abstra
 
             // item was in the inventory
             if (pIndex <= 26) {
-                if (!attemptToShiftIntoMenu(player, itemstack, itemstack1, pIndex).isEmpty()) {
+                if (!attemptToShiftIntoMenu(player, itemstack, itemstack1, pIndex).isEmpty()) { // try the implementations container
                     return itemstack;
                 }
-                if (!this.moveItemStackTo(itemstack1, 27, 35, false)) {
+                if (!this.moveItemStackTo(itemstack1, 27, 35, false)) { // try the hotbar
                     return ItemStack.EMPTY;
                 }
             } else { // item was in the hotbar
-                if (!attemptToShiftIntoMenu(player, itemstack, itemstack1, pIndex).isEmpty()) {
+                if (!attemptToShiftIntoMenu(player, itemstack, itemstack1, pIndex).isEmpty()) { // try the implementations container
                     return itemstack;
                 }
-                if (!this.moveItemStackTo(itemstack1, 0, 26, false)) {
+                if (!this.moveItemStackTo(itemstack1, 0, 26, false)) { // try the inventory
                     return ItemStack.EMPTY;
                 }
             }

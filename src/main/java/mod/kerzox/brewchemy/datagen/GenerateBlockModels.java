@@ -22,7 +22,7 @@ public class GenerateBlockModels extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        for (BrewchemyRegistry.makeBlock<?> block : BrewchemyRegistry.makeBlock.ENTRIES) {
+        for (BrewchemyRegistry.Blocks.makeBlock<?> block : BrewchemyRegistry.Blocks.makeBlock.ENTRIES) {
             if (block.get() instanceof BrewchemyCropBlock crop) {
                 CropModelBuilder blockstate = new CropModelBuilder(block.getName(), crop.getMaxAge() + 1);
                 for (var i = 0; i < crop.getMaxAge() + 1; i++) {

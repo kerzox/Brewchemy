@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
 import mod.kerzox.brewchemy.common.crafting.AbstractRecipe;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
+import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.util.SomeJsonUtil;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.NonNullList;
@@ -24,13 +25,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class GerminationRecipe extends AbstractRecipe {
+public class FermentJarRecipe extends AbstractRecipe {
 
-    private final NonNullList<Ingredient> ingredients = NonNullList.create();
-    private final Map<Ingredient, Boolean> matching = new HashMap<>();
+    private final NonNullList<FluidIngredient> ingredients = NonNullList.create();
+    private final Map<FluidIngredient, Boolean> matching = new HashMap<>();
     private final ItemStack result;
 
-    public GerminationRecipe(RecipeType<?> type, ResourceLocation id, String group, ItemStack result, Ingredient[] ingredients, int duration) {
+    public FermentJarRecipe(RecipeType<?> type, ResourceLocation id, String group, ItemStack result, FluidIngredient[] ingredients, int duration) {
         super(type, id, group, duration);
         this.result = result;
         this.ingredients.addAll(Arrays.asList(ingredients));
@@ -39,15 +40,16 @@ public class GerminationRecipe extends AbstractRecipe {
 
     @Override
     public boolean matches(RecipeInventoryWrapper pContainer, Level pLevel) {
-        ingredients.forEach(((ingredient) -> {
-            for (int i = 0; i < pContainer.getContainerSize(); i++) {
-                if (ingredient.test(pContainer.getItem(i))) {
-                    matching.put(ingredient, true);
-                }
-            }
-        }));
-
         return !matching.containsValue(false);
+    }
+
+    public NonNullList<FluidIngredient> getFluidIngredients() {
+        return this.ingredients;
+    }
+
+    @Override
+    public NonNullList<Ingredient> getIngredients() {
+        return NonNullList.create();
     }
 
     @Override
@@ -60,36 +62,36 @@ public class GerminationRecipe extends AbstractRecipe {
         return result;
     }
 
-    public static class Serializer implements RecipeSerializer<GerminationRecipe> {
+    public static class Serializer implements RecipeSerializer<FermentJarRecipe> {
 
         @Override
-        public GerminationRecipe fromJson(ResourceLocation pRecipeId, JsonObject json) {
+        public FermentJarRecipe fromJson(ResourceLocation pRecipeId, JsonObject json) {
             String group = JsonUtils.getStringOr("group", json, "");
-            Ingredient[] ingredients = SomeJsonUtil.deserializeIngredients(json);
+            FluidIngredient[] ingredients = SomeJsonUtil.deserializeFluidIngredients(json);
             ItemStack resultStack = SomeJsonUtil.deserializeItemStack(json);
             int duration = JsonUtils.getIntOr("duration", json, 0);
-            return new GerminationRecipe(BrewchemyRegistry.Recipes.GERMINATION_RECIPE.get(), pRecipeId, group, resultStack, ingredients, duration);
+            return new FermentJarRecipe(BrewchemyRegistry.Recipes.FERMENTS_JAR_RECIPE.get(), pRecipeId, group, resultStack, ingredients, duration);
         }
 
 
         @Override
-        public @Nullable GerminationRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
+        public @Nullable FermentJarRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
             String group = pBuffer.readUtf();
             int ingredientCount = pBuffer.readVarInt();
-            Ingredient[] ingredients = new Ingredient[ingredientCount];
+            FluidIngredient[] ingredients = new FluidIngredient[ingredientCount];
             for (int i = 0; i < ingredients.length; i++) {
-                ingredients[i] = Ingredient.fromNetwork(pBuffer);
+                ingredients[i] = FluidIngredient.fromNetwork(pBuffer);
             }
             ItemStack resultStack = pBuffer.readItem();
             int duration = pBuffer.readVarInt();
-            return new GerminationRecipe(BrewchemyRegistry.Recipes.GERMINATION_RECIPE.get(), pRecipeId, group, resultStack, ingredients, duration);
+            return new FermentJarRecipe(BrewchemyRegistry.Recipes.FERMENTS_JAR_RECIPE.get(), pRecipeId, group, resultStack, ingredients, duration);
         }
 
         @Override
-        public void toNetwork(FriendlyByteBuf pBuffer, GerminationRecipe pRecipe) {
+        public void toNetwork(FriendlyByteBuf pBuffer, FermentJarRecipe pRecipe) {
             pBuffer.writeUtf(pRecipe.getGroup());
             pBuffer.writeVarInt(pRecipe.getIngredients().size());
-            for (Ingredient ingredient : pRecipe.getIngredients()) {
+            for (FluidIngredient ingredient : pRecipe.getFluidIngredients()) {
                 ingredient.toNetwork(pBuffer);
             }
             pBuffer.writeItem(pRecipe.getResultItem());
@@ -100,12 +102,12 @@ public class GerminationRecipe extends AbstractRecipe {
     public static class DatagenBuilder {
         private final ResourceLocation name;
         private final ItemStack result;
-        private final Ingredient ingredient;
+        private final FluidIngredient ingredient;
         private String group;
         final int duration;
         private final RecipeSerializer<?> supplier;
 
-        public DatagenBuilder(ResourceLocation name, ItemStack result, Ingredient ingredient, int duration, RecipeSerializer<?> supplier) {
+        public DatagenBuilder(ResourceLocation name, ItemStack result, FluidIngredient ingredient, int duration, RecipeSerializer<?> supplier) {
             this.name = name;
             this.result = result;
             this.ingredient = ingredient;
@@ -114,8 +116,8 @@ public class GerminationRecipe extends AbstractRecipe {
             this.supplier = supplier;
         }
 
-        public static DatagenBuilder addRecipe(ResourceLocation name, ItemStack result, Ingredient ingredient, int duration) {
-            return new DatagenBuilder(name, result, ingredient, duration, BrewchemyRegistry.Recipes.GERMINATION_RECIPE_SERIALIZER.get());
+        public static DatagenBuilder addRecipe(ResourceLocation name, ItemStack result, FluidIngredient ingredient, int duration) {
+            return new DatagenBuilder(name, result, ingredient, duration, BrewchemyRegistry.Recipes.FERMENTS_JAR_RECIPE_SERIALIZER.get());
         }
 
         public void build(Consumer<FinishedRecipe> consumer) {
@@ -131,12 +133,12 @@ public class GerminationRecipe extends AbstractRecipe {
         public static class Factory implements FinishedRecipe {
             private final ResourceLocation name;
             private final ItemStack result;
-            private final Ingredient ingredient;
+            private final FluidIngredient ingredient;
             private String group;
             final int duration;
             private final RecipeSerializer<?> supplier;
 
-            public Factory(ResourceLocation name, String group, ItemStack result, Ingredient ingredient, int duration, RecipeSerializer<?> supplier) {
+            public Factory(ResourceLocation name, String group, ItemStack result, FluidIngredient ingredient, int duration, RecipeSerializer<?> supplier) {
                 this.name = name;
                 this.group = group;
                 this.result = result;
@@ -160,7 +162,7 @@ public class GerminationRecipe extends AbstractRecipe {
                     json.addProperty("group", this.group);
                 }
                 json.addProperty("duration", this.duration);
-                json.add("ingredient", this.ingredient.toJson());
+                json.add("ingredient", this.ingredient.serialize());
                 json.add("result", serializeItemStacks(this.result));
             }
 

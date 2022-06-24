@@ -118,7 +118,7 @@ public class MillstoneRecipe extends AbstractRecipe {
             this.supplier = supplier;
         }
 
-        public static DatagenBuilder MillstoneRecipe(ResourceLocation name, ItemStack result, Ingredient ingredient, int duration) {
+        public static DatagenBuilder addRecipe(ResourceLocation name, ItemStack result, Ingredient ingredient, int duration) {
             return new DatagenBuilder(name, result, ingredient, duration, BrewchemyRegistry.Recipes.MILLSTONE_RECIPE_SERIALIZER.get());
         }
 

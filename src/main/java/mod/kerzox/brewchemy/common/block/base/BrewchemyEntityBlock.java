@@ -34,10 +34,10 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
 
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (!pLevel.isClientSide && pLevel.getBlockEntity(pPos) instanceof MenuProvider menu) {
-            if (pPlayer.getMainHandItem().getItem() instanceof BlockItem || pPlayer.getOffhandItem().getItem() instanceof BlockItem)
-                return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
+        if (pLevel.getBlockEntity(pPos) instanceof MenuProvider menu) {
+            if (pLevel.isClientSide) return InteractionResult.SUCCESS;
             NetworkHooks.openGui((ServerPlayer) pPlayer, menu, pPos);
+            return InteractionResult.SUCCESS;
         }
         return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
     }
