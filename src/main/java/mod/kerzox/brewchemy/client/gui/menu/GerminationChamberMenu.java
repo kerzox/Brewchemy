@@ -17,11 +17,15 @@ public class GerminationChamberMenu extends DefaultMenu<GerminationChamberBlockE
             addSlotRange(cap, 0, 36, 16, 6, 18);
             addSlot(cap, 6, 81, 51);
         });
+
     }
 
     @Override
-    public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
-        return null;
+    protected ItemStack attemptToShiftIntoMenu(Player player, ItemStack returnStack, ItemStack copied, int index) {
+        if (!this.moveItemStackTo(copied, 36, 42, false)) {
+            return ItemStack.EMPTY;
+        }
+        return copied;
     }
 
     @Override

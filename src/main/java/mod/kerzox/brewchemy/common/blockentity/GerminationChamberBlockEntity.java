@@ -10,6 +10,7 @@ import mod.kerzox.brewchemy.common.util.IServerTickable;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -39,6 +40,7 @@ public class GerminationChamberBlockEntity extends BrewchemyBlockEntity implemen
     }, new ItemStackInventory.OutputHandler(1));
 
     private boolean reCache;
+    private boolean hasSun;
     
     private Map<ItemStack, Integer> inputSlots = new HashMap<>();
     private Map<ItemStack, GerminationRecipe> cachedRecipes = new HashMap<>();
@@ -61,6 +63,7 @@ public class GerminationChamberBlockEntity extends BrewchemyBlockEntity implemen
         checkInputs();
         if (reCache) checkAndCacheRecipes();
         doAllRecipes();
+        syncBlockEntity();
     }
 
     private void doAllRecipes() {
@@ -83,6 +86,7 @@ public class GerminationChamberBlockEntity extends BrewchemyBlockEntity implemen
                 int duration = this.recipeDurations.get(ingredient);
                 duration--;
                 recipeDurations.put(ingredient, duration);
+                syncBlockEntity();
             }
 
             if (recipeDurations.get(ingredient) <= 0) {
@@ -119,22 +123,44 @@ public class GerminationChamberBlockEntity extends BrewchemyBlockEntity implemen
     }
     
     private void checkAndCacheRecipes() {
-        for (ItemStack item : inputSlots.keySet()) {
+        for (Iterator<ItemStack> it = inputSlots.keySet().iterator(); it.hasNext(); ) {
+            ItemStack item = it.next();
             if (cachedRecipes.get(item) != null) continue;
             RecipeInventoryWrapper recipeInv = new RecipeInventoryWrapper(new ItemStackHandler(1));
             recipeInv.setItem(0, item);
-
             Optional<GerminationRecipe> recipe = level.getRecipeManager().getRecipeFor(BrewchemyRegistry.Recipes.GERMINATION_RECIPE.get(),
                     recipeInv, level);
-
-            recipe.ifPresent(germinationRecipe -> this.cachedRecipes.put(item, germinationRecipe));
+            if (recipe.isPresent()) {
+                this.cachedRecipes.put(item, recipe.get());
+                return;
+            }
+            it.remove();
         }
     }
 
-    private boolean canGerminate() {
-        return level.canSeeSky(getBlockPos().above());
+    public boolean canGerminate() {
+        if (level == null) return false;
+        return level.isDay() && level.canSeeSky(getBlockPos().above());
     }
 
+    @Override
+    protected void write(CompoundTag pTag) {
+
+    }
+
+    @Override
+    protected void read(CompoundTag pTag) {
+        hasSun = pTag.getBoolean("hasSun");
+    }
+
+    @Override
+    protected void addToUpdateTag(CompoundTag tag) {
+        if (level.isClientSide) {
+            tag.putBoolean("hasSun", hasSun);
+        }else {
+            tag.putBoolean("hasSun", canGerminate());
+        }
+    }
 
     @Override
     public @NotNull Component getDisplayName() {

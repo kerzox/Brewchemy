@@ -2,6 +2,7 @@ package mod.kerzox.brewchemy.client.gui.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import mod.kerzox.brewchemy.client.gui.components.WidgetComponent;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
@@ -58,6 +59,11 @@ public abstract class DefaultScreen<T extends AbstractContainerMenu> extends Abs
     protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
         super.renderLabels(pPoseStack, pMouseX, pMouseY);
         addToForeground(pPoseStack, pMouseX, pMouseY);
+    }
+
+    protected void addWidgetComponent(WidgetComponent<?> widget) {
+        widget.updatePositionToScreen();
+        addRenderableOnly(widget);
     }
 
     public abstract void addToBackground(PoseStack stack, float partialTicks, int x, int y);

@@ -1,12 +1,14 @@
 package mod.kerzox.brewchemy.client.gui.menu;
 
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import org.jetbrains.annotations.Nullable;
@@ -40,6 +42,10 @@ public abstract class DefaultMenu<T extends BrewchemyBlockEntity> extends Abstra
         this.blockEntity.syncBlockEntity();
     }
 
+    public CompoundTag getUpdateTag() {
+        return getBlockEntity().getUpdateTag();
+    }
+
     // inventory layout
 
     public void layoutPlayerInventorySlots(int leftCol, int topRow) {
@@ -49,7 +55,7 @@ public abstract class DefaultMenu<T extends BrewchemyBlockEntity> extends Abstra
     }
 
     public int addSlotRange(Container handler, int index, int x, int y, int amount, int dx) {
-        for (int i = 0 ; i < amount ; i++) {
+        for (int i = 0; i < amount; i++) {
             addSlot(new Slot(handler, index, x, y));
             x += dx;
             index++;
@@ -58,7 +64,7 @@ public abstract class DefaultMenu<T extends BrewchemyBlockEntity> extends Abstra
     }
 
     public int addSlotBox(Container handler, int index, int x, int y, int horAmount, int dx, int verAmount, int dy) {
-        for (int j = 0 ; j < verAmount ; j++) {
+        for (int j = 0; j < verAmount; j++) {
             index = addSlotRange(handler, index, x, y, horAmount, dx);
             y += dy;
         }
@@ -66,7 +72,7 @@ public abstract class DefaultMenu<T extends BrewchemyBlockEntity> extends Abstra
     }
 
     public int addSlotRange(IItemHandler handler, int index, int x, int y, int amount, int dx) {
-        for (int i = 0 ; i < amount ; i++) {
+        for (int i = 0; i < amount; i++) {
             addSlot(new SlotItemHandler(handler, index, x, y));
             x += dx;
             index++;
@@ -79,11 +85,65 @@ public abstract class DefaultMenu<T extends BrewchemyBlockEntity> extends Abstra
     }
 
     public int addSlotBox(IItemHandler handler, int index, int x, int y, int horAmount, int dx, int verAmount, int dy) {
-        for (int j = 0 ; j < verAmount ; j++) {
+        for (int j = 0; j < verAmount; j++) {
             index = addSlotRange(handler, index, x, y, horAmount, dx);
             y += dy;
         }
         return index;
     }
+
+    protected ItemStack moveToInventory(ItemStack stack) {
+        if (!this.moveItemStackTo(stack, 0, 35, false)) {
+            return ItemStack.EMPTY;
+        }
+        return stack;
+    }
+
+    @Override
+    public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
+        ItemStack itemstack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(pIndex);
+        if (slot != null && slot.hasItem()) {
+            ItemStack itemstack1 = slot.getItem();
+            itemstack = itemstack1.copy();
+
+            // try to shift back into the inventory
+            if (slot instanceof SlotItemHandler) {
+                if (!this.moveItemStackTo(itemstack1, 0, 35, false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+
+            // item was in the inventory
+            if (pIndex <= 26) {
+                if (!attemptToShiftIntoMenu(player, itemstack, itemstack1, pIndex).isEmpty()) {
+                    return itemstack;
+                }
+                if (!this.moveItemStackTo(itemstack1, 27, 35, false)) {
+                    return ItemStack.EMPTY;
+                }
+            } else { // item was in the hotbar
+                if (!attemptToShiftIntoMenu(player, itemstack, itemstack1, pIndex).isEmpty()) {
+                    return itemstack;
+                }
+                if (!this.moveItemStackTo(itemstack1, 0, 26, false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+
+            if (itemstack1.isEmpty()) {
+                slot.set(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+            if (itemstack1.getCount() == itemstack.getCount()) {
+                return ItemStack.EMPTY;
+            }
+            slot.onTake(pPlayer, itemstack1);
+        }
+        return itemstack;
+    }
+
+    protected abstract ItemStack attemptToShiftIntoMenu(Player player, ItemStack returnStack, ItemStack copied, int index);
 
 }

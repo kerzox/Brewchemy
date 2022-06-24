@@ -22,12 +22,12 @@ public class MillstoneMenu extends DefaultMenu<MillStoneBlockEntity>{
     }
 
     @Override
-    public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
-        return null;
+    public boolean stillValid(Player pPlayer) {
+        return true;
     }
 
     @Override
-    public boolean stillValid(Player pPlayer) {
-        return true;
+    protected ItemStack attemptToShiftIntoMenu(Player player, ItemStack returnStack, ItemStack copied, int index) {
+        return null;
     }
 }
