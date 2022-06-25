@@ -2,15 +2,15 @@ package mod.kerzox.brewchemy.common.blockentity.base;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.ModelDataManager;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BrewchemyBlockEntity extends BlockEntity {
@@ -79,5 +79,9 @@ public abstract class BrewchemyBlockEntity extends BlockEntity {
 
     protected void addToUpdateTag(CompoundTag tag) {
 
+    }
+
+    public boolean onPlayerClick(Level pLevel, Player pPlayer) {
+        return false;
     }
 }

@@ -172,10 +172,10 @@ public class BrewchemyRegistry {
         public static void init() {
         }
 
-        public static makeFluid<BrewchemyFluidType> WORT_FLUID = makeFluid.build("wort_fluid", true, () ->
+        public static final makeFluid<BrewchemyFluidType> WORT_FLUID = makeFluid.build("wort_fluid", true, () ->
                         new BrewchemyFluidType(FluidType.Properties.create(),
                         new ResourceLocation("block/water_still"),
-                        new ResourceLocation("block/water_still"), 0xAF7FFFD4));
+                        new ResourceLocation("block/water_still"), 0x56230E));
 
         public static class makeFluid<T extends FluidType> implements Supplier<T> {
 

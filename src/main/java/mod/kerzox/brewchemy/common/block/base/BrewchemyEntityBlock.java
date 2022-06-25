@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.common.block.base;
 
+import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.util.IClientTickable;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
 import net.minecraft.core.BlockPos;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -34,6 +36,17 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
 
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+        if (FluidUtil.getFluidHandler(pPlayer.getItemInHand(pHand)).isPresent()) {
+            if (!pLevel.isClientSide) {
+                FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pHit.getBlockPos(), pHit.getDirection());
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (pLevel.getBlockEntity(pPos) instanceof BrewchemyBlockEntity onClick) {
+            if (onClick.onPlayerClick(pLevel, pPlayer)) {
+                return InteractionResult.SUCCESS;
+            }
+        }
         if (pLevel.getBlockEntity(pPos) instanceof MenuProvider menu) {
             if (pLevel.isClientSide) return InteractionResult.SUCCESS;
             NetworkHooks.openGui((ServerPlayer) pPlayer, menu, pPos);

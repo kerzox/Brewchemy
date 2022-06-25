@@ -32,6 +32,10 @@ public class FluidIngredient implements Predicate<FluidStack> {
         this.tag = tag;
     }
 
+    public FluidStack[] getStacks() {
+        return stacks;
+    }
+
     public static FluidStack fromResourceId(ResourceLocation fluidId, int amount) {
         return new FluidStack(ForgeRegistries.FLUIDS.getValue(fluidId), amount);
     }

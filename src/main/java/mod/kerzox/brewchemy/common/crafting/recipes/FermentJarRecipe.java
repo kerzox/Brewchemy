@@ -16,6 +16,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,19 +29,27 @@ import java.util.function.Consumer;
 public class FermentJarRecipe extends AbstractRecipe {
 
     private final NonNullList<FluidIngredient> ingredients = NonNullList.create();
-    private final Map<FluidIngredient, Boolean> matching = new HashMap<>();
     private final ItemStack result;
 
     public FermentJarRecipe(RecipeType<?> type, ResourceLocation id, String group, ItemStack result, FluidIngredient[] ingredients, int duration) {
         super(type, id, group, duration);
         this.result = result;
         this.ingredients.addAll(Arrays.asList(ingredients));
-        this.ingredients.forEach(i -> matching.put(i, false));
     }
 
     @Override
-    public boolean matches(RecipeInventoryWrapper pContainer, Level pLevel) {
-        return !matching.containsValue(false);
+    public boolean matches(RecipeInventoryWrapper inv, Level pLevel) {
+        if (!inv.canStorageFluid()) return false;
+        if (inv.getFluidInventory().getFluidAmount() < 125) {
+            return false;
+        }
+        FluidStack matchingStack = new FluidStack(inv.getFluidInventory().getFluid().getFluid(), 125);
+        for (FluidIngredient ingredient : ingredients) {
+            if (ingredient.test(matchingStack)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public NonNullList<FluidIngredient> getFluidIngredients() {
