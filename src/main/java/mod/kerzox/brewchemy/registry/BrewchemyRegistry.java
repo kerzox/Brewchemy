@@ -10,6 +10,7 @@ import mod.kerzox.brewchemy.common.crafting.recipes.FermentJarRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipes.GerminationRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipes.MillstoneRecipe;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluidType;
+import mod.kerzox.brewchemy.common.fluid.BrewchemyLiquidBlock;
 import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
 import mod.kerzox.brewchemy.common.item.rope.RopeItem;
 import net.minecraft.core.BlockPos;
@@ -20,7 +21,6 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -172,34 +172,35 @@ public class BrewchemyRegistry {
         public static void init() {
         }
 
-        public static final makeFluid<BrewchemyFluidType> WORT_FLUID = makeFluid.build("wort_fluid", true, () ->
-                        new BrewchemyFluidType(FluidType.Properties.create(),
-                        new ResourceLocation("block/water_still"),
-                        new ResourceLocation("block/water_still"), 0x56230E));
+        public static final makeFluid<BrewchemyFluidType> WORT_FLUID = makeFluid.build("wort_fluid", false, true, () -> BrewchemyFluidType.createColoured(0x56230E));
+        public static final makeFluid<BrewchemyFluidType> BEER = makeFluid.build("beer_fluid", false, true, () -> BrewchemyFluidType.createColoured(0x56230E));
 
         public static class makeFluid<T extends FluidType> implements Supplier<T> {
 
             private RegistryObject<T> fluidType;
             private RegistryObject<Fluid> fluid;
             private RegistryObject<FlowingFluid> flowingFluid;
-            private RegistryObject<LiquidBlock> block;
+            private RegistryObject<BrewchemyLiquidBlock> block;
             private RegistryObject<Item> bucket;
             private ForgeFlowingFluid.Properties properties;
 
             private final String name;
 
-            public makeFluid(RegistryObject<T> fluidType, String name, boolean needsBucket) {
+            public makeFluid(RegistryObject<T> fluidType, String name, boolean placeable, boolean needsBucket) {
                 this.fluidType = fluidType;
                 this.name = name;
-                this.properties = new ForgeFlowingFluid.Properties(this.fluidType, makeSource(name), makeFlowing(name)).block(makeBlock(name));
+                this.properties = new ForgeFlowingFluid.Properties(this.fluidType, makeSource(name), makeFlowing(name));
+                if (placeable) {
+                    this.properties.block(makeBlock(name));
+                }
                 if (needsBucket) {
                     this.properties.bucket(makeBucket(name));
                 }
             }
 
-            public static <T extends FluidType> makeFluid<T> build(String name, boolean bucket, Supplier<T> fluid) {
+            public static <T extends FluidType> makeFluid<T> build(String name, boolean placeable, boolean bucket, Supplier<T> fluid) {
                 RegistryObject<T> type = FLUID_TYPES.register(name, fluid);
-                return new makeFluid<>(type, name, bucket);
+                return new makeFluid<>(type, name, placeable, bucket);
             }
 
 
@@ -213,9 +214,9 @@ public class BrewchemyRegistry {
                 return flowingFluid;
             }
 
-            private RegistryObject<LiquidBlock> makeBlock(String name) {
+            private RegistryObject<BrewchemyLiquidBlock> makeBlock(String name) {
                 this.block = BLOCKS.register(name+"_block",
-                        () -> new LiquidBlock(this.flowingFluid, BlockBehaviour.Properties.of(Material.WATER).noCollission().strength(100.0F).noLootTable()));
+                        () -> new BrewchemyLiquidBlock(this.flowingFluid, BlockBehaviour.Properties.of(Material.WATER).noCollission().strength(100.0F).noLootTable()));
                 return block;
             }
 
@@ -253,7 +254,7 @@ public class BrewchemyRegistry {
                 return bucket;
             }
 
-            public RegistryObject<LiquidBlock> getBlock() {
+            public RegistryObject<BrewchemyLiquidBlock> getBlock() {
                 return block;
             }
 

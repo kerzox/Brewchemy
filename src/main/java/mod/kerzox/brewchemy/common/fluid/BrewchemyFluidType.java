@@ -34,6 +34,19 @@ public class BrewchemyFluidType extends FluidType {
         this(properties, stillTexture, flowingTexture, null, null, colour);
     }
 
+    /**
+     * use this if you just want a tinted water fluid ;)
+     * @param tint
+     * @return fluid type
+     */
+
+    public static BrewchemyFluidType createColoured(int tint) {
+        return new BrewchemyFluidType(FluidType.Properties.create(),
+                new ResourceLocation("block/water_still"),
+                new ResourceLocation("block/water_flowing"),
+                tint);
+    }
+
     @Override
     public void initializeClient(Consumer<IFluidTypeRenderProperties> consumer) {
         consumer.accept(new IFluidTypeRenderProperties() {
