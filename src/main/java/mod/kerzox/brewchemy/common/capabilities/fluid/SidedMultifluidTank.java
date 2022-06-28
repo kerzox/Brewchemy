@@ -7,17 +7,20 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SidedMultifluidTank extends CombinedFluidWrapper implements IStrictSided {
+public class SidedMultifluidTank extends CombinedFluidInventory implements IStrictSided {
     private Set<Direction> input = new HashSet<>();
     private Set<Direction> output = new HashSet<>();
 
     private final LazyOptional<SidedMultifluidTank> handler = LazyOptional.of(() -> this);
 
-    public SidedMultifluidTank(int inputTank, int inputCapacities, int outputTanks, int outputCapacities) {
-        super(new InputWrapper(inputTank, inputCapacities), new OutputWrapper(outputTanks, outputCapacities));
+    public SidedMultifluidTank(int inputTanks, int inputCapacities, int outputTanks, int outputCapacities) {
+        super(new InputWrapper(inputTanks, inputCapacities), new OutputWrapper(outputTanks, outputCapacities));
+        input.add(Direction.UP);
+        output.add(Direction.NORTH);
     }
 
     public <T> LazyOptional<T> getHandler(Direction side) {
@@ -42,24 +45,33 @@ public class SidedMultifluidTank extends CombinedFluidWrapper implements IStrict
         return super.fill(resource, action);
     }
 
+    @NotNull
     @Override
-    public FluidStack drain(FluidStack resource, int amount, int tank, FluidAction action) {
-        int index = getIndexForSlot(tank);
-        IFluidHandler handler = getHandlerFromIndex(tank);
-        if (handler instanceof InputWrapper inputWrapper) {
-            return inputWrapper.forceDrain(resource, action);
+    public FluidStack drain(FluidStack resource, FluidAction action)
+    {
+        FluidStack ret = FluidStack.EMPTY;
+        for (int i = 0; i < slotCount; i++) {
+            IFluidHandler handler = getHandlerFromSlot(i);
+            if (handler instanceof InputWrapper input) {
+                ret = input.forceDrain(resource, action);
+            } else {
+                ret = handler.drain(resource, action);
+            }
+            if (!ret.isEmpty()) {
+                return ret;
+            }
         }
-        return super.drain(resource, amount, tank, action);
+        return ret;
     }
 
     @Override
     public Set<Direction> getOutputs() {
-        return null;
+        return output;
     }
 
     @Override
     public Set<Direction> getInputs() {
-        return null;
+        return input;
     }
 
     public static class InputWrapper extends MultitankFluid {
@@ -96,6 +108,10 @@ public class SidedMultifluidTank extends CombinedFluidWrapper implements IStrict
         @Override
         public int fill(FluidStack resource, FluidAction action) {
             return 0;
+        }
+
+        public int forceFill(FluidStack resource, FluidAction action) {
+            return super.fill(resource, action);
         }
 
         public <T> LazyOptional<T> getHandler() {

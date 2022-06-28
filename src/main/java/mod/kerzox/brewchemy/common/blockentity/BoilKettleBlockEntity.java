@@ -1,7 +1,9 @@
 package mod.kerzox.brewchemy.common.blockentity;
 
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
+import mod.kerzox.brewchemy.common.capabilities.fluid.MultitankFluid;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SidedFluidTank;
+import mod.kerzox.brewchemy.common.capabilities.fluid.SidedMultifluidTank;
 import mod.kerzox.brewchemy.common.crafting.recipes.BrewingRecipe;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
@@ -13,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
@@ -26,8 +29,8 @@ import org.jetbrains.annotations.Nullable;
 public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServerTickable {
 
     private final ItemStackHandler inventory = new ItemStackHandler(1);
-    private final SidedFluidTank sidedFluidTank = new SidedFluidTank(PintGlassItem.KEG_VOLUME, PintGlassItem.KEG_VOLUME);
-    private final LazyOptional<SidedFluidTank> handler = LazyOptional.of(() -> sidedFluidTank);
+    private final SidedMultifluidTank sidedFluidTank = new SidedMultifluidTank(2, PintGlassItem.KEG_VOLUME, 2, PintGlassItem.KEG_VOLUME);
+    private final LazyOptional<SidedMultifluidTank> handler = LazyOptional.of(() -> sidedFluidTank);
     private final LazyOptional<ItemStackHandler> itemHandler = LazyOptional.of(() -> inventory);
     private boolean running;
     private int duration;
@@ -58,7 +61,14 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
     @Override
     public boolean onPlayerClick(Level pLevel, Player pPlayer) {
         if (!pLevel.isClientSide) {
-            if (pPlayer.getMainHandItem().getItem() == Items.STICK) {
+            if (pPlayer.getMainHandItem().getItem() == Items.DIAMOND) {
+                this.sidedFluidTank.drain(new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), 500), IFluidHandler.FluidAction.EXECUTE);
+            }
+            else if (pPlayer.getMainHandItem().getItem() == Items.BLAZE_ROD) {
+                this.sidedFluidTank.getOutputHandler().forceFill(this.sidedFluidTank.drain(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                this.sidedFluidTank.getOutputHandler().forceFill(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
+            }
+            else if (pPlayer.getMainHandItem().getItem() == Items.STICK) {
                 this.sidedFluidTank.fill(new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), 500), IFluidHandler.FluidAction.EXECUTE);
             } else {
                 for (int i = 0; i < this.sidedFluidTank.getTanks(); i++) {

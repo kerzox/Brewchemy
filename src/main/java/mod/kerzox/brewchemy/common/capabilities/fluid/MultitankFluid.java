@@ -1,5 +1,7 @@
 package mod.kerzox.brewchemy.common.capabilities.fluid;
 
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
@@ -116,6 +118,21 @@ public class MultitankFluid implements IFluidHandler {
     @Override
     public FluidStack drain(int maxDrain, FluidAction action)
     {
-        return FluidStack.EMPTY;
+        FluidStack stack = FluidStack.EMPTY;
+        for (int i = 0; i < this.storageTanks.length; i++) {
+            int drained = maxDrain;
+            if (getFluidInTank(i).getAmount() < drained) {
+                drained = getFluidInTank(i).getAmount();
+            }
+            stack = new FluidStack(getFluidInTank(i), drained);
+            if (action.execute() && drained > 0) {
+                getFluidInTank(i).shrink(drained);
+                onContentsChanged();
+                return stack;
+            }
+            if (!stack.isEmpty()) return stack;
+
+        }
+        return stack;
     }
 }
