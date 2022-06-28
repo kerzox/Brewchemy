@@ -42,7 +42,7 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
             }
             return InteractionResult.SUCCESS;
         }
-        if (pLevel.getBlockEntity(pPos) instanceof BrewchemyBlockEntity onClick) {
+        if (pLevel.getBlockEntity(pPos) instanceof BrewchemyBlockEntity onClick && pHand == InteractionHand.MAIN_HAND) {
             if (onClick.onPlayerClick(pLevel, pPlayer)) {
                 return InteractionResult.SUCCESS;
             }

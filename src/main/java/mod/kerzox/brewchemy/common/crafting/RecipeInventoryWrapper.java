@@ -2,6 +2,7 @@ package mod.kerzox.brewchemy.common.crafting;
 
 import mod.kerzox.brewchemy.common.capabilities.fluid.FluidStorageTank;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
@@ -11,13 +12,18 @@ public class RecipeInventoryWrapper extends RecipeWrapper {
 
     // we can't make this look nicer i don't think so meh
 
-    protected FluidStorageTank fluidInventory;
+    protected IFluidHandler fluidInventory;
 
     public RecipeInventoryWrapper(IItemHandlerModifiable inv) {
         super(inv);
     }
 
-    public RecipeInventoryWrapper(FluidStorageTank inv) {
+    public RecipeInventoryWrapper(IFluidHandler fluid, IItemHandlerModifiable item) {
+        super(item);
+        this.fluidInventory = fluid;
+    }
+
+    public RecipeInventoryWrapper(IFluidHandler inv) {
         super(new ItemStackHandler());
         this.fluidInventory = inv;
     }
@@ -26,7 +32,7 @@ public class RecipeInventoryWrapper extends RecipeWrapper {
         return fluidInventory != null;
     }
 
-    public FluidStorageTank getFluidInventory() {
+    public IFluidHandler getFluidInventory() {
         return fluidInventory;
     }
 

@@ -6,9 +6,7 @@ import mod.kerzox.brewchemy.common.block.*;
 import mod.kerzox.brewchemy.common.block.rope.RopeBlock;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.*;
-import mod.kerzox.brewchemy.common.crafting.recipes.FermentJarRecipe;
-import mod.kerzox.brewchemy.common.crafting.recipes.GerminationRecipe;
-import mod.kerzox.brewchemy.common.crafting.recipes.MillstoneRecipe;
+import mod.kerzox.brewchemy.common.crafting.recipes.*;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluidType;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyLiquidBlock;
 import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
@@ -102,6 +100,10 @@ public class BrewchemyRegistry {
         public static final RegistryObject<GerminationRecipe.Serializer> GERMINATION_RECIPE_SERIALIZER = RECIPES.register("germination_recipe_serializer", GerminationRecipe.Serializer::new);
         public static final RegistryObject<RecipeType<FermentJarRecipe>> FERMENTS_JAR_RECIPE = RECIPE_TYPES.register("fermentsjar", () -> RecipeType.simple(new ResourceLocation(MODID, "fermentsjar")));
         public static final RegistryObject<FermentJarRecipe.Serializer> FERMENTS_JAR_RECIPE_SERIALIZER = RECIPES.register("fermentsjar_serializer", FermentJarRecipe.Serializer::new);
+        public static final RegistryObject<RecipeType<FermentationRecipe>> FERMENTATION_RECIPE = RECIPE_TYPES.register("fermentation", () -> RecipeType.simple(new ResourceLocation(MODID, "fermentation")));
+        public static final RegistryObject<FermentationRecipe.Serializer> FERMENTATION_RECIPE_SERIALIZER = RECIPES.register("fermentation_serializer", FermentationRecipe.Serializer::new);
+        public static final RegistryObject<RecipeType<BrewingRecipe>> BREWING_RECIPE = RECIPE_TYPES.register("brewing", () -> RecipeType.simple(new ResourceLocation(MODID, "brewing")));
+        public static final RegistryObject<BrewingRecipe.Serializer> BREWING_RECIPE_SERIALIZER = RECIPES.register("brewing_serializer", BrewingRecipe.Serializer::new);
 
 
     }
@@ -125,7 +127,6 @@ public class BrewchemyRegistry {
         }
 
         public static final makeBlock<BrewchemyEntityBlock<MillStoneBlockEntity>> MILL_STONE_BLOCK = makeBlock.build("millstone_block", p -> new BrewchemyEntityBlock<>(MILL_STONE.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
-        public static final makeBlock<BrewchemyEntityBlock<BoilKettleBlockEntity>> BREWING_POT_BLOCK = makeBlock.build("brewing_pot_block", p -> new BrewchemyEntityBlock<>(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
         public static final makeBlock<BarleyCropBlock> BARLEY_CROP_BLOCK = makeBlock.build("barley_crop", BarleyCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
         public static final makeBlock<HopsCropBlock> HOPS_CROP_BLOCK = makeBlock.build("hops_crop", HopsCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
         public static final makeBlock<SupportStickBlock> SUPPORT_STICK_BLOCK = makeBlock.build("support_stick_block", SupportStickBlock::new, BlockBehaviour.Properties.of(Material.WOOD), true);
@@ -134,6 +135,9 @@ public class BrewchemyRegistry {
         public static final makeBlock<FermentsJarBlock> FERMENTS_JAR_BLOCK = makeBlock.build("ferments_jar_block", FermentsJarBlock::new, BlockBehaviour.Properties.of(Material.GLASS), true);
         public static final makeBlock<MillstoneCrankBlock> MILLSTONE_CRANK_BLOCK = makeBlock.build("millstone_crank_block", MillstoneCrankBlock::new, BlockBehaviour.Properties.of(Material.METAL).noCollission(), true);
         public static final makeBlock<BrewchemyEntityBlock<GerminationChamberBlockEntity>> GERMINATION_CHAMBER_BLOCK = makeBlock.build("germination_chamber_block", p -> new BrewchemyEntityBlock<>(GERMINATION_CHAMBER.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
+        public static final makeBlock<FluidBarrelBlock<WoodenBarrelBlockEntity>> WOODEN_BARREL_BLOCK = makeBlock.build("wooden_barrel_block", p -> new FluidBarrelBlock<>(WOODEN_BARREL.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
+        public static final makeBlock<BoilKettleBlock> BOIL_KETTLE_BLOCK = makeBlock.build("boil_kettle_block", p -> new BoilKettleBlock(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
+
 
         public static class makeBlock<T extends Block> implements Supplier<T> {
 
@@ -165,6 +169,56 @@ public class BrewchemyRegistry {
                 return name;
             }
         }
+    }
+
+    public static final class BlockEntities {
+
+        public static void init() {
+        }
+
+        public static final makeBlockEntity<MillstoneCrankBlockEntity> MILL_STONE_CRANK = makeBlockEntity.build("millstone_crank_be", MillstoneCrankBlockEntity::new, MILLSTONE_CRANK_BLOCK);
+        public static final makeBlockEntity<MillStoneBlockEntity> MILL_STONE = makeBlockEntity.build("millstone_be", MillStoneBlockEntity::new, MILL_STONE_BLOCK);
+        public static final makeBlockEntity<FermentsJarBlockEntity> FERMENTS_JAR = makeBlockEntity.build("ferments_jar_be", FermentsJarBlockEntity::new, FERMENTS_JAR_BLOCK);
+        public static final makeBlockEntity<BoilKettleBlockEntity> BREWING_POT = makeBlockEntity.build("brewing_pot_be", BoilKettleBlockEntity::new, BOIL_KETTLE_BLOCK);
+        public static final makeBlockEntity<SupportStickEntityBlock> SUPPORT_STICK = makeBlockEntity.build("support_stick_be", SupportStickEntityBlock::new, SUPPORT_STICK_BLOCK);
+        public static final makeBlockEntity<RopeBlockEntity> ROPE = makeBlockEntity.build("rope_be", RopeBlockEntity::new, ROPE_BLOCK);
+        public static final makeBlockEntity<RopeTiedFenceBlockEntity> ROPE_FENCE = makeBlockEntity.build("rope_fence_be", RopeTiedFenceBlockEntity::new, ROPE_FENCE_BLOCK);
+        public static final makeBlockEntity<GerminationChamberBlockEntity> GERMINATION_CHAMBER = makeBlockEntity.build("germination_chamber_be", GerminationChamberBlockEntity::new, GERMINATION_CHAMBER_BLOCK);
+        public static final makeBlockEntity<WoodenBarrelBlockEntity> WOODEN_BARREL = makeBlockEntity.build("wooden_barrel_be", WoodenBarrelBlockEntity::new, WOODEN_BARREL_BLOCK);
+
+
+        public static class makeBlockEntity<T extends BlockEntity> implements Supplier<BlockEntityType<T>> {
+
+            private final RegistryObject<BlockEntityType<T>> type;
+
+            public static <T extends BlockEntity> makeBlockEntity<T> build(
+                    String name,
+                    BlockEntityType.BlockEntitySupplier<T> blockEntitySupplier,
+                    Supplier<? extends Block> valid) {
+                return new makeBlockEntity<T>(BLOCK_ENTITIES.register(name, () -> BlockEntityType.Builder.of(blockEntitySupplier, valid.get()).build(null)));
+            }
+
+            public static <T extends BlockEntity> makeBlockEntity<T> buildEntityAndBlock(
+                    String name,
+                    BlockEntityType.BlockEntitySupplier<T> blockEntitySupplier,
+                    makeBlock<?> valid) {
+                return new makeBlockEntity<T>(BLOCK_ENTITIES.register(name, () -> BlockEntityType.Builder.of(blockEntitySupplier, valid.get()).build(null)));
+            }
+
+            public makeBlockEntity(RegistryObject<BlockEntityType<T>> type) {
+                this.type = type;
+            }
+
+            @Override
+            public BlockEntityType<T> get() {
+                return this.getType().get();
+            }
+
+            public RegistryObject<BlockEntityType<T>> getType() {
+                return type;
+            }
+        }
+
     }
 
     public static final class Fluids {
@@ -260,54 +314,6 @@ public class BrewchemyRegistry {
 
             public RegistryObject<T> getType () {
                 return fluidType;
-            }
-        }
-
-    }
-
-    public static final class BlockEntities {
-
-        public static void init() {
-        }
-
-        public static final makeBlockEntity<MillstoneCrankBlockEntity> MILL_STONE_CRANK = makeBlockEntity.build("millstone_crank_be", MillstoneCrankBlockEntity::new, MILLSTONE_CRANK_BLOCK);
-        public static final makeBlockEntity<MillStoneBlockEntity> MILL_STONE = makeBlockEntity.build("millstone_be", MillStoneBlockEntity::new, MILL_STONE_BLOCK);
-        public static final makeBlockEntity<FermentsJarBlockEntity> FERMENTS_JAR = makeBlockEntity.build("ferments_jar_be", FermentsJarBlockEntity::new, FERMENTS_JAR_BLOCK);
-        public static final makeBlockEntity<BoilKettleBlockEntity> BREWING_POT = makeBlockEntity.build("brewing_pot_be", BoilKettleBlockEntity::new, BREWING_POT_BLOCK);
-        public static final makeBlockEntity<SupportStickEntityBlock> SUPPORT_STICK = makeBlockEntity.build("support_stick_be", SupportStickEntityBlock::new, SUPPORT_STICK_BLOCK);
-        public static final makeBlockEntity<RopeBlockEntity> ROPE = makeBlockEntity.build("rope_be", RopeBlockEntity::new, ROPE_BLOCK);
-        public static final makeBlockEntity<RopeTiedFenceBlockEntity> ROPE_FENCE = makeBlockEntity.build("rope_fence_be", RopeTiedFenceBlockEntity::new, ROPE_FENCE_BLOCK);
-        public static final makeBlockEntity<GerminationChamberBlockEntity> GERMINATION_CHAMBER = makeBlockEntity.build("germination_chamber_be", GerminationChamberBlockEntity::new, GERMINATION_CHAMBER_BLOCK);
-
-        public static class makeBlockEntity<T extends BlockEntity> implements Supplier<BlockEntityType<T>> {
-
-            private final RegistryObject<BlockEntityType<T>> type;
-
-            public static <T extends BlockEntity> makeBlockEntity<T> build(
-                    String name,
-                    BlockEntityType.BlockEntitySupplier<T> blockEntitySupplier,
-                    Supplier<? extends Block> valid) {
-                return new makeBlockEntity<T>(BLOCK_ENTITIES.register(name, () -> BlockEntityType.Builder.of(blockEntitySupplier, valid.get()).build(null)));
-            }
-
-            public static <T extends BlockEntity> makeBlockEntity<T> buildEntityAndBlock(
-                    String name,
-                    BlockEntityType.BlockEntitySupplier<T> blockEntitySupplier,
-                    makeBlock<?> valid) {
-                return new makeBlockEntity<T>(BLOCK_ENTITIES.register(name, () -> BlockEntityType.Builder.of(blockEntitySupplier, valid.get()).build(null)));
-            }
-
-            public makeBlockEntity(RegistryObject<BlockEntityType<T>> type) {
-                this.type = type;
-            }
-
-            @Override
-            public BlockEntityType<T> get() {
-                return this.getType().get();
-            }
-
-            public RegistryObject<BlockEntityType<T>> getType() {
-                return type;
             }
         }
 
