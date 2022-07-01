@@ -25,20 +25,45 @@ import java.util.function.Consumer;
 
 public class BrewingRecipe extends AbstractRecipe {
 
+    public static final int NO_HEAT = 0;
+    public static final int FIRE = 600;
+
     private final NonNullList<Ingredient> ingredients = NonNullList.create();
     private final NonNullList<FluidIngredient> fluidIngredients = NonNullList.create();
     private final FluidStack result;
+    private final int heat;
 
-    public BrewingRecipe(RecipeType<?> type, ResourceLocation id, String group, FluidStack result, Ingredient[] ingredients, FluidIngredient[] fingredients, int duration) {
+    public BrewingRecipe(RecipeType<?> type, ResourceLocation id, String group, FluidStack result, Ingredient[] ingredients, FluidIngredient[] fingredients, int duration, int heat) {
         super(type, id, group, duration);
         this.result = result;
+        this.heat = heat;
         this.ingredients.addAll(Arrays.asList(ingredients));
         this.fluidIngredients.addAll(Arrays.asList(fingredients));
     }
 
     @Override
     public boolean matches(RecipeInventoryWrapper inv, Level pLevel) {
-        return false;
+        boolean fluidMatches = false;
+        boolean itemMatches = false;
+        for (int i = 0; i < inv.getFluidInventory().getTanks(); i++) {
+            FluidStack fluid = inv.getFluidInventory().getFluidInTank(i);
+            for (FluidIngredient fluidIngredient : fluidIngredients) {
+                if (fluidIngredient.test(new FluidStack(fluid.getFluid(), fluidIngredient.getAmountFromIngredient()))) {
+                    if (fluid.getAmount() >= fluidIngredient.getAmountFromIngredient()) fluidMatches = true;
+                }
+            }
+        }
+        for (Ingredient ingredient : ingredients) {
+            for (int i = 0; i < inv.getContainerSize(); i++) {
+                if (ingredient.test(inv.getItem(i))) {
+                    itemMatches = true;
+                }
+            }
+        }
+
+        if (!fluidMatches) return false;
+        if (!itemMatches) return false;
+        return true;
     }
 
     public NonNullList<FluidIngredient> getFluidIngredients() {
@@ -63,6 +88,9 @@ public class BrewingRecipe extends AbstractRecipe {
         return this.result;
     }
 
+    public int getHeat() {
+        return heat;
+    }
 
     @Override
     public ItemStack getResultItem() {
@@ -76,9 +104,15 @@ public class BrewingRecipe extends AbstractRecipe {
             String group = JsonUtils.getStringOr("group", json, "");
             Ingredient[] ingredients = SomeJsonUtil.deserializeIngredients(json);
             FluidIngredient[] fluidIngredients = SomeJsonUtil.deserializeFluidIngredients(json);
-            FluidStack resultStack = SomeJsonUtil.deserializeFluidStack(json);
+            FluidStack resultStack = FluidStack.EMPTY;
+            if (json.has("result")) {
+                ResourceLocation fluid = new ResourceLocation(JsonUtils.getStringOr("fluid", json.getAsJsonObject("result"), ""));
+                int amount = JsonUtils.getIntOr("amount", json.getAsJsonObject("result"), 0);
+                resultStack = new FluidStack(ForgeRegistries.FLUIDS.getValue(fluid), amount);
+            }
             int duration = JsonUtils.getIntOr("duration", json, 0);
-            return new BrewingRecipe(BrewchemyRegistry.Recipes.BREWING_RECIPE.get(), pRecipeId, group, resultStack, ingredients, fluidIngredients, duration);
+            int heat = JsonUtils.getIntOr("heat", json, 0);
+            return new BrewingRecipe(BrewchemyRegistry.Recipes.BREWING_RECIPE.get(), pRecipeId, group, resultStack, ingredients, fluidIngredients, duration, heat);
         }
 
 
@@ -97,7 +131,8 @@ public class BrewingRecipe extends AbstractRecipe {
             }
             FluidStack resultStack = pBuffer.readFluidStack();
             int duration = pBuffer.readVarInt();
-            return new BrewingRecipe(BrewchemyRegistry.Recipes.BREWING_RECIPE.get(), pRecipeId, group, resultStack, ingredients, fluidIngredients, duration);
+            int heat = pBuffer.readVarInt();
+            return new BrewingRecipe(BrewchemyRegistry.Recipes.BREWING_RECIPE.get(), pRecipeId, group, resultStack, ingredients, fluidIngredients, duration, heat);
         }
 
         @Override
@@ -113,6 +148,7 @@ public class BrewingRecipe extends AbstractRecipe {
             }
             pBuffer.writeFluidStack(pRecipe.getResultFluid());
             pBuffer.writeVarInt(pRecipe.getDuration());
+            pBuffer.writeVarInt(pRecipe.getHeat());
         }
     }
 
@@ -122,21 +158,23 @@ public class BrewingRecipe extends AbstractRecipe {
         private final Ingredient ingredient;
         private final FluidIngredient fluidIngredient;
         private String group;
-        final int duration;
+        private final int duration;
+        private final int heat;
         private final RecipeSerializer<?> supplier;
 
-        public DatagenBuilder(ResourceLocation name, FluidStack result, Ingredient ingredient, FluidIngredient fluidIngredient, int duration, RecipeSerializer<?> supplier) {
+        public DatagenBuilder(ResourceLocation name, FluidStack result, Ingredient ingredient, FluidIngredient fluidIngredient, int duration, int heat, RecipeSerializer<?> supplier) {
             this.name = name;
             this.result = result;
             this.ingredient = ingredient;
             this.fluidIngredient = fluidIngredient;
+            this.heat = heat;
             this.group = group;
             this.duration = duration;
             this.supplier = supplier;
         }
 
-        public static DatagenBuilder addRecipe(ResourceLocation name, FluidStack result, Ingredient ingredient, FluidIngredient fluidIngredient, int duration) {
-            return new DatagenBuilder(name, result, ingredient, fluidIngredient, duration, BrewchemyRegistry.Recipes.BREWING_RECIPE_SERIALIZER.get());
+        public static DatagenBuilder addRecipe(ResourceLocation name, FluidStack result, Ingredient ingredient, FluidIngredient fluidIngredient, int duration, int heat) {
+            return new DatagenBuilder(name, result, ingredient, fluidIngredient, duration, heat, BrewchemyRegistry.Recipes.BREWING_RECIPE_SERIALIZER.get());
         }
 
         public void build(Consumer<FinishedRecipe> consumer) {

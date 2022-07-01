@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.registry;
 
+import mod.kerzox.brewchemy.client.gui.menu.FermentationBarrelMenu;
 import mod.kerzox.brewchemy.client.gui.menu.GerminationChamberMenu;
 import mod.kerzox.brewchemy.client.gui.menu.MillstoneMenu;
 import mod.kerzox.brewchemy.common.block.*;
@@ -9,6 +10,7 @@ import mod.kerzox.brewchemy.common.blockentity.*;
 import mod.kerzox.brewchemy.common.crafting.recipes.*;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluidType;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyLiquidBlock;
+import mod.kerzox.brewchemy.common.item.PintGlassItem;
 import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
 import mod.kerzox.brewchemy.common.item.rope.RopeItem;
 import net.minecraft.core.BlockPos;
@@ -88,6 +90,12 @@ public class BrewchemyRegistry {
             return new GerminationChamberMenu(windowId, inv, inv.player, (GerminationChamberBlockEntity) level.getBlockEntity(pos));
         }));
 
+        public static final RegistryObject<MenuType<FermentationBarrelMenu>> FERMENTATION_BARREL_MENU = MENUS.register("fermentation", () -> IForgeMenuType.create((windowId, inv, data) -> {
+            BlockPos pos = data.readBlockPos();
+            Level level = inv.player.getLevel();
+            return new FermentationBarrelMenu(windowId, inv, inv.player, (WoodenBarrelBlockEntity) level.getBlockEntity(pos));
+        }));
+
     }
 
     public static final class Recipes {
@@ -118,6 +126,7 @@ public class BrewchemyRegistry {
         public static final RegistryObject<BrewchemyItem> MALTED_BARLEY_ITEM = ITEMS.register("malted_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
         public static final RegistryObject<BrewchemyItem> MILLED_BARLEY_ITEM = ITEMS.register("milled_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
         public static final RegistryObject<BrewchemyItem> BREWERS_YEAST = ITEMS.register("brewers_yeast_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
+        public static final RegistryObject<PintGlassItem> PINT_GLASS = ITEMS.register("pint_glass_item", () -> new PintGlassItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
 
     }
 
@@ -130,7 +139,7 @@ public class BrewchemyRegistry {
         public static final makeBlock<BarleyCropBlock> BARLEY_CROP_BLOCK = makeBlock.build("barley_crop", BarleyCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
         public static final makeBlock<HopsCropBlock> HOPS_CROP_BLOCK = makeBlock.build("hops_crop", HopsCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
         public static final makeBlock<SupportStickBlock> SUPPORT_STICK_BLOCK = makeBlock.build("support_stick_block", SupportStickBlock::new, BlockBehaviour.Properties.of(Material.WOOD), true);
-        public static final makeBlock<RopeBlock> ROPE_BLOCK = makeBlock.build("rope_block", RopeBlock::new, BlockBehaviour.Properties.of(Material.AIR).sound(SoundType.WOOL), true);
+        public static final makeBlock<RopeBlock> ROPE_BLOCK = makeBlock.build("rope_block", RopeBlock::new, BlockBehaviour.Properties.of(Material.AIR).sound(SoundType.WOOL), false);
         public static final makeBlock<RopeTiedFenceBlock> ROPE_FENCE_BLOCK = makeBlock.build("rope_fence_block", RopeTiedFenceBlock::new, BlockBehaviour.Properties.of(Material.WOOD), false);
         public static final makeBlock<FermentsJarBlock> FERMENTS_JAR_BLOCK = makeBlock.build("ferments_jar_block", FermentsJarBlock::new, BlockBehaviour.Properties.of(Material.GLASS), true);
         public static final makeBlock<MillstoneCrankBlock> MILLSTONE_CRANK_BLOCK = makeBlock.build("millstone_crank_block", MillstoneCrankBlock::new, BlockBehaviour.Properties.of(Material.METAL).noCollission(), true);

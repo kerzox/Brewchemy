@@ -3,12 +3,14 @@ package mod.kerzox.brewchemy;
 import ca.weblite.objc.Client;
 import com.mojang.logging.LogUtils;
 import mod.kerzox.brewchemy.client.ClientStartupEvents;
+import mod.kerzox.brewchemy.client.gui.screen.FermentationScreen;
 import mod.kerzox.brewchemy.client.gui.screen.GerminationScreen;
 import mod.kerzox.brewchemy.client.gui.screen.MillstoneScreen;
 import mod.kerzox.brewchemy.client.render.MillstoneCrankBlockEntityRenderer;
 import mod.kerzox.brewchemy.common.capabilities.BrewchemyCapabilities;
 import mod.kerzox.brewchemy.common.crafting.misc.CauldronRecipes;
 import mod.kerzox.brewchemy.common.events.CommonEvents;
+import mod.kerzox.brewchemy.common.network.PacketHandler;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -58,6 +60,7 @@ public class Brewchemy
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         BrewchemyRegistry.init(modEventBus);
+        PacketHandler.register();
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonLoad);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientLoad);
@@ -77,6 +80,7 @@ public class Brewchemy
         ItemBlockRenderTypes.setRenderLayer(ROPE_BLOCK.get(), RenderType.cutout());
         MenuScreens.register(BrewchemyRegistry.Menus.MILLSTONE_GUI.get(), MillstoneScreen::new);
         MenuScreens.register(BrewchemyRegistry.Menus.GERMINATION_CHAMBER_GUI.get(), GerminationScreen::new);
+        MenuScreens.register(BrewchemyRegistry.Menus.FERMENTATION_BARREL_MENU.get(), FermentationScreen::new);
     }
 
     private void onEntityRenderRegister(EntityRenderersEvent.RegisterRenderers e) {

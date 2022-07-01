@@ -4,21 +4,29 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
+import org.jetbrains.annotations.Nullable;
 
 import javax.json.Json;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import static net.minecraftforge.common.crafting.CraftingHelper.getNBT;
 
 public class FluidIngredient implements Predicate<FluidStack> {
 
@@ -43,8 +51,14 @@ public class FluidIngredient implements Predicate<FluidStack> {
         return 0;
     }
 
+    public static FluidIngredient of(CompoundTag tag) {
+        List<FluidStack> fluidStacks = new ArrayList<>();
+        fluidStacks.add(FluidStack.loadFluidStackFromNBT(tag));
+        return new FluidIngredient((FluidStack[]) fluidStacks.toArray(), false, null);
+    }
+
     public static FluidStack fromResourceId(ResourceLocation fluidId, int amount) {
-        return new FluidStack(ForgeRegistries.FLUIDS.getValue(fluidId), amount);
+        return new FluidStack(Objects.requireNonNull(ForgeRegistries.FLUIDS.getValue(fluidId)), amount);
     }
 
     public static FluidIngredient of(FluidStack... fluid) {

@@ -1,6 +1,8 @@
 package mod.kerzox.brewchemy.client.gui.menu;
 
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
+import mod.kerzox.brewchemy.common.network.PacketHandler;
+import mod.kerzox.brewchemy.common.network.SyncContainer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -38,11 +40,8 @@ public abstract class DefaultMenu<T extends BrewchemyBlockEntity> extends Abstra
         return blockEntity;
     }
 
-    public void syncToServer() {
-        this.blockEntity.syncBlockEntity();
-    }
-
     public CompoundTag getUpdateTag() {
+        PacketHandler.sendToServer(new SyncContainer());
         return getBlockEntity().getUpdateTag();
     }
 

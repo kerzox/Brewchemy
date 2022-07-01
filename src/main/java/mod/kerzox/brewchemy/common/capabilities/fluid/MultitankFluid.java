@@ -62,11 +62,7 @@ public class MultitankFluid implements IFluidHandler {
 
     private int doFill(FluidStack resource) {
         for (int i = 0; i < this.storageTanks.length; i++) {
-            if (getFluidInTank(i).isEmpty()) {
-                this.storageTanks[i].setFluid(new FluidStack(resource, Math.min(getTankCapacity(i), resource.getAmount())));
-                onContentsChanged();
-                return getFluidInTank(i).getAmount();
-            } else if (getFluidInTank(i).isFluidEqual(resource)) {
+            if (getFluidInTank(i).isFluidEqual(resource)) {
                 int filled = getTankCapacity(i) - getFluidInTank(i).getAmount();
                 if (resource.getAmount() < filled) {
                     getFluidInTank(i).grow(resource.getAmount());
@@ -78,6 +74,11 @@ public class MultitankFluid implements IFluidHandler {
                     onContentsChanged();
                     return filled;
                 }
+            }
+            else if (getFluidInTank(i).isEmpty()) {
+                this.storageTanks[i].setFluid(new FluidStack(resource, Math.min(getTankCapacity(i), resource.getAmount())));
+                onContentsChanged();
+                return getFluidInTank(i).getAmount();
             }
         }
         return 0;

@@ -1,5 +1,6 @@
-// 1.19	2022-06-27T16:49:30.6741984	Recipes
+// 1.19	2022-06-30T15:58:17.9357021	Recipes
 35a88fdb5840879bbf3831963c8aff7232c1db73 data/brewchemy/recipes/brewers_yeast_from_wort.json
-f02375d869e0ae65a67ec8736c6004b71b31d365 data/brewchemy/recipes/fermentation_lager.json
+03010e97bb15179b2ad44676ef1a0106a4836918 data/brewchemy/recipes/brewing_beer_from_wort.json
+653f4fc8ed0297af0a5721d69ec0e8c1e95abe3e data/brewchemy/recipes/fermentation_beer.json
 48d62ad66e7753269c7ae79cc451a88e9eb52152 data/brewchemy/recipes/germinate_barley.json
 97d3e09fc83e0ac43ddf68b5a431fbb0ee01dd53 data/brewchemy/recipes/milled_barley_from_malted_barley.json

@@ -33,17 +33,22 @@ public class SomeJsonUtil {
     public static Ingredient[] deserializeIngredients(JsonObject json) {
         Ingredient[] ingredients = null;
         if (json.has("ingredient")) {
-            JsonObject item = json.get("ingredient").getAsJsonObject();
-            if (item.has("item")) {
-                if (item.get("item").isJsonArray()) {
-                    JsonArray arr = item.getAsJsonArray();
+            JsonObject ingredient = json.get("ingredient").getAsJsonObject();
+            if (ingredient.has("item")) {
+                if (ingredient.get("item").isJsonArray()) {
+                    JsonArray arr = ingredient.getAsJsonArray();
                     ingredients = new Ingredient[arr.size()];
                     for (int i = 0; i < arr.size(); i++) {
                         ingredients[i] = Ingredient.fromJson(arr.get(i));
                     }
                 } else {
-                    ingredients = new Ingredient[1];
-                    ingredients[0] = Ingredient.fromJson(item.getAsJsonObject());
+                    if (ingredient.has("fluid")) {
+                        ingredients = new Ingredient[1];
+                        ingredients[0] = Ingredient.fromJson(ingredient.getAsJsonObject("item"));
+                    } else {
+                        ingredients = new Ingredient[1];
+                        ingredients[0] = Ingredient.fromJson(ingredient.getAsJsonObject());
+                    }
                 }
             }
         }
@@ -53,8 +58,9 @@ public class SomeJsonUtil {
     public static FluidStack deserializeFluidStack(JsonObject json) {
         FluidStack resultStack = FluidStack.EMPTY;
         if (json.has("result")) {
-            ResourceLocation fluid = new ResourceLocation(JsonUtils.getStringOr("fluid", json, ""));
-            int amount = JsonUtils.getIntOr("amount", json, 0);
+            JsonObject result = json.getAsJsonObject("result");
+            ResourceLocation fluid = new ResourceLocation(JsonUtils.getStringOr("fluid", result, ""));
+            int amount = JsonUtils.getIntOr("amount", result, 0);
             resultStack = new FluidStack(ForgeRegistries.FLUIDS.getValue(fluid), amount);
         }
         return resultStack;
@@ -72,8 +78,13 @@ public class SomeJsonUtil {
                         ingredients[i] = FluidIngredient.deserialize(arr.get(i));
                     }
                 } else {
-                    ingredients = new FluidIngredient[1];
-                    ingredients[0] = FluidIngredient.deserialize(fluid);
+                    if (fluid.has("item")) {
+                        ingredients = new FluidIngredient[1];
+                        ingredients[0] = FluidIngredient.deserialize(fluid.getAsJsonObject("fluid"));
+                    } else {
+                        ingredients = new FluidIngredient[1];
+                        ingredients[0] = FluidIngredient.deserialize(fluid);
+                    }
                 }
             }
         }

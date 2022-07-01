@@ -2,10 +2,7 @@ package mod.kerzox.brewchemy.datagen;
 
 import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
-import mod.kerzox.brewchemy.common.crafting.recipes.FermentJarRecipe;
-import mod.kerzox.brewchemy.common.crafting.recipes.FermentationRecipe;
-import mod.kerzox.brewchemy.common.crafting.recipes.GerminationRecipe;
-import mod.kerzox.brewchemy.common.crafting.recipes.MillstoneRecipe;
+import mod.kerzox.brewchemy.common.crafting.recipes.*;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.data.DataGenerator;
@@ -49,10 +46,14 @@ public class GenerateRecipes extends RecipeProvider {
                 FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT_FLUID.getFluid().get(), 125)),200)
                 .build(pFinishedRecipeConsumer);
 
-        FermentationRecipe.DatagenBuilder.addRecipe(new ResourceLocation(Brewchemy.MODID, "fermentation_lager"),
+        BrewingRecipe.DatagenBuilder.addRecipe(new ResourceLocation(Brewchemy.MODID, "brewing_beer_from_wort"),
                 new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), PintGlassItem.KEG_VOLUME),
-                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT_FLUID.getFluid().get(), PintGlassItem.KEG_VOLUME)),30)
+                Ingredient.of(new ItemStack(BrewchemyRegistry.Blocks.HOPS_CROP_BLOCK.get())),
+                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT_FLUID.getFluid().get(), PintGlassItem.KEG_VOLUME)),30, BrewingRecipe.FIRE)
                 .build(pFinishedRecipeConsumer);
+
+        FermentationRecipe.DatagenBuilder.addRecipe(new ResourceLocation(Brewchemy.MODID, "fermentation_beer"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), PintGlassItem.KEG_VOLUME)).build(pFinishedRecipeConsumer);
 
     }
 }
