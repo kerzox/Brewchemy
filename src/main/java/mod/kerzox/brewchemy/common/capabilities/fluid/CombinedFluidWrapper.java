@@ -8,6 +8,8 @@ import net.minecraftforge.items.wrapper.EmptyHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+
 public class CombinedFluidWrapper implements IFluidHandler {
 
     protected final IFluidHandler[] fluidHandler; // the handlers

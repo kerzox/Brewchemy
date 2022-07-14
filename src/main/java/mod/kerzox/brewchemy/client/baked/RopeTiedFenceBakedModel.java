@@ -7,6 +7,7 @@ import mod.kerzox.brewchemy.common.block.rope.RopeConnections;
 import mod.kerzox.brewchemy.common.blockentity.RopeBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.RopeTiedFenceBlockEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
@@ -14,12 +15,14 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.resources.model.MultiPartBakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.IDynamicBakedModel;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.generators.BlockModelProvider;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -47,15 +50,16 @@ public class RopeTiedFenceBakedModel implements IDynamicBakedModel {
     }
 
     @Override
-    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull IModelData extraData) {
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData extraData, @Nullable RenderType renderType) {
         List<BakedQuad> quads = this.multiPart.getQuads(state, side, rand);
         quads.addAll(getCamoModelFromData(extraData).getQuads(state, side, rand));
         return quads;
     }
 
-    private BakedModel getCamoModelFromData(IModelData data) {
+
+    private BakedModel getCamoModelFromData(ModelData data) {
         BakedModel model = this.model;
-        BlockState mimic = data.getData(RopeTiedFenceBlockEntity.MIMIC);
+        BlockState mimic = data.get(RopeTiedFenceBlockEntity.MIMIC);
         if (mimic != null && !(mimic.getBlock() instanceof RopeTiedFenceBlock)) {
             model = Minecraft.getInstance().getBlockRenderer().getBlockModel(mimic);
         }
@@ -91,4 +95,6 @@ public class RopeTiedFenceBakedModel implements IDynamicBakedModel {
     public ItemOverrides getOverrides() {
         return model.getOverrides();
     }
+
+
 }

@@ -8,6 +8,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.registries.RegistryObject;
 
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
 public class FermentsJarBlock extends BrewchemyEntityBlock<FermentsJarBlockEntity> {
 
     public FermentsJarBlock(Properties properties) {

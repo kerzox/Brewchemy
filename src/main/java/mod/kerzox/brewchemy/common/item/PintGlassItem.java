@@ -23,6 +23,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
+import net.minecraft.world.item.Item.Properties;
+
 public class PintGlassItem extends BrewchemyItem {
 
     public static final int PINT_SIZE = 550;

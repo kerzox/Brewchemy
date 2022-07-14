@@ -13,9 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.ModelDataManager;
-import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.client.model.data.ModelDataMap;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,10 +48,12 @@ public class RopeTiedFenceBlockEntity extends BrewchemyBlockEntity {
 
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        BlockState old = mimic;
-        super.onDataPacket(net, pkt);
-        ModelDataManager.requestModelDataRefresh(this);
-        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
+        if (level != null) {
+            BlockState old = mimic;
+            super.onDataPacket(net, pkt);
+            requestModelDataUpdate();
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
+        }
     }
 
     public BlockState getMimic() {
@@ -92,9 +92,7 @@ public class RopeTiedFenceBlockEntity extends BrewchemyBlockEntity {
     }
 
     @Override
-    public IModelData getModelData() {
-        return new ModelDataMap.Builder()
-                .withInitial(MIMIC, mimic)
-                .build();
+    public ModelData getModelData() {
+        return ModelData.builder().with(MIMIC, mimic).build();
     }
 }

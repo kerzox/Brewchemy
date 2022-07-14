@@ -6,6 +6,8 @@ import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.RegistryObject;
 
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
 public class SupportStickBlock extends BrewchemyEntityBlock<SupportStickEntityBlock> {
 
     public SupportStickBlock(Properties properties) {

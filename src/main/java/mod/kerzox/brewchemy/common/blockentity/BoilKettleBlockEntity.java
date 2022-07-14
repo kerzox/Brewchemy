@@ -4,6 +4,7 @@ import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.fluid.MultitankFluid;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SidedFluidTank;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SidedMultifluidTank;
+import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.BrewingRecipe;
@@ -16,6 +17,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.SoulFireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
@@ -32,7 +36,7 @@ import java.util.Optional;
 
 public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServerTickable {
 
-    private final ItemStackHandler inventory = new ItemStackHandler(1);
+    private final ItemStackInventory.InputHandler inventory = new ItemStackInventory.InputHandler(1);
     private final SidedMultifluidTank sidedFluidTank = new SidedMultifluidTank(1, PintGlassItem.KEG_VOLUME, 1, PintGlassItem.KEG_VOLUME);
     private final LazyOptional<SidedMultifluidTank> handler = LazyOptional.of(() -> sidedFluidTank);
     private final LazyOptional<ItemStackHandler> itemHandler = LazyOptional.of(() -> inventory);
@@ -49,6 +53,16 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
         recipe.ifPresent(this::doRecipe);
     }
 
+    private boolean hasHeatForRecipe(BrewingRecipe recipe) {
+        if (recipe.getHeat() == BrewingRecipe.FIRE) {
+            return level.getBlockState(this.getBlockPos().below()).getBlock() instanceof BaseFireBlock;
+        } else if (recipe.getHeat() == BrewingRecipe.SUPERHEATED) {
+            return level.getBlockState(this.getBlockPos().below()).getBlock() instanceof SoulFireBlock;
+        } else {
+            return true;
+        }
+    }
+
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
         if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
@@ -62,7 +76,7 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
 
     private void doRecipe(BrewingRecipe recipe) {
         FluidStack result = recipe.assembleFluid(new RecipeInventoryWrapper(sidedFluidTank, inventory));
-        if (result.isEmpty()) return;
+        if (result.isEmpty() || hasHeatForRecipe(recipe)) return;
         if (!running) {
             duration = recipe.getDuration();
             running = true;
@@ -80,26 +94,5 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
             }
         }
         duration--;
-    }
-
-    @Override
-    public boolean onPlayerClick(Level pLevel, Player pPlayer) {
-//        if (!pLevel.isClientSide) {
-//            if (pPlayer.getMainHandItem().getItem() == Items.DIAMOND) {
-//                this.sidedFluidTank.drain(new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), 500), IFluidHandler.FluidAction.EXECUTE);
-//            }
-//            else if (pPlayer.getMainHandItem().getItem() == Items.BLAZE_ROD) {
-//                this.sidedFluidTank.getOutputHandler().forceFill(this.sidedFluidTank.drain(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
-//                this.sidedFluidTank.getOutputHandler().forceFill(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
-//            }
-//            else if (pPlayer.getMainHandItem().getItem() == Items.STICK) {
-//                this.sidedFluidTank.fill(new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), 500), IFluidHandler.FluidAction.EXECUTE);
-//            } else {
-//                for (int i = 0; i < this.sidedFluidTank.getTanks(); i++) {
-//                    pPlayer.sendSystemMessage(Component.literal(this.sidedFluidTank.getFluidInTank(i).getFluid() + " : " + this.sidedFluidTank.getFluidInTank(i).getAmount()));
-//                }
-//            }
-//        }
-        return super.onPlayerClick(pLevel, pPlayer);
     }
 }

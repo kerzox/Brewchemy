@@ -29,6 +29,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
 public class RopeTiedFenceBlock extends FenceBlock implements EntityBlock, IRopeConnectable {
 
     public RopeTiedFenceBlock(Properties pos) {

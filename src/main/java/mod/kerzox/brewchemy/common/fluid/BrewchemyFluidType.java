@@ -2,11 +2,13 @@ package mod.kerzox.brewchemy.common.fluid;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.IFluidTypeRenderProperties;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidType;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
+
+import net.minecraftforge.fluids.FluidType.Properties;
 
 public class BrewchemyFluidType extends FluidType {
 
@@ -48,8 +50,8 @@ public class BrewchemyFluidType extends FluidType {
     }
 
     @Override
-    public void initializeClient(Consumer<IFluidTypeRenderProperties> consumer) {
-        consumer.accept(new IFluidTypeRenderProperties() {
+    public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer) {
+        consumer.accept(new IClientFluidTypeExtensions() {
             @Override
             public ResourceLocation getStillTexture()
             {
@@ -75,7 +77,7 @@ public class BrewchemyFluidType extends FluidType {
             }
 
             @Override
-            public int getColorTint()
+            public int getTintColor()
             {
                 return colour;
             }

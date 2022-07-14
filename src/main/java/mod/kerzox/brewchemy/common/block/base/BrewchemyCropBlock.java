@@ -10,6 +10,8 @@ import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
 public class BrewchemyCropBlock extends CropBlock {
 
     public BrewchemyCropBlock(Properties properties) {

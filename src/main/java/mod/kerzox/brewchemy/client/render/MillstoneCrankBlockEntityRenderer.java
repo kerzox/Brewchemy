@@ -8,15 +8,11 @@ import mod.kerzox.brewchemy.client.util.RenderingUtil;
 import mod.kerzox.brewchemy.common.blockentity.MillstoneCrankBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-
-import javax.crypto.interfaces.PBEKey;
 
 public class MillstoneCrankBlockEntityRenderer implements BlockEntityRenderer<MillstoneCrankBlockEntity> {
 
@@ -50,7 +46,7 @@ public class MillstoneCrankBlockEntityRenderer implements BlockEntityRenderer<Mi
             pPoseStack.translate(-0.5f, -0.5f, -0.5f);
         }
 
-        RenderingUtil.renderModelCorrectLighting(
+        RenderingUtil.renderSolidModel(
                 pPoseStack,
                 pBufferSource,
                 Minecraft.getInstance().getModelManager().getModel(CRANK_MODEL),

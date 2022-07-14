@@ -5,6 +5,8 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+
 public class CombinedFluidInventory implements IFluidHandler {
 
     protected final IFluidHandler[] fluidHandler; // the handlers

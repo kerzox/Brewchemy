@@ -7,6 +7,8 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
 public class BrewchemyBlock extends Block {
 
     public BrewchemyBlock(Properties properties) {

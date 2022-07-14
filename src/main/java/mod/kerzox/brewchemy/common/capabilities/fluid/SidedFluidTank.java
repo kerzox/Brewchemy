@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+
 public class SidedFluidTank extends CombinedFluidWrapper implements IStrictSided {
 
     private Set<Direction> input = new HashSet<>();

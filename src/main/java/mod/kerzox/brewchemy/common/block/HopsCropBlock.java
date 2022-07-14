@@ -32,6 +32,8 @@ import org.jetbrains.annotations.Nullable;
 import static mod.kerzox.brewchemy.common.block.rope.RopeBlock.DOWN;
 import static mod.kerzox.brewchemy.common.block.rope.RopeBlock.HAS_TRELLIS;
 
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
 public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectable {
 
     private static final int maturationAge = 7;

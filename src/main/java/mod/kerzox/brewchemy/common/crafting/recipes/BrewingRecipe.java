@@ -27,6 +27,7 @@ public class BrewingRecipe extends AbstractRecipe {
 
     public static final int NO_HEAT = 0;
     public static final int FIRE = 600;
+    public static final int SUPERHEATED = 1000;
 
     private final NonNullList<Ingredient> ingredients = NonNullList.create();
     private final NonNullList<FluidIngredient> fluidIngredients = NonNullList.create();

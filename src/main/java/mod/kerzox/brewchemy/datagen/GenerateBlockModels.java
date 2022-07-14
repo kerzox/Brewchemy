@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockModelProvider;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
-import net.minecraftforge.client.model.generators.IGeneratedBlockstate;
+import net.minecraftforge.client.model.generators.IGeneratedBlockState;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -38,7 +38,7 @@ public class GenerateBlockModels extends BlockStateProvider {
         }
     }
 
-    public static class CropModelBuilder implements IGeneratedBlockstate {
+    public static class CropModelBuilder implements IGeneratedBlockState {
 
         private final String modelName;
         private final int age;

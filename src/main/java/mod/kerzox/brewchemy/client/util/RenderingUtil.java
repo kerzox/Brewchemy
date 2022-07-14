@@ -9,17 +9,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.data.ModelData;
 
+import java.util.Objects;
 import java.util.Random;
 
 public class RenderingUtil {
 
-    public static void renderModelCorrectLighting(PoseStack pMatrixStack, MultiBufferSource pBuffer, BakedModel model, BlockEntity te, BlockPos pos, int overlay) {
-        Level world = te.getLevel();
-
+    public static void renderSolidModel(PoseStack pMatrixStack, MultiBufferSource pBuffer, BakedModel model, BlockEntity te, BlockPos pos, int overlay) {
         Minecraft.getInstance().getBlockRenderer().getModelRenderer().tesselateWithAO(
-                world,
+                Objects.requireNonNull(te.getLevel()),
                 model,
                 te.getBlockState(),
                 pos,
@@ -28,7 +27,7 @@ public class RenderingUtil {
                 false,
                 RandomSource.create(),
                 0,
-                overlay, EmptyModelData.INSTANCE);
+                overlay, ModelData.EMPTY, RenderType.solid());
     }
 
 }

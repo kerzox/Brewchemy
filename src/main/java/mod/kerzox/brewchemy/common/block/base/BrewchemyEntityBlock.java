@@ -25,6 +25,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
 public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock implements EntityBlock {
 
     protected RegistryObject<BlockEntityType<T>> type;
@@ -49,7 +51,7 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
         }
         if (pLevel.getBlockEntity(pPos) instanceof MenuProvider menu) {
             if (pLevel.isClientSide) return InteractionResult.SUCCESS;
-            NetworkHooks.openGui((ServerPlayer) pPlayer, menu, pPos);
+            NetworkHooks.openScreen((ServerPlayer) pPlayer, menu, pPos);
             return InteractionResult.SUCCESS;
         }
         return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);

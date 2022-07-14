@@ -27,6 +27,8 @@ import java.util.Map;
 
 import static mod.kerzox.brewchemy.registry.BrewchemyRegistry.BlockEntities.ROPE;
 
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
 public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements IRopeConnectable {
 
     public static final EnumProperty<RopeConnections> NORTH = EnumProperty.create("north_rope", RopeConnections.class);

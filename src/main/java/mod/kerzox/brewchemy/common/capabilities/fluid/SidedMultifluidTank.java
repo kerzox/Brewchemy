@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+
 public class SidedMultifluidTank extends CombinedFluidInventory implements IStrictSided {
     private Set<Direction> input = new HashSet<>();
     private Set<Direction> output = new HashSet<>();

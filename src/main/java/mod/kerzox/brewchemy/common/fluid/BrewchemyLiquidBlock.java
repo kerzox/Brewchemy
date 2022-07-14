@@ -11,6 +11,8 @@ import net.minecraft.world.level.material.FlowingFluid;
 
 import java.util.function.Supplier;
 
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
 public class BrewchemyLiquidBlock extends LiquidBlock {
 
     public BrewchemyLiquidBlock(Supplier<? extends FlowingFluid> p_54694_, Properties p_54695_) {

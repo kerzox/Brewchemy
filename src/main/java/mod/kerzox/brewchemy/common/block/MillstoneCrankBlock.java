@@ -22,6 +22,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
 public class MillstoneCrankBlock extends BrewchemyEntityBlock<MillstoneCrankBlockEntity> {
 
     public MillstoneCrankBlock(Properties properties) {

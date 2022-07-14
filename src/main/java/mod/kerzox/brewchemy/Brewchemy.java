@@ -75,9 +75,6 @@ public class Brewchemy
 
     private void clientLoad(final FMLClientSetupEvent event) {
         ClientStartupEvents.init();
-        ItemBlockRenderTypes.setRenderLayer(BARLEY_CROP_BLOCK.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(HOPS_CROP_BLOCK.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ROPE_BLOCK.get(), RenderType.cutout());
         MenuScreens.register(BrewchemyRegistry.Menus.MILLSTONE_GUI.get(), MillstoneScreen::new);
         MenuScreens.register(BrewchemyRegistry.Menus.GERMINATION_CHAMBER_GUI.get(), GerminationScreen::new);
         MenuScreens.register(BrewchemyRegistry.Menus.FERMENTATION_BARREL_MENU.get(), FermentationScreen::new);
