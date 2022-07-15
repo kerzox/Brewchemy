@@ -51,8 +51,8 @@ public class RopeTiedFenceBakedModel implements IDynamicBakedModel {
 
     @Override
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData extraData, @Nullable RenderType renderType) {
-        List<BakedQuad> quads = this.multiPart.getQuads(state, side, rand);
-        quads.addAll(getCamoModelFromData(extraData).getQuads(state, side, rand));
+        List<BakedQuad> quads = new ArrayList<>(this.multiPart.getQuads(state, side, rand));
+        quads.addAll(new ArrayList<>(this.getCamoModelFromData(extraData).getQuads(state, side, rand)));
         return quads;
     }
 

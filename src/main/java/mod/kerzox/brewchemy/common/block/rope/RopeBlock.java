@@ -3,14 +3,19 @@ package mod.kerzox.brewchemy.common.block.rope;
 import mod.kerzox.brewchemy.common.block.HopsCropBlock;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.RopeBlockEntity;
+import mod.kerzox.brewchemy.common.blockentity.RopeTiedFenceBlockEntity;
 import mod.kerzox.brewchemy.common.util.IRopeConnectable;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -131,5 +136,26 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
     @Override
     public boolean canConnectTo(BlockState state, Direction connectingFrom) {
         return true;
+    }
+
+    public static class Item extends BlockItem {
+
+        public Item(Properties pProperties) {
+            super(BrewchemyRegistry.Blocks.ROPE_BLOCK.get(), pProperties);
+        }
+
+        @Override
+        public InteractionResult useOn(UseOnContext pContext) {
+            if (pContext.getLevel().getBlockState(pContext.getClickedPos()).getBlock() instanceof FenceBlock fence) {
+                BlockState oldState = pContext.getLevel().getBlockState(pContext.getClickedPos());
+                pContext.getLevel().setBlockAndUpdate(pContext.getClickedPos(), BrewchemyRegistry.Blocks.ROPE_FENCE_BLOCK.get().defaultBlockState());
+                if (pContext.getLevel().getBlockEntity(pContext.getClickedPos()) instanceof RopeTiedFenceBlockEntity rope) {
+                    rope.setFenceToMimic(oldState);
+                    pContext.getItemInHand().shrink(1);
+                    return InteractionResult.SUCCESS;
+                }
+            }
+            return super.useOn(pContext);
+        }
     }
 }
