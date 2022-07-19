@@ -22,6 +22,8 @@ public class MillstoneCrankBlockEntity extends BrewchemyBlockEntity implements I
     private Quaternion prevRotation;
     private boolean clicked;
 
+    private long prevTime;
+
     public MillstoneCrankBlockEntity(BlockPos pWorldPosition, BlockState pBlockState) {
         super(BrewchemyRegistry.BlockEntities.MILL_STONE_CRANK.get(), pWorldPosition, pBlockState);
     }
@@ -32,6 +34,10 @@ public class MillstoneCrankBlockEntity extends BrewchemyBlockEntity implements I
 
     public MillStoneBlockEntity getMillstone() {
         return millstone;
+    }
+
+    public long getPrevTime() {
+        return prevTime;
     }
 
     @Override
@@ -53,6 +59,7 @@ public class MillstoneCrankBlockEntity extends BrewchemyBlockEntity implements I
             inUse--;
             if (inUse == 0) {
                 clicked = false;
+                prevTime = level.getGameTime();
             }
         }
     }

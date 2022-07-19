@@ -15,6 +15,7 @@ public class DataGenerators {
         ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
         gen.addProvider(event.includeServer(), new GenerateRecipes(gen));
         gen.addProvider(event.includeClient(), new GenerateBlockModels(gen, existingFileHelper));
+        gen.addProvider(event.includeClient(), new GenerateItemModels(gen, existingFileHelper));
     }
 
 

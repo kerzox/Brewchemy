@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.common.capabilities.fluid;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -16,6 +17,21 @@ public class MultitankFluid implements IFluidHandler {
         this.storageTanks = new FluidStorageTank[tanks];
         for (int i = 0; i < this.storageTanks.length; i++) {
             this.storageTanks[i] = new FluidStorageTank(tankCapacities);
+        }
+    }
+
+    public CompoundTag write(CompoundTag tag) {
+        for (int i = 0; i < storageTanks.length; i++) {
+            CompoundTag tag1 = new CompoundTag();
+            storageTanks[i].writeToNBT(tag1);
+            tag.put("tank" + i, tag1);
+        }
+        return tag;
+    }
+
+    public void read(CompoundTag tag) {
+        for (int i = 0; i < storageTanks.length; i++) {
+            storageTanks[i].readFromNBT(tag.getCompound("tank"+i));
         }
     }
 

@@ -1,6 +1,7 @@
 package mod.kerzox.brewchemy.client.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -23,11 +24,29 @@ public class RenderingUtil {
                 te.getBlockState(),
                 pos,
                 pMatrixStack,
-                pBuffer.getBuffer(RenderType.cutout()),
+                pBuffer.getBuffer(RenderType.solid()),
                 false,
                 RandomSource.create(),
                 0,
                 overlay, ModelData.EMPTY, RenderType.solid());
+    }
+
+    public static void addVertex(VertexConsumer renderer, PoseStack stack, float x, float y, float z, float u, float v) {
+        renderer.vertex(stack.last().pose(), x, y, z)
+                .color(1.0f, 1.0f, 1.0f, 1.0f)
+                .uv(u, v)
+                .uv2(0, 240)
+                .normal(1, 0, 0)
+                .endVertex();
+    }
+
+    public static void addVertex(VertexConsumer renderer, PoseStack stack, float x, float y, float z, float u, float v, int color) {
+        renderer.vertex(stack.last().pose(), x, y, z)
+                .color(color)
+                .uv(u, v)
+                .uv2(0, 240)
+                .normal(1, 0, 0)
+                .endVertex();
     }
 
 }

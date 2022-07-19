@@ -40,7 +40,7 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (FluidUtil.getFluidHandler(pPlayer.getItemInHand(pHand)).isPresent()) {
             if (!pLevel.isClientSide) {
-                FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pHit.getBlockPos(), pHit.getDirection());
+                FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pPos, pHit.getDirection());
             }
             return InteractionResult.SUCCESS;
         }

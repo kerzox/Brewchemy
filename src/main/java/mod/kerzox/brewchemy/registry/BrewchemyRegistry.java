@@ -1,9 +1,11 @@
 package mod.kerzox.brewchemy.registry;
 
+import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.gui.menu.FermentationBarrelMenu;
 import mod.kerzox.brewchemy.client.gui.menu.GerminationChamberMenu;
 import mod.kerzox.brewchemy.client.gui.menu.MillstoneMenu;
 import mod.kerzox.brewchemy.common.block.*;
+import mod.kerzox.brewchemy.common.block.base.BrewchemyInvisibleBlock;
 import mod.kerzox.brewchemy.common.block.rope.RopeBlock;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.*;
@@ -119,6 +121,7 @@ public class BrewchemyRegistry {
         public static void init() {
         }
 
+        public static final RegistryObject<BrewchemyItem> HOPS_ITEM = ITEMS.register("hops_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
         public static final RegistryObject<BrewchemyItem> SOAKED_BARLEY_ITEM = ITEMS.register("soaked_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
         public static final RegistryObject<BrewchemyItem> GERMINATED_BARLEY_ITEM = ITEMS.register("germinated_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
         public static final RegistryObject<BrewchemyItem> MALTED_BARLEY_ITEM = ITEMS.register("malted_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
@@ -133,6 +136,7 @@ public class BrewchemyRegistry {
         public static void init() {
         }
 
+        public static final makeBlock<BrewchemyInvisibleBlock> INVISIBLE_BLOCK = makeBlock.build("invisible_block", BrewchemyInvisibleBlock::new, BlockBehaviour.Properties.of(Material.GLASS).noCollission().noLootTable(), false);
         public static final makeBlock<BrewchemyEntityBlock<MillStoneBlockEntity>> MILL_STONE_BLOCK = makeBlock.build("millstone_block", p -> new BrewchemyEntityBlock<>(MILL_STONE.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
         public static final makeBlock<BarleyCropBlock> BARLEY_CROP_BLOCK = makeBlock.build("barley_crop", BarleyCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
         public static final makeBlock<HopsCropBlock> HOPS_CROP_BLOCK = makeBlock.build("hops_crop", HopsCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
@@ -144,6 +148,7 @@ public class BrewchemyRegistry {
         public static final makeBlock<BrewchemyEntityBlock<GerminationChamberBlockEntity>> GERMINATION_CHAMBER_BLOCK = makeBlock.build("germination_chamber_block", p -> new BrewchemyEntityBlock<>(GERMINATION_CHAMBER.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
         public static final makeBlock<FluidBarrelBlock<WoodenBarrelBlockEntity>> WOODEN_BARREL_BLOCK = makeBlock.build("wooden_barrel_block", p -> new FluidBarrelBlock<>(WOODEN_BARREL.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
         public static final makeBlock<BoilKettleBlock> BOIL_KETTLE_BLOCK = makeBlock.build("boil_kettle_block", p -> new BoilKettleBlock(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
+        public static final makeBlock<BoilKettleBlock.BoilKettleTop> BOIL_KETTLE_TOP_BLOCK = makeBlock.build("boil_kettle_top_block", BoilKettleBlock.BoilKettleTop::new, BlockBehaviour.Properties.of(Material.GLASS).noCollission().noLootTable(), false);
 
 
         public static class makeBlock<T extends Block> implements Supplier<T> {

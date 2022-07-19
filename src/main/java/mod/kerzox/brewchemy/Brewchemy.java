@@ -6,6 +6,7 @@ import mod.kerzox.brewchemy.client.ClientStartupEvents;
 import mod.kerzox.brewchemy.client.gui.screen.FermentationScreen;
 import mod.kerzox.brewchemy.client.gui.screen.GerminationScreen;
 import mod.kerzox.brewchemy.client.gui.screen.MillstoneScreen;
+import mod.kerzox.brewchemy.client.render.BoilKettleBlockEntityRenderer;
 import mod.kerzox.brewchemy.client.render.MillstoneCrankBlockEntityRenderer;
 import mod.kerzox.brewchemy.common.capabilities.BrewchemyCapabilities;
 import mod.kerzox.brewchemy.common.crafting.misc.CauldronRecipes;
@@ -83,6 +84,7 @@ public class Brewchemy
     private void onEntityRenderRegister(EntityRenderersEvent.RegisterRenderers e) {
         System.out.println("Registering Entity Renderers");
         e.registerBlockEntityRenderer(BrewchemyRegistry.BlockEntities.MILL_STONE_CRANK.get(), MillstoneCrankBlockEntityRenderer::new);
+        e.registerBlockEntityRenderer(BrewchemyRegistry.BlockEntities.BREWING_POT.get(), BoilKettleBlockEntityRenderer::new);
     }
 
 }

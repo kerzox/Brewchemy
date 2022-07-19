@@ -38,7 +38,7 @@ import static mod.kerzox.brewchemy.common.block.rope.RopeBlock.SIDES;
 
 public class RopeTiedFenceBakedModel implements IDynamicBakedModel {
 
-    private final Map<String, List<BakedQuad>> quadCache = new HashMap<>();
+    private final Map<BlockState, BakedModel> cachedCamo = new HashMap<>();
     private BakedModel model;
     private MultiPartBakedModel multiPart;
 

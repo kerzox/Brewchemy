@@ -20,8 +20,7 @@ public class MillstoneCrankBlockEntityRenderer implements BlockEntityRenderer<Mi
 
     }
 
-    public static ResourceLocation CRANK_MODEL = new ResourceLocation(Brewchemy.MODID, "block/crank");
-    public static ResourceLocation CRANK_TEXTURE = new ResourceLocation(Brewchemy.MODID, "block/crank_texture");
+    public static ResourceLocation CRANK_MODEL = new ResourceLocation(Brewchemy.MODID, "block/millstonelever");
 
     private boolean wasClicked;
 
@@ -56,11 +55,15 @@ public class MillstoneCrankBlockEntityRenderer implements BlockEntityRenderer<Mi
 
         pPoseStack.popPose();
 
+        long word = pBlockEntity.getLevel().getGameTime() - pBlockEntity.getPrevTime();
+
+        System.out.println(pBlockEntity.getLevel().getGameTime() + " : " + word);
+
 
     }
 
     private Quaternion performAnimation(float pPartialTick, MillstoneCrankBlockEntity pBlockEntity) {
-        return Vector3f.YP.rotationDegrees((float) Mth.lerp((float) ((pBlockEntity.getLevel().getGameTime() + pPartialTick) * 0.075), 0, 360));
+        return Vector3f.YP.rotationDegrees((float) Mth.lerp(((pBlockEntity.getLevel().getGameTime() + pPartialTick) * 0.075), 0, 360));
     }
 
 }

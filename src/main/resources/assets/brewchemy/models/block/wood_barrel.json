@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "brewchemy:block/barrel_bottom",
+    "front": "brewchemy:block/barrel_top",
+    "side": "brewchemy:block/barrel_side",
+    "top": "brewchemy:block/barrel_side"
+  }
+}

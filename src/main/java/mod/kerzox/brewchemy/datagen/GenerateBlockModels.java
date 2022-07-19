@@ -28,7 +28,7 @@ public class GenerateBlockModels extends BlockStateProvider {
                 for (var i = 0; i < crop.getMaxAge() + 1; i++) {
                     String textureName = "block/"+block.getName()+"_stage"+i;
                     ResourceLocation cropModel = modLoc(textureName);
-                    BlockModelBuilder builder = models().getBuilder(modLoc(textureName).getPath())
+                    models().getBuilder(modLoc(textureName).getPath())
                             .parent(models().getExistingFile(modLoc("brewchemycrops")))
                             .texture("crop", cropModel);
                     registeredBlocks.put(crop, blockstate);

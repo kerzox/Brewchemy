@@ -2,6 +2,7 @@ package mod.kerzox.brewchemy.common.capabilities.fluid;
 
 import mod.kerzox.brewchemy.common.capabilities.item.IStrictSided;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -21,7 +22,7 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
 
     public SidedMultifluidTank(int inputTanks, int inputCapacities, int outputTanks, int outputCapacities) {
         super(new InputWrapper(inputTanks, inputCapacities), new OutputWrapper(outputTanks, outputCapacities));
-        input.add(Direction.UP);
+        input.addAll(Arrays.stream(Direction.values()).toList());
         output.add(Direction.NORTH);
     }
 
@@ -76,6 +77,18 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
         return input;
     }
 
+    public CompoundTag serialize() {
+        CompoundTag tag = new CompoundTag();
+        getInputHandler().write(tag);
+        getOutputHandler().write(tag);
+        return tag;
+    }
+
+    public void deserialize(CompoundTag tag) {
+        getInputHandler().read(tag.getCompound("fluidHandler"));
+        getOutputHandler().read(tag.getCompound("fluidHandler"));
+    }
+
     public static class InputWrapper extends MultitankFluid {
 
         private LazyOptional<InputWrapper> handler = LazyOptional.of(()-> this);
@@ -97,6 +110,17 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
             return handler.cast();
         }
 
+        @Override
+        public CompoundTag write(CompoundTag tag) {
+            CompoundTag tag1 = new CompoundTag();
+            tag.put("input", super.write(tag1));
+            return tag;
+        }
+
+        @Override
+        public void read(CompoundTag tag) {
+            super.read(tag.getCompound("input"));
+        }
     }
 
     public static class OutputWrapper extends MultitankFluid {
@@ -118,6 +142,18 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
 
         public <T> LazyOptional<T> getHandler() {
             return handler.cast();
+        }
+
+        @Override
+        public CompoundTag write(CompoundTag tag) {
+            CompoundTag tag1 = new CompoundTag();
+            tag.put("output", super.write(tag1));
+            return tag;
+        }
+
+        @Override
+        public void read(CompoundTag tag) {
+            super.read(tag.getCompound("output"));
         }
     }
 }

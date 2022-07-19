@@ -78,7 +78,7 @@ public abstract class BrewchemyBlockEntity extends BlockEntity {
      */
 
     protected void addToUpdateTag(CompoundTag tag) {
-
+        write(tag);
     }
 
     public boolean onPlayerClick(Level pLevel, Player pPlayer) {
