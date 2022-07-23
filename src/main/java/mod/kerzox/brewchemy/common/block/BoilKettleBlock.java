@@ -99,35 +99,116 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
         return pLevel.getBlockState(pCurrentPos.above()).getBlock() == BrewchemyRegistry.Blocks.BOIL_KETTLE_TOP_BLOCK.get() ? super.updateShape(pState, pDirection, pNeighborState, pLevel, pCurrentPos, pNeighborPos) : Blocks.AIR.defaultBlockState();
     }
 
-    private VoxelShape shapeLidOpen() {
-        return Stream.of(
-                Block.box(14, 2, 1, 15, 24, 14),
-                Block.box(2, 2, 14, 15, 24, 15),
-                Block.box(1, 2, 2, 2, 24, 15),
-                Block.box(1, 2, 1, 14, 24, 2),
-                Block.box(2, 0, 2, 14, 2, 14),
-                Block.box(-1, 25, 7, 3, 26, 9),
-                Block.box(-6, 24, 1, 8, 25, 15),
-                Block.box(5.5, 3, 0, 10.5, 8, 1)
-        ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+    private VoxelShape shapeLidOpen(Direction direction) {
+        switch (direction) {
+            case WEST -> {
+                return Stream.of(
+                        Block.box(1, 2, 1, 14, 24, 2),
+                        Block.box(14, 2, 1, 15, 24, 14),
+                        Block.box(2, 2, 14, 15, 24, 15),
+                        Block.box(1, 2, 2, 2, 24, 15),
+                        Block.box(2, 0, 2, 14, 2, 14),
+                        Block.box(7, 25, 13, 9, 26, 17),
+                        Block.box(1, 24, 8, 15, 25, 22),
+                        Block.box(0, 3, 5.5, 1, 8, 10.5)
+                ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+            }
+            case EAST -> {
+                return Stream.of(
+                        Block.box(2, 2, 14, 15, 24, 15),
+                        Block.box(1, 2, 2, 2, 24, 15),
+                        Block.box(1, 2, 1, 14, 24, 2),
+                        Block.box(14, 2, 1, 15, 24, 14),
+                        Block.box(2, 0, 2, 14, 2, 14),
+                        Block.box(7, 25, -1, 9, 26, 3),
+                        Block.box(1, 24, -6, 15, 25, 8),
+                        Block.box(15, 3, 5.5, 16, 8, 10.5)
+                ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+            }
+            case SOUTH -> {
+                return Stream.of(
+                        Block.box(1, 2, 2, 2, 24, 15),
+                        Block.box(1, 2, 1, 14, 24, 2),
+                        Block.box(14, 2, 1, 15, 24, 14),
+                        Block.box(2, 2, 14, 15, 24, 15),
+                        Block.box(2, 0, 2, 14, 2, 14),
+                        Block.box(13, 25, 7, 17, 26, 9),
+                        Block.box(8, 24, 1, 22, 25, 15),
+                        Block.box(5.5, 3, 15, 10.5, 8, 16)
+                ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+            }
+            default -> {
+                return Stream.of(
+                        Block.box(14, 2, 1, 15, 24, 14),
+                        Block.box(2, 2, 14, 15, 24, 15),
+                        Block.box(1, 2, 2, 2, 24, 15),
+                        Block.box(1, 2, 1, 14, 24, 2),
+                        Block.box(2, 0, 2, 14, 2, 14),
+                        Block.box(-1, 25, 7, 3, 26, 9),
+                        Block.box(-6, 24, 1, 8, 25, 15),
+                        Block.box(5.5, 3, 0, 10.5, 8, 1)
+                ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+            }
+        }
     }
 
-    private VoxelShape shapeLidClosed() {
-        return Stream.of(
-                Block.box(14, 2, 1, 15, 24, 14),
-                Block.box(2, 2, 14, 15, 24, 15),
-                Block.box(1, 2, 2, 2, 24, 15),
-                Block.box(1, 2, 1, 14, 24, 2),
-                Block.box(2, 0, 2, 14, 2, 14),
-                Block.box(6, 25, 7, 10, 26, 9),
-                Block.box(1, 24, 1, 15, 25, 15),
-                Block.box(5.5, 3, 0, 10.5, 8, 1)
-        ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+    private VoxelShape shapeLidClosed(Direction direction) {
+        switch (direction) {
+            case WEST -> {
+                return Stream.of(
+                        Block.box(1, 2, 1, 14, 24, 2),
+                        Block.box(14, 2, 1, 15, 24, 14),
+                        Block.box(2, 2, 14, 15, 24, 15),
+                        Block.box(1, 2, 2, 2, 24, 15),
+                        Block.box(2, 0, 2, 14, 2, 14),
+                        Block.box(7, 25, 6, 9, 26, 10),
+                        Block.box(1, 24, 1, 15, 25, 15),
+                        Block.box(0, 3, 5.5, 1, 8, 10.5)
+                ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+            }
+            case SOUTH -> {
+                return Stream.of(
+                        Block.box(1, 2, 2, 2, 24, 15),
+                        Block.box(1, 2, 1, 14, 24, 2),
+                        Block.box(14, 2, 1, 15, 24, 14),
+                        Block.box(2, 2, 14, 15, 24, 15),
+                        Block.box(2, 0, 2, 14, 2, 14),
+                        Block.box(6, 25, 7, 10, 26, 9),
+                        Block.box(1, 24, 1, 15, 25, 15),
+                        Block.box(5.5, 3, 15, 10.5, 8, 16)
+                ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+            }
+            case EAST -> {
+                return Stream.of(
+                        Block.box(2, 2, 14, 15, 24, 15),
+                        Block.box(1, 2, 2, 2, 24, 15),
+                        Block.box(1, 2, 1, 14, 24, 2),
+                        Block.box(14, 2, 1, 15, 24, 14),
+                        Block.box(2, 0, 2, 14, 2, 14),
+                        Block.box(7, 25, 6, 9, 26, 10),
+                        Block.box(1, 24, 1, 15, 25, 15),
+                        Block.box(15, 3, 5.5, 16, 8, 10.5)
+                ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+            }
+            default -> {
+                return Stream.of(
+                        Block.box(14, 2, 1, 15, 24, 14),
+                        Block.box(2, 2, 14, 15, 24, 15),
+                        Block.box(1, 2, 2, 2, 24, 15),
+                        Block.box(1, 2, 1, 14, 24, 2),
+                        Block.box(2, 0, 2, 14, 2, 14),
+                        Block.box(6, 25, 7, 10, 26, 9),
+                        Block.box(1, 24, 1, 15, 25, 15),
+                        Block.box(5.5, 3, 0, 10.5, 8, 1)
+                ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+            }
+        }
+
     }
 
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-        return isOpened(pState) ? shapeLidOpen() : shapeLidClosed();
+        return isOpened(pState) ? shapeLidOpen(pState.getValue(HorizontalDirectionalBlock.FACING)) : shapeLidClosed(pState.getValue(HorizontalDirectionalBlock.FACING));
     }
 
     public static class BoilKettleTop extends BrewchemyInvisibleBlock {
@@ -154,39 +235,119 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
             return canSurvive(pState, pLevel, pCurrentPos) ? super.updateShape(pState, pDirection, pNeighborState, pLevel, pCurrentPos, pNeighborPos) : Blocks.AIR.defaultBlockState();
         }
 
-        private VoxelShape shapeLidOpen() {
-            return Stream.of(
-                    Block.box(14, -14, 1, 15, 8, 14),
-                    Block.box(2, -14, 14, 15, 8, 15),
-                    Block.box(1, -14, 2, 2, 8, 15),
-                    Block.box(1, -14, 1, 14, 8, 2),
-                    Block.box(2, -16, 2, 14, -14, 14),
-                    Block.box(-1, 9, 7, 3, 10, 9),
-                    Block.box(-6, 8, 1, 8, 9, 15),
-                    Block.box(1, 0, 1, 15, 1, 15),
-                    Block.box(5.5, -13, 0, 10.5, -8, 1)
-            ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+        private VoxelShape shapeLidOpen(Direction direction) {
+            switch (direction) {
+                case WEST -> {
+                    return Stream.of(
+                            Block.box(1, -14, 1, 14, 8, 2),
+                            Block.box(14, -14, 1, 15, 8, 14),
+                            Block.box(2, -14, 14, 15, 8, 15),
+                            Block.box(1, -14, 2, 2, 8, 15),
+                            Block.box(2, -16, 2, 14, -14, 14),
+                            Block.box(7, 9, 13, 9, 10, 17),
+                            Block.box(1, 8, 8, 15, 9, 22),
+                            Block.box(0, -13, 5.5, 1, -8, 10.5)
+                    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+                }
+                case EAST -> {
+                    return Stream.of(
+                            Block.box(2, -14, 14, 15, 8, 15),
+                            Block.box(1, -14, 2, 2, 8, 15),
+                            Block.box(1, -14, 1, 14, 8, 2),
+                            Block.box(14, -14, 1, 15, 8, 14),
+                            Block.box(2, -16, 2, 14, -14, 14),
+                            Block.box(7, 9, -1, 9, 10, 3),
+                            Block.box(1, 8, -6, 15, 9, 8),
+                            Block.box(15, -13, 5.5, 16, -8, 10.5)
+                    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+                }
+                case SOUTH -> {
+                    return Stream.of(
+                            Block.box(1, -14, 2, 2, 8, 15),
+                            Block.box(1, -14, 1, 14, 8, 2),
+                            Block.box(14, -14, 1, 15, 8, 14),
+                            Block.box(2, -14, 14, 15, 8, 15),
+                            Block.box(2, -16, 2, 14, -14, 14),
+                            Block.box(13, 9, 7, 17, 10, 9),
+                            Block.box(8, 8, 1, 22, 9, 15),
+                            Block.box(5.5, -13, 15, 10.5, -8, 16)
+                    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+                }
+                default -> {
+                    return Stream.of(
+                            Block.box(14, -14, 1, 15, 8, 14),
+                            Block.box(2, -14, 14, 15, 8, 15),
+                            Block.box(1, -14, 2, 2, 8, 15),
+                            Block.box(1, -14, 1, 14, 8, 2),
+                            Block.box(2, -16, 2, 14, -14, 14),
+                            Block.box(-1, 9, 7, 3, 10, 9),
+                            Block.box(-6, 8, 1, 8, 9, 15),
+                            Block.box(1, 0, 1, 15, 1, 15),
+                            Block.box(5.5, -13, 0, 10.5, -8, 1)
+                    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+                }
+            }
+
         }
 
-        private VoxelShape shapeLidClosed() {
-            return Stream.of(
-                    Block.box(14, -14, 1, 15, 8, 14),
-                    Block.box(2, -14, 14, 15, 8, 15),
-                    Block.box(1, -14, 2, 2, 8, 15),
-                    Block.box(1, -14, 1, 14, 8, 2),
-                    Block.box(2, -16, 2, 14, -14, 14),
-                    Block.box(6, 9, 7, 10, 10, 9),
-                    Block.box(1, 8, 1, 15, 9, 15),
-                    Block.box(5.5, -13, 0, 10.5, -8, 1)
-            ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+        private VoxelShape shapeLidClosed(Direction direction) {
+            switch (direction) {
+                case WEST -> {
+                    return Stream.of(
+                            Block.box(1, -14, 1, 14, 8, 2),
+                            Block.box(14, -14, 1, 15, 8, 14),
+                            Block.box(2, -14, 14, 15, 8, 15),
+                            Block.box(1, -14, 2, 2, 8, 15),
+                            Block.box(2, -16, 2, 14, -14, 14),
+                            Block.box(7, 9, 6, 9, 10, 10),
+                            Block.box(1, 8, 1, 15, 9, 15),
+                            Block.box(0, -13, 5.5, 1, -8, 10.5)
+                    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+                }
+                case SOUTH -> {
+                    return Stream.of(
+                            Block.box(1, -14, 2, 2, 8, 15),
+                            Block.box(1, -14, 1, 14, 8, 2),
+                            Block.box(14, -14, 1, 15, 8, 14),
+                            Block.box(2, -14, 14, 15, 8, 15),
+                            Block.box(2, -16, 2, 14, -14, 14),
+                            Block.box(6, 9, 7, 10, 10, 9),
+                            Block.box(1, 8, 1, 15, 9, 15),
+                            Block.box(5.5, -13, 15, 10.5, -8, 16)
+                    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+                }
+                case EAST -> {
+                    return Stream.of(
+                            Block.box(2, -14, 14, 15, 8, 15),
+                            Block.box(1, -14, 2, 2, 8, 15),
+                            Block.box(1, -14, 1, 14, 8, 2),
+                            Block.box(14, -14, 1, 15, 8, 14),
+                            Block.box(2, -16, 2, 14, -14, 14),
+                            Block.box(7, 9, 6, 9, 10, 10),
+                            Block.box(1, 8, 1, 15, 9, 15),
+                            Block.box(15, -13, 5.5, 16, -8, 10.5)
+                    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+                }
+                default -> {
+                    return Stream.of(
+                            Block.box(14, -14, 1, 15, 8, 14),
+                            Block.box(2, -14, 14, 15, 8, 15),
+                            Block.box(1, -14, 2, 2, 8, 15),
+                            Block.box(1, -14, 1, 14, 8, 2),
+                            Block.box(2, -16, 2, 14, -14, 14),
+                            Block.box(6, 9, 7, 10, 10, 9),
+                            Block.box(1, 8, 1, 15, 9, 15),
+                            Block.box(5.5, -13, 0, 10.5, -8, 1)
+                    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+                }
+            }
+
         }
-
-
 
         @Override
         public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
             if (pLevel.getBlockState(pPos.below()).getBlock() instanceof BoilKettleBlock kettle) {
-                return kettle.isOpened(pLevel.getBlockState(pPos.below())) ? shapeLidOpen() : shapeLidClosed();
+                return kettle.isOpened(pLevel.getBlockState(pPos.below())) ? shapeLidOpen(pLevel.getBlockState(pPos.below()).getValue(HorizontalDirectionalBlock.FACING)) : shapeLidClosed(pLevel.getBlockState(pPos.below()).getValue(HorizontalDirectionalBlock.FACING));
             }
             return Shapes.empty();
         }

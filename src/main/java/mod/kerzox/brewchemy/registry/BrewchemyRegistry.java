@@ -71,6 +71,7 @@ public class BrewchemyRegistry {
         RECIPE_TYPES.register(bus);
         RECIPES.register(bus);
         MENUS.register(bus);
+        EFFECTS.register(bus);
 
         Items.init();
         Effects.init();
@@ -259,6 +260,8 @@ public class BrewchemyRegistry {
         public static void init() {
         }
 
+        public static final List<makeFluid<?>> FLUID_LIST = new ArrayList<>();
+
         public static final makeFluid<BrewchemyFluidType> WORT = makeFluid.build("wort_fluid", false, true, () -> BrewchemyFluidType.createColoured(0xFF56230E, false));
         public static final makeFluid<BrewchemyFluidType> BEER = makeFluid.build("beer_fluid", false, true, () -> BrewchemyFluidType.createColoured(0xFFfef068, true));
 
@@ -283,6 +286,7 @@ public class BrewchemyRegistry {
                 if (needsBucket) {
                     this.properties.bucket(makeBucket(name));
                 }
+                FLUID_LIST.add(this);
             }
 
             public static <T extends FluidType> makeFluid<T> build(String name, boolean placeable, boolean bucket, Supplier<T> fluid) {

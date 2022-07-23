@@ -8,6 +8,7 @@ import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -76,7 +77,7 @@ public class PintGlassItem extends BrewchemyItem {
             if (handler.get() instanceof ItemStackTankFluidCapability capability) {
 
                 if (FermentationHelper.getFermentationStage(capability.getFluid()) == FermentationHelper.Stages.MATURE) {
-                    player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.INTOXICATED.get(), 200, 0));
+                    player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.INTOXICATED.get(), 200, 10));
                 }
 
                 if (!pLevel.isClientSide) {
@@ -103,7 +104,7 @@ public class PintGlassItem extends BrewchemyItem {
                 if (!handler.getFluid().isEmpty()) {
                     pTooltipComponents.add(Component.literal("Glass of ").append(Component.translatable(handler.getFluid().getTranslationKey())));
                     if (handler.getFluid().getFluid().getFluidType() instanceof BrewchemyFluidType brewchemyFluidType) {
-                        if (brewchemyFluidType.isAlcoholic()) pTooltipComponents.add(Component.literal("Maturity " + FermentationHelper.getFermentationStage(handler.getFluid())));
+                        if (brewchemyFluidType.isAlcoholic()) pTooltipComponents.add(Component.literal("Maturity " + FermentationHelper.getFermentationStage(handler.getFluid()).getSerializedName()));
                     } else {
                         pTooltipComponents.add(Component.literal("Non alcoholic"));
                     }
@@ -126,5 +127,27 @@ public class PintGlassItem extends BrewchemyItem {
     @Override
     public @Nullable ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
         return new ItemStackTankFluidCapability(stack, PINT_SIZE);
+    }
+
+    @Override
+    public void fillItemCategory(CreativeModeTab pCategory, NonNullList<ItemStack> pItems) {
+        if (this.allowedIn(pCategory)) {
+            pItems.add(new ItemStack(this));
+            for (BrewchemyRegistry.Fluids.makeFluid<?> makeFluid : BrewchemyRegistry.Fluids.FLUID_LIST) {
+                if (makeFluid.get() instanceof BrewchemyFluidType type) {
+                    if (type.isAlcoholic()) {
+                        ItemStack stack1 = new ItemStack(this);
+                        stack1.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).ifPresent(cap -> {
+                            if (cap instanceof ItemStackTankFluidCapability capability) {
+                                FluidStack fluidStack = new FluidStack(makeFluid.getFluid().get(), PINT_SIZE);
+                                FermentationHelper.ageFluidStack(fluidStack, FermentationHelper.Stages.MATURE.getTime());
+                                capability.setFluid(fluidStack);
+                                pItems.add(stack1);
+                            }
+                        });
+                    }
+                }
+            }
+        }
     }
 }

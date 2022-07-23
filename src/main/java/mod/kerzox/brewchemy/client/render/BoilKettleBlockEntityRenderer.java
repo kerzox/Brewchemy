@@ -17,7 +17,9 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.AtlasSet;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
@@ -59,14 +61,42 @@ public class BoilKettleBlockEntityRenderer implements BlockEntityRenderer<BoilKe
         Matrix4f matrix4f = pPoseStack.last().pose();
         Matrix3f matrix3f = pPoseStack.last().normal();
 
-        pPoseStack.translate(.5f, 0 + 5.3f / 16f, .5f + -0.01f / 16f);
-        // do rotation animation
+        Direction facing = pBlockEntity.getBlockState().getValue(HorizontalDirectionalBlock.FACING);
 
-        if (pBlockEntity.getHeat() < 125) {
-            pPoseStack.mulPose(Vector3f.ZP.rotationDegrees((45)));
-        } else {
-            pPoseStack.mulPose(Vector3f.ZP.rotationDegrees(((float) pBlockEntity.getHeat() / BrewingRecipe.SUPERHEATED) * 310));
+        pPoseStack.translate(.5f, 0 + 5.3f / 16f, .5f + -0.01f / 16f);
+
+        if (facing == Direction.WEST) {
+            if (pBlockEntity.getHeat() < 125) {
+                pPoseStack.mulPose(Vector3f.XP.rotationDegrees((45)));
+            } else {
+                pPoseStack.mulPose(Vector3f.XP.rotationDegrees(((float) pBlockEntity.getHeat() / BrewingRecipe.SUPERHEATED) * 310));
+            }
+            pPoseStack.translate(-.5f, 0, .5f);
         }
+        else if (facing == Direction.SOUTH) {
+            pPoseStack.translate(0, 0, 1f);
+            if (pBlockEntity.getHeat() < 125) {
+                pPoseStack.mulPose(Vector3f.ZN.rotationDegrees((45)));
+            } else {
+                pPoseStack.mulPose(Vector3f.ZN.rotationDegrees(((float) pBlockEntity.getHeat() / BrewingRecipe.SUPERHEATED) * 310));
+            }
+        }
+        else if (facing == Direction.EAST) {
+            if (pBlockEntity.getHeat() < 125) {
+                pPoseStack.mulPose(Vector3f.XN.rotationDegrees((45)));
+            } else {
+                pPoseStack.mulPose(Vector3f.XN.rotationDegrees(((float) pBlockEntity.getHeat() / BrewingRecipe.SUPERHEATED) * 310));
+            }
+            pPoseStack.translate(.5f, 0, .5f);
+        }
+        else {
+            if (pBlockEntity.getHeat() < 125) {
+                pPoseStack.mulPose(Vector3f.ZP.rotationDegrees((45)));
+            } else {
+                pPoseStack.mulPose(Vector3f.ZP.rotationDegrees(((float) pBlockEntity.getHeat() / BrewingRecipe.SUPERHEATED) * 310));
+            }
+        }
+
         // translate back
         pPoseStack.translate(-0.5f, -(5.3f + 1.3f) / 16f, -.5f + 0.01f / 16f);
 

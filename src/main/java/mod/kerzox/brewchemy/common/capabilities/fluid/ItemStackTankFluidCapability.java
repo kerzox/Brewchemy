@@ -17,7 +17,12 @@ public class ItemStackTankFluidCapability extends FluidHandlerItemStack {
         super(container, capacity);
     }
 
-//
+    @Override
+    public void setFluid(FluidStack fluid) {
+        super.setFluid(fluid);
+    }
+
+    //
 //    public void write(CompoundTag tag) {
 //        CompoundTag tag1 = new CompoundTag();
 //        this.getFluid().writeToNBT(tag1);
