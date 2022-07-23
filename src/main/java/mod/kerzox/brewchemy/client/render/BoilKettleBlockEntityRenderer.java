@@ -41,15 +41,14 @@ public class BoilKettleBlockEntityRenderer implements BlockEntityRenderer<BoilKe
             TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(IClientFluidTypeExtensions.of(fluid.getFluid()).getStillTexture());
             pPoseStack.pushPose();
 
-            float percentage = ( (float) pBlockEntity.getSidedFluidTank().getInputHandler().getFluidInTank(0).getAmount() / (float) pBlockEntity.getSidedFluidTank().getInputHandler().getTankCapacity(0)) * 100;
-
-            if (percentage < 10 && percentage != 0) {
-                percentage = 10;
+            float percentage = ( (float) pBlockEntity.getSidedFluidTank().getInputHandler().getFluidInTank(0).getAmount() / (float) pBlockEntity.getSidedFluidTank().getInputHandler().getTankCapacity(0)) * 22 / 16f;
+            if (percentage <= 0.15) {
+                percentage = 0.15f;
             }
-            addVertex(quadVertex, pPoseStack, 0.1f, (percentage / 75f), .9f, sprite.getU(0), sprite.getV(16), IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor());
-            addVertex(quadVertex, pPoseStack, .9f, (percentage / 75f), .9f, sprite.getU(16), sprite.getV(16), IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor());
-            addVertex(quadVertex, pPoseStack, .9f, (percentage / 75f), 0.1f, sprite.getU(16), sprite.getV(0), IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor());
-            addVertex(quadVertex, pPoseStack, 0.1f, (percentage / 75f), 0.1f, sprite.getU(0), sprite.getV(0), IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor());
+            addVertex(quadVertex, pPoseStack, 0.1f, percentage, .9f, sprite.getU(0), sprite.getV(16), IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor());
+            addVertex(quadVertex, pPoseStack, .9f, percentage, .9f, sprite.getU(16), sprite.getV(16), IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor());
+            addVertex(quadVertex, pPoseStack, .9f, percentage, 0.1f, sprite.getU(16), sprite.getV(0), IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor());
+            addVertex(quadVertex, pPoseStack, 0.1f, percentage, 0.1f, sprite.getU(0), sprite.getV(0), IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor());
             pPoseStack.popPose();
         }
 

@@ -15,21 +15,5 @@ public class BrewchemyBlock extends Block {
         super(properties);
     }
 
-    @Override
-    public BlockState rotate(BlockState pState, Rotation pRotation) {
-        return super.rotate(pState, pRotation);
-    }
-
-    @Override
-    public BlockState mirror(BlockState pState, Mirror pMirror) {
-        return super.mirror(pState, pMirror);
-    }
-
-    @Nullable
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        return super.getStateForPlacement(pContext);
-    }
-
 
 }

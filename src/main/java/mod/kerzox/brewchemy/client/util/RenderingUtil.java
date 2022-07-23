@@ -2,16 +2,25 @@ package mod.kerzox.brewchemy.client.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.FaceBakery;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 
+import java.awt.*;
 import java.util.Objects;
 import java.util.Random;
 
@@ -47,6 +56,114 @@ public class RenderingUtil {
                 .uv2(0, 240)
                 .normal(1, 0, 0)
                 .endVertex();
+    }
+
+    public static float[] convertColor(int color) {
+        float alpha = ((color >> 24) & 0xFF) / 255F;
+        float red = ((color >> 16) & 0xFF) / 255F;
+        float green = ((color >> 8) & 0xFF) / 255F;
+        float blue = ((color) & 0xFF) / 255F;
+        return new float[] { red, green, blue, alpha };
+    }
+
+    public static void drawSpriteGrid(PoseStack mStack, int xPos, int yPos, int blitOffset, int xSize, int ySize, TextureAtlasSprite sprite, int repeatX, int repeatY) {
+        for (int iX = 0; iX < repeatX; iX++) {
+            for (int iY = 0; iY < repeatY; iY++) {
+                Gui.blit(mStack, xPos + (xSize * iX), yPos + (ySize * iY), blitOffset, xSize, ySize, sprite);
+            }
+        }
+    }
+
+    public static void drawSpriteAsQuads(PoseStack pPoseStack, VertexConsumer vertexConsumer, TextureAtlasSprite sprite, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, int tint) {
+        drawSpriteAsQuads(pPoseStack, vertexConsumer, sprite, minX, minY, minZ, maxX, maxY, maxZ, tint, false, false);
+    }
+
+    public static void drawSpriteAsQuads(PoseStack pPoseStack, VertexConsumer vertexConsumer, TextureAtlasSprite sprite, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, int tint, boolean drawTop, boolean drawBottom) {
+
+        // north
+        addVertex(vertexConsumer, pPoseStack, minX, maxY, minZ, sprite.getU(0), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, maxX, maxY, minZ, sprite.getU(16), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, maxX, minY, minZ, sprite.getU(16), sprite.getV(0), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, minY, minZ, sprite.getU(0), sprite.getV(0), tint);
+
+        // south
+        addVertex(vertexConsumer, pPoseStack, maxX, maxY, maxZ, sprite.getU(0), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, maxY, maxZ, sprite.getU(16), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, minY, maxZ, sprite.getU(16), sprite.getV(0), tint);
+        addVertex(vertexConsumer, pPoseStack, maxX, minY, maxZ, sprite.getU(0), sprite.getV(0), tint);
+
+        // east
+        addVertex(vertexConsumer, pPoseStack, maxX, maxY, minZ, sprite.getU(0), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, maxX, maxY, maxZ, sprite.getU(16), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, maxX, minY, maxZ, sprite.getU(16), sprite.getV(0), tint);
+        addVertex(vertexConsumer, pPoseStack, maxX, minY, minZ, sprite.getU(0), sprite.getV(0), tint);
+
+        // west
+        addVertex(vertexConsumer, pPoseStack, minX, maxY, maxZ, sprite.getU(0), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, maxY, minZ, sprite.getU(16), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, minY, minZ, sprite.getU(16), sprite.getV(0), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, minY, maxZ, sprite.getU(0), sprite.getV(0), tint);
+
+        // top
+        addVertex(vertexConsumer, pPoseStack, maxX, maxY, minZ, sprite.getU(0), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, maxY, minZ, sprite.getU(16), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, maxY, maxZ, sprite.getU(16), sprite.getV(0), tint);
+        addVertex(vertexConsumer, pPoseStack, maxX, maxY, maxZ, sprite.getU(0), sprite.getV(0), tint);
+
+        // bottom
+        addVertex(vertexConsumer, pPoseStack, maxX, minY, minZ, sprite.getU(0), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, minY, minZ, sprite.getU(16), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, minY, maxZ, sprite.getU(16), sprite.getV(0), tint);
+        addVertex(vertexConsumer, pPoseStack, maxX, minY, maxZ, sprite.getU(0), sprite.getV(0), tint);
+
+    }
+
+    public static QuadBakingVertexConsumer addVertex(QuadBakingVertexConsumer baker, Vector3f pos, float u, float v, int color, Direction direction) {
+        baker.vertex(pos.x(),pos.y(),pos.z());
+        baker.color(color);
+        baker.uv(u, v);
+        baker.uv2(0, 240);
+        baker.normal(1, 0, 0);
+        baker.setDirection(direction);
+        baker.endVertex();
+        return baker;
+    }
+
+    public static Vector3f[] getVerticesFromDirection(Direction direction, float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+        switch (direction) {
+            case NORTH -> {
+                return new Vector3f[]{new Vector3f(minX, maxY, minZ), new Vector3f(maxX, maxY, minZ), new Vector3f(maxX, minY, minZ), new Vector3f(minX, minY, minZ)};
+            }
+            case SOUTH -> {
+                return new Vector3f[]{new Vector3f(maxX, maxY, maxZ), new Vector3f(minX, maxY, maxZ), new Vector3f(minX, minY, maxZ), new Vector3f(maxX, minY, maxZ)};
+            }
+            case EAST -> {
+                return new Vector3f[]{new Vector3f(maxX, maxY, minZ), new Vector3f(maxX, maxY, maxZ), new Vector3f(maxX, minY, maxZ), new Vector3f(maxX, minY, minZ)};
+            }
+            case WEST -> {
+                return new Vector3f[]{new Vector3f(minX, maxY, maxZ), new Vector3f(minX, maxY, minZ), new Vector3f(minX, minY, minZ), new Vector3f(minX, minY, maxZ)};
+            }
+            case UP -> {
+                return new Vector3f[]{new Vector3f(maxX, maxY, minZ), new Vector3f(minX, maxY, minZ), new Vector3f(minX, maxY, maxZ), new Vector3f(maxX, maxY, maxZ)};
+            }
+            case DOWN -> {
+                return new Vector3f[]{new Vector3f(maxX, minY, minZ), new Vector3f(minX, minY, minZ), new Vector3f(minX, minY, maxZ), new Vector3f(maxX, minY, maxZ)};
+            }
+        }
+        return null;
+    }
+
+    public static BakedQuad bakeQuad(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float u1, float v1, float u2, float v2, TextureAtlasSprite sprite, int tint, Direction direction) {
+        BakedQuad[] quad = new BakedQuad[1];
+        QuadBakingVertexConsumer baker = new QuadBakingVertexConsumer(q -> quad[0] = q);
+        baker.setSprite(sprite);
+        Vector3f[] vertices = getVerticesFromDirection(direction, minX, minY, minZ, maxX, maxY, maxZ);
+        if (vertices == null) return null;
+        addVertex(baker, vertices[0], u1, v2, tint, direction);
+        addVertex(baker, vertices[1], u2, v2, tint, direction);
+        addVertex(baker, vertices[2], u2, v1, tint, direction);
+        addVertex(baker, vertices[3], u1, v1, tint, direction);
+        return quad[0];
     }
 
 }

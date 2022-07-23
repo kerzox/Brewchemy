@@ -4,19 +4,21 @@ import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.fluid.FluidStorageTank;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
 import mod.kerzox.brewchemy.common.crafting.recipes.FermentJarRecipe;
-import mod.kerzox.brewchemy.common.crafting.recipes.MillstoneRecipe;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -37,15 +39,38 @@ public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements ISer
     private boolean running;
     private int duration;
 
+    private FluidStack prevFluid = FluidStack.EMPTY;
+
     public FermentsJarBlockEntity(BlockPos pWorldPosition, BlockState pBlockState) {
         super(BrewchemyRegistry.BlockEntities.FERMENTS_JAR.get(), pWorldPosition, pBlockState);
+    }
+
+    public FluidStorageTank getTank() {
+        return tank;
+    }
+
+    @Override
+    protected void write(CompoundTag pTag) {
+        this.tank.writeToNBT(pTag);
+        pTag.putInt("duration", this.duration);
+    }
+
+    @Override
+    protected void read(CompoundTag pTag) {
+        this.tank.setFluid(tank.readFromNBT(pTag).getFluid());
+        this.duration = pTag.getInt("duration");
     }
 
     @Override
     public void onServer() {
         if (this.tank.isEmpty()) return;
+        if (!this.tank.getFluid().isFluidStackIdentical(prevFluid)) {
+            prevFluid = this.tank.getFluid();
+            syncBlockEntity();
+        }
         Optional<FermentJarRecipe> recipe = level.getRecipeManager().getRecipeFor(BrewchemyRegistry.Recipes.FERMENTS_JAR_RECIPE.get(), new RecipeInventoryWrapper(tank), level);
         recipe.ifPresent(this::doRecipe);
+
     }
 
     private void doRecipe(FermentJarRecipe r) {
@@ -62,11 +87,12 @@ public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements ISer
                 running = false;
             }
         }
+        syncBlockEntity();
         duration--;
      }
 
     @Override
-    public boolean onPlayerClick(Level level, Player player) {
+    public boolean onPlayerClick(Level level, Player player, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
         if (!level.isClientSide) {
             player.sendSystemMessage(Component.literal(String.valueOf(tank.getFluidAmount())));
             player.sendSystemMessage(Component.literal(String.valueOf(inventory.getStackInSlot(0))));

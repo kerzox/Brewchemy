@@ -13,14 +13,12 @@ import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
@@ -78,7 +76,7 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
     }
 
     @Override
-    public boolean onPlayerClick(Level pLevel, Player pPlayer) {
+    public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
         if (!pLevel.isClientSide) {
             if (getBlockState().getBlock() instanceof BoilKettleBlock kettle) {
                 BlockPos pos = getBlockPos();
@@ -90,7 +88,7 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
                 }
             }
         }
-        return super.onPlayerClick(pLevel, pPlayer);
+        return super.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit);
     }
 
     private boolean hasHeatForRecipe(BrewingRecipe recipe) {

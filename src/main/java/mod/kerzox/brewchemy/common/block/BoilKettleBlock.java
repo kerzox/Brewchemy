@@ -1,6 +1,7 @@
 package mod.kerzox.brewchemy.common.block;
 
 import mod.kerzox.brewchemy.Brewchemy;
+import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyInvisibleBlock;
 import mod.kerzox.brewchemy.common.block.rope.RopeBlock;
 import mod.kerzox.brewchemy.common.blockentity.BoilKettleBlockEntity;
@@ -43,7 +44,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.stream.Stream;
 
-public class BoilKettleBlock extends FluidBarrelBlock<BoilKettleBlockEntity> {
+public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity> {
 
     private static final BooleanProperty LID = BooleanProperty.create("lid");
 

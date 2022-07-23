@@ -3,6 +3,7 @@ package mod.kerzox.brewchemy.client.gui.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mod.kerzox.brewchemy.client.gui.components.WidgetComponent;
+import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
@@ -17,7 +18,7 @@ public abstract class DefaultScreen<T extends AbstractContainerMenu> extends Abs
     protected static final int DEFAULT_WIDTH = 176;
     protected static final int DEFAULT_HEIGHT = 166;
 
-    private ResourceLocation texture;
+    protected ResourceLocation texture;
     protected int guiX;
     protected int guiY;
 
@@ -42,6 +43,11 @@ public abstract class DefaultScreen<T extends AbstractContainerMenu> extends Abs
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
         this.renderTooltip(pPoseStack, pMouseX, pMouseY);
+        mouseTracked(pPoseStack, pMouseX, pMouseY);
+    }
+
+    protected void mouseTracked(PoseStack pPoseStack, int pMouseX, int pMouseY) {
+
     }
 
     @Override
@@ -62,7 +68,6 @@ public abstract class DefaultScreen<T extends AbstractContainerMenu> extends Abs
     }
 
     protected void addWidgetComponent(WidgetComponent<?> widget) {
-        widget.updatePositionToScreen();
         addRenderableOnly(widget);
     }
 

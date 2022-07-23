@@ -68,6 +68,26 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
     }
 
     @Override
+    public @NotNull FluidStack drain(int maxDrain, FluidAction action) {
+        FluidStack ret = FluidStack.EMPTY;
+        for (int i = 0; i < slotCount; i++) {
+            IFluidHandler handler = getHandlerFromSlot(i);
+            FluidStack resource = getFluidInTank(i);
+            if (!resource.isEmpty()) {
+                if (handler instanceof InputWrapper input) {
+                    ret = input.forceDrain(resource, action);
+                } else {
+                    ret = handler.drain(resource, action);
+                }
+            }
+            if (!ret.isEmpty()) {
+                return ret;
+            }
+        }
+        return super.drain(maxDrain, action);
+    }
+
+    @Override
     public Set<Direction> getOutputs() {
         return output;
     }

@@ -57,8 +57,6 @@ public class MillstoneCrankBlockEntityRenderer implements BlockEntityRenderer<Mi
 
         long word = pBlockEntity.getLevel().getGameTime() - pBlockEntity.getPrevTime();
 
-        System.out.println(pBlockEntity.getLevel().getGameTime() + " : " + word);
-
 
     }
 

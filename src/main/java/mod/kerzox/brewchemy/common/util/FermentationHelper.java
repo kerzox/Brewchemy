@@ -8,7 +8,7 @@ public class FermentationHelper {
 
     public enum Stages implements StringRepresentable {
         YOUNG("stage_one", 0),
-        MATURE("stage_three", 200);
+        MATURE("stage_two", 18000);
 
         private String name;
         private int time;
@@ -22,8 +22,11 @@ public class FermentationHelper {
             if (time >= MATURE.time) {
                 return MATURE;
             }
-            System.out.println(time);
             return YOUNG;
+        }
+
+        public int getTime() {
+            return time;
         }
 
         @Override
@@ -38,6 +41,10 @@ public class FermentationHelper {
 
     public static Stages getFermentationStage(FluidStack stack) {
         return Stages.getNextStage(getFermentationTag(stack).getInt("time"));
+    }
+
+    public static int getFermentationTime(FluidStack stack) {
+        return getFermentationTag(stack).getInt("time");
     }
 
     public static void ageFluidStack(FluidStack stack, int time) {

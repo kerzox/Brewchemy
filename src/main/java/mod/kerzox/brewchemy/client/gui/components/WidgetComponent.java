@@ -19,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 public abstract class WidgetComponent<T extends DefaultMenu<?>> extends GuiComponent implements Widget, GuiEventListener {
 
     protected ResourceLocation widgetTexture;
+    protected final int x1;
+    protected final int y1;
     protected int x;
     protected int y;
     protected int width;
@@ -34,8 +36,10 @@ public abstract class WidgetComponent<T extends DefaultMenu<?>> extends GuiCompo
 
     public WidgetComponent(DefaultScreen<T> screen, int x, int y, int width, int height, ResourceLocation texture) {
         this.screen = screen;
-        this.x = screen.getGuiLeft() + x;
-        this.y = screen.getGuiTop() + y;
+        this.x = x;
+        this.y = y;
+        this.x1 = x;
+        this.y1 = y;
         this.u = 0;
         this.v = 0;
         this.width = width;
@@ -46,6 +50,10 @@ public abstract class WidgetComponent<T extends DefaultMenu<?>> extends GuiCompo
     public void setTextureOffset(int u, int v) {
         this.u = u;
         this.v = v;
+    }
+
+    public void updateTexture(ResourceLocation widgetTexture) {
+        this.widgetTexture = widgetTexture;
     }
 
     public void updatePositionToScreen() {
@@ -104,8 +112,12 @@ public abstract class WidgetComponent<T extends DefaultMenu<?>> extends GuiCompo
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         if (!visible) return;
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, this.widgetTexture);
+        if (this.widgetTexture != null) {
+            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+            RenderSystem.setShaderTexture(0, this.widgetTexture);
+        }
+        this.x = this.screen.getGuiLeft() + this.x1;
+        this.y = this.screen.getGuiTop() + this.y1;
         drawComponent(pPoseStack, pMouseX, pMouseY, pPartialTick);
     }
 

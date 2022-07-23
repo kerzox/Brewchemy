@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.common.block.base;
 
+import mod.kerzox.brewchemy.common.blockentity.WoodenBarrelBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.util.IClientTickable;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
@@ -30,22 +31,34 @@ import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock implements EntityBlock {
 
     protected RegistryObject<BlockEntityType<T>> type;
+    protected boolean shouldTick;
 
     public BrewchemyEntityBlock(RegistryObject<BlockEntityType<T>> type, Properties properties) {
         super(properties);
         this.type = type;
+        shouldTick = true;
+    }
+
+    public BrewchemyEntityBlock(RegistryObject<BlockEntityType<T>> type, Properties properties, boolean shouldTick) {
+        super(properties);
+        this.type = type;
+        this.shouldTick = shouldTick;
     }
 
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (FluidUtil.getFluidHandler(pPlayer.getItemInHand(pHand)).isPresent()) {
             if (!pLevel.isClientSide) {
-                FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pPos, pHit.getDirection());
+                if (pLevel.getBlockEntity(pPos) instanceof WoodenBarrelBlockEntity barrel) {
+                    barrel.tryMergeFluid(pLevel, pPlayer, pHand, pHit);
+                } else {
+                    FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pPos, pHit.getDirection());
+                }
             }
             return InteractionResult.SUCCESS;
         }
         if (pLevel.getBlockEntity(pPos) instanceof BrewchemyBlockEntity onClick && pHand == InteractionHand.MAIN_HAND) {
-            if (onClick.onPlayerClick(pLevel, pPlayer)) {
+            if (onClick.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit)) {
                 return InteractionResult.SUCCESS;
             }
         }
@@ -66,13 +79,13 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
-        return (pLevel1, pPos, pState1, pBlockEntity) -> {
+        return shouldTick ? (pLevel1, pPos, pState1, pBlockEntity) -> {
             if (!pLevel1.isClientSide && pBlockEntity instanceof IServerTickable tick) {
                 tick.onServer();
             }
             if (pLevel1.isClientSide && pBlockEntity instanceof IClientTickable tick) {
                 tick.onClient();
             }
-        };
+        } : null;
     }
 }

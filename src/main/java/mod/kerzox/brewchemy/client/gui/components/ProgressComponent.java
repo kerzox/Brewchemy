@@ -35,6 +35,7 @@ public class ProgressComponent<T extends DefaultMenu<?>> extends WidgetComponent
 
     @Override
     public void drawComponent(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+        if (widgetTexture == null) return;
         int size = 0;
 
         this.setTextureOffset(this.u1, this.v1);

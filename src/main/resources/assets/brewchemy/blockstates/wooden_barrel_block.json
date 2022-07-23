@@ -1,7 +1,27 @@
 {
   "variants": {
-    "": {
+    "facing=north": {
       "model": "brewchemy:block/wood_barrel"
+    },
+    "facing=south": {
+      "model": "brewchemy:block/wood_barrel",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "brewchemy:block/wood_barrel",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "brewchemy:block/wood_barrel",
+      "y": 90
+    },
+    "facing=down": {
+      "model": "brewchemy:block/wood_barrel",
+      "x": 90
+    },
+    "facing=up": {
+      "model": "brewchemy:block/wood_barrel",
+      "x": -90
     }
   }
 }

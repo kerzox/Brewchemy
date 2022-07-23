@@ -2,14 +2,10 @@ package mod.kerzox.brewchemy.common.blockentity;
 
 import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.gui.menu.FermentationBarrelMenu;
-import mod.kerzox.brewchemy.client.gui.menu.GerminationChamberMenu;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
-import mod.kerzox.brewchemy.common.capabilities.fluid.FluidStorageTank;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SidedMultifluidTank;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
-import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
-import mod.kerzox.brewchemy.common.crafting.recipes.BrewingRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipes.FermentationRecipe;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
 import mod.kerzox.brewchemy.common.util.FermentationHelper;
@@ -19,21 +15,25 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements IServerTickable, MenuProvider {
@@ -47,30 +47,31 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
     private int fermentationTicks;
     private int tick;
 
+    private boolean blockFermentation;
+
     public WoodenBarrelBlockEntity(BlockPos pWorldPosition, BlockState pBlockState) {
         super(BrewchemyRegistry.BlockEntities.WOODEN_BARREL.get(), pWorldPosition, pBlockState);
     }
 
+    public SidedMultifluidTank getFluidTank() {
+        return fluidTank;
+    }
+
     @Override
     public void onServer() {
-        tick++;
-        for (int i = 0; i < this.fluidTank.getTanks(); i++) {
-            if (tick % 20 == 0) {
-                System.out.println(this.fluidTank.getFluidInTank(i).getAmount());
-            }
-        }
         if (this.fluidTank.getFluidInTank(0).isEmpty()) {
-            inputStacks[0] = FluidStack.EMPTY;
             return;
         }
-        if (inputStacks[0].isEmpty()) {
-            inputStacks[0] = this.fluidTank.getFluidInTank(0);
-        } else if (!inputStacks[0].isFluidStackIdentical(this.fluidTank.getFluidInTank(0))) {
-            this.running = false;
-            this.inputStacks[0] = this.fluidTank.getFluidInTank(0);
+
+        if (!blockFermentation) {
+            Optional<FermentationRecipe> recipe = level.getRecipeManager().getRecipeFor(BrewchemyRegistry.Recipes.FERMENTATION_RECIPE.get(), new RecipeInventoryWrapper(this.fluidTank, inventory), level);
+            recipe.ifPresent(this::doRecipe);
         }
-        Optional<FermentationRecipe> recipe = level.getRecipeManager().getRecipeFor(BrewchemyRegistry.Recipes.FERMENTATION_RECIPE.get(), new RecipeInventoryWrapper(this.fluidTank, inventory), level);
-        recipe.ifPresent(this::doRecipe);
+
+    }
+
+    public boolean isFermentationBlocked() {
+        return blockFermentation;
     }
 
     public int getTick() {
@@ -104,6 +105,7 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
     @Override
     protected void write(CompoundTag pTag) {
         pTag.putInt("fermentationTicks", this.fermentationTicks);
+        pTag.put("fluidHandler", this.getFluidTank().serialize());
         pTag.putBoolean("running", this.running);
     }
 
@@ -111,11 +113,30 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
     protected void read(CompoundTag pTag) {
         this.fermentationTicks = pTag.getInt("fermentationTicks");
         this.running = pTag.getBoolean("running");
+        if (pTag.contains("fluidHandler")) this.getFluidTank().deserialize(pTag);
     }
 
-    @Override
-    protected void addToUpdateTag(CompoundTag tag) {
+    // we need to merge stacks together!
 
+    @Override
+    public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
+        return super.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit);
+    }
+
+    public boolean tryMergeFluid(Level pLevel, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+        if (FluidUtil.getFluidHandler(pPlayer.getItemInHand(pHand)).isPresent()) {
+            for (int i = 0; i < this.fluidTank.getInputHandler().getTanks(); i++) {
+                FluidStack stack1 = new FluidStack(this.fluidTank.getInputHandler().getFluidInTank(i).getFluid(), this.fluidTank.getInputHandler().getFluidInTank(i).getAmount());
+                if (stack1.getAmount() == PintGlassItem.KEG_VOLUME) {
+                    return false;
+                }
+                blockFermentation = true;
+                running = false;
+                FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, getBlockPos(), pHit.getDirection());
+                blockFermentation = false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -124,7 +145,7 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
             return inventory.getHandler(side);
         }
         if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-            return handler.cast();
+            return fluidTank.getHandler(side);
         }
         return super.getCapability(cap, side);
     }
