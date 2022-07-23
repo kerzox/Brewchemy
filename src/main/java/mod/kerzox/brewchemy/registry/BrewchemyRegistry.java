@@ -259,8 +259,8 @@ public class BrewchemyRegistry {
         public static void init() {
         }
 
-        public static final makeFluid<BrewchemyFluidType> WORT = makeFluid.build("wort_fluid", false, true, () -> BrewchemyFluidType.createColoured(0xFF56230E));
-        public static final makeFluid<BrewchemyFluidType> BEER = makeFluid.build("beer_fluid", false, true, () -> BrewchemyFluidType.createColoured(0xFFfef068));
+        public static final makeFluid<BrewchemyFluidType> WORT = makeFluid.build("wort_fluid", false, true, () -> BrewchemyFluidType.createColoured(0xFF56230E, false));
+        public static final makeFluid<BrewchemyFluidType> BEER = makeFluid.build("beer_fluid", false, true, () -> BrewchemyFluidType.createColoured(0xFFfef068, true));
 
         public static class makeFluid<T extends FluidType> implements Supplier<T> {
 

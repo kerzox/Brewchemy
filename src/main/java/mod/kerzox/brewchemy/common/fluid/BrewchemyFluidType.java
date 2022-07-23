@@ -16,6 +16,7 @@ public class BrewchemyFluidType extends FluidType {
     private final ResourceLocation flowingTexture;
     private ResourceLocation overlayTexture;
     private ResourceLocation viewOverlayTexture;
+    private boolean alcoholic;
     private final int colour;
 
     public BrewchemyFluidType(Properties properties,
@@ -32,8 +33,9 @@ public class BrewchemyFluidType extends FluidType {
         this.colour = colour;
     }
 
-    public BrewchemyFluidType(Properties properties, ResourceLocation stillTexture, ResourceLocation flowingTexture, int colour) {
+    public BrewchemyFluidType(Properties properties, ResourceLocation stillTexture, ResourceLocation flowingTexture, int colour, boolean alcoholic) {
         this(properties, stillTexture, flowingTexture, null, null, colour);
+        this.alcoholic = alcoholic;
     }
 
     /**
@@ -42,11 +44,15 @@ public class BrewchemyFluidType extends FluidType {
      * @return fluid type
      */
 
-    public static BrewchemyFluidType createColoured(int tint) {
+    public static BrewchemyFluidType createColoured(int tint, boolean alcoholic) {
         return new BrewchemyFluidType(FluidType.Properties.create(),
                 new ResourceLocation("block/water_still"),
                 new ResourceLocation("block/water_flowing"),
-                tint);
+                tint, alcoholic);
+    }
+
+    public boolean isAlcoholic() {
+        return alcoholic;
     }
 
     @Override

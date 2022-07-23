@@ -1,6 +1,7 @@
 package mod.kerzox.brewchemy.common.item;
 import mod.kerzox.brewchemy.common.capabilities.fluid.FluidStorageTank;
 import mod.kerzox.brewchemy.common.capabilities.fluid.ItemStackTankFluidCapability;
+import mod.kerzox.brewchemy.common.fluid.BrewchemyFluidType;
 import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
 import mod.kerzox.brewchemy.common.util.FermentationHelper;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
@@ -35,6 +36,7 @@ import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,9 +101,12 @@ public class PintGlassItem extends BrewchemyItem {
         pStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).ifPresent(cap -> {
             if (cap instanceof ItemStackTankFluidCapability handler) {
                 if (!handler.getFluid().isEmpty()) {
-                    pTooltipComponents.add(Component.literal("A cold glass of "));
-                    pTooltipComponents.add(Component.translatable(handler.getFluid().getTranslationKey()));
-                    pTooltipComponents.add(Component.literal("Maturity " + FermentationHelper.getFermentationStage(handler.getFluid())));
+                    pTooltipComponents.add(Component.literal("Glass of ").append(Component.translatable(handler.getFluid().getTranslationKey())));
+                    if (handler.getFluid().getFluid().getFluidType() instanceof BrewchemyFluidType brewchemyFluidType) {
+                        if (brewchemyFluidType.isAlcoholic()) pTooltipComponents.add(Component.literal("Maturity " + FermentationHelper.getFermentationStage(handler.getFluid())));
+                    } else {
+                        pTooltipComponents.add(Component.literal("Non alcoholic"));
+                    }
                 }
             }
         });
