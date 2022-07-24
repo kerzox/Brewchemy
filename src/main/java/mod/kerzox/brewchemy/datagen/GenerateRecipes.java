@@ -88,5 +88,8 @@ public class GenerateRecipes extends RecipeProvider {
                 .define('S', Ingredient.of(ItemTags.WOODEN_SLABS))
                 .pattern(" S ").pattern("G G").pattern("GGG").unlockedBy("has_glass", has(ItemTags.create(new ResourceLocation("forge", "glass")))).save(pFinishedRecipeConsumer);
 
+        SimpleCookingRecipeBuilder.smoking(Ingredient.of(BrewchemyRegistry.Items.SOAKED_BARLEY_ITEM.get()), BrewchemyRegistry.Items.MALTED_BARLEY_ITEM.get(), 2f, 100);
+
+
     }
 }

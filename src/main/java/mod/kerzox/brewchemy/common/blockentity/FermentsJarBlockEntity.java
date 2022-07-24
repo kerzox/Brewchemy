@@ -2,6 +2,7 @@ package mod.kerzox.brewchemy.common.blockentity;
 
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.fluid.FluidStorageTank;
+import mod.kerzox.brewchemy.common.capabilities.item.CapabilityUtils;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
 import mod.kerzox.brewchemy.common.crafting.recipes.FermentJarRecipe;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
@@ -22,6 +23,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +32,8 @@ import java.util.Optional;
 
 public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements IServerTickable {
 
-    private final ItemStackHandler inventory = new ItemStackHandler(1);
+    private final int OUTPUT_SLOT = 0;
+    private final ItemStackHandler inventory = new ItemStackHandler(OUTPUT_SLOT);
     private final LazyOptional<ItemStackHandler> itemHandler = LazyOptional.of(() -> inventory);
 
     private final FluidStorageTank tank = new FluidStorageTank(1000);
@@ -94,11 +97,13 @@ public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements ISer
     @Override
     public boolean onPlayerClick(Level level, Player player, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
         if (!level.isClientSide) {
-            player.sendSystemMessage(Component.literal(String.valueOf(tank.getFluidAmount())));
-            player.sendSystemMessage(Component.literal(String.valueOf(inventory.getStackInSlot(0))));
+            if (!this.inventory.getStackInSlot(0).isEmpty()) {
+                CapabilityUtils.tryPlayerInventoryInsert(this.inventory, OUTPUT_SLOT, player);
+            }
         }
         return false;
     }
+
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
