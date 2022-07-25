@@ -14,10 +14,18 @@ public class IntoxicatedEffect extends MobEffect {
     }
 
     @Override
+    public boolean isDurationEffectTick(int pDuration, int pAmplifier) {
+        return true;
+    }
+
+    @Override
     public void applyEffectTick(LivingEntity pLivingEntity, int pAmplifier) {
-        if (pLivingEntity instanceof Player) {
+        if (pLivingEntity instanceof Player player) {
             if (!pLivingEntity.level.isClientSide) {
-                ((Player)pLivingEntity).getFoodData().eat(pAmplifier + 1, .5F);
+                player.getFoodData().eat(pAmplifier + 1, .5F);
+                if (pLivingEntity.getHealth() < pLivingEntity.getMaxHealth()) {
+                    pLivingEntity.heal(.05F * pAmplifier);
+                }
             }
         }
     }

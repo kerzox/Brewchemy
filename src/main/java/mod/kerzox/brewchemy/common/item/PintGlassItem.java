@@ -1,4 +1,5 @@
 package mod.kerzox.brewchemy.common.item;
+import mod.kerzox.brewchemy.common.capabilities.CapabilityUtils;
 import mod.kerzox.brewchemy.common.capabilities.fluid.FluidStorageTank;
 import mod.kerzox.brewchemy.common.capabilities.fluid.ItemStackTankFluidCapability;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluidType;
@@ -27,6 +28,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.model.data.ModelProperty;
 import net.minecraftforge.common.capabilities.Capability;
@@ -77,7 +79,8 @@ public class PintGlassItem extends BrewchemyItem {
             if (handler.get() instanceof ItemStackTankFluidCapability capability) {
 
                 if (FermentationHelper.getFermentationStage(capability.getFluid()) == FermentationHelper.Stages.MATURE) {
-                    player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.INTOXICATED.get(), 200, 10));
+                    player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.INTOXICATED.get(), 200, 1));
+
                 }
 
                 if (!pLevel.isClientSide) {
@@ -104,7 +107,7 @@ public class PintGlassItem extends BrewchemyItem {
                 if (!handler.getFluid().isEmpty()) {
                     pTooltipComponents.add(Component.literal("Glass of ").append(Component.translatable(handler.getFluid().getTranslationKey())));
                     if (handler.getFluid().getFluid().getFluidType() instanceof BrewchemyFluidType brewchemyFluidType) {
-                        if (brewchemyFluidType.isAlcoholic()) pTooltipComponents.add(Component.literal("Maturity " + FermentationHelper.getFermentationStage(handler.getFluid()).getSerializedName()));
+                        if (brewchemyFluidType.isAlcoholic()) pTooltipComponents.add(Component.literal("Maturity: " + FermentationHelper.getFermentationStage(handler.getFluid()).toString().toLowerCase()));
                     } else {
                         pTooltipComponents.add(Component.literal("Non alcoholic"));
                     }
@@ -129,24 +132,29 @@ public class PintGlassItem extends BrewchemyItem {
         return new ItemStackTankFluidCapability(stack, PINT_SIZE);
     }
 
+    private ItemStack pintOf(Fluid fluid) {
+        ItemStack temp = new ItemStack(this);
+
+        if (fluid.getFluidType() instanceof BrewchemyFluidType brewchemyFluidType) {
+            if (brewchemyFluidType.isAlcoholic()) {
+                FluidStack fluidStack = new FluidStack(fluid, PINT_SIZE);
+                FermentationHelper.ageFluidStack(fluidStack, FermentationHelper.Stages.MATURE.getTime());
+                CapabilityUtils.getTankFromItemStack(temp).setFluid(fluidStack);
+                return temp;
+            }
+        }
+
+        CapabilityUtils.getTankFromItemStack(temp).setFluid(new FluidStack(fluid, PINT_SIZE));
+        return temp;
+    }
+
     @Override
     public void fillItemCategory(CreativeModeTab pCategory, NonNullList<ItemStack> pItems) {
         if (this.allowedIn(pCategory)) {
-            pItems.add(new ItemStack(this));
+            pItems.add(pintOf(Fluids.EMPTY));
+            pItems.add(pintOf(Fluids.WATER));
             for (BrewchemyRegistry.Fluids.makeFluid<?> makeFluid : BrewchemyRegistry.Fluids.FLUID_LIST) {
-                if (makeFluid.get() instanceof BrewchemyFluidType type) {
-                    if (type.isAlcoholic()) {
-                        ItemStack stack1 = new ItemStack(this);
-                        stack1.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).ifPresent(cap -> {
-                            if (cap instanceof ItemStackTankFluidCapability capability) {
-                                FluidStack fluidStack = new FluidStack(makeFluid.getFluid().get(), PINT_SIZE);
-                                FermentationHelper.ageFluidStack(fluidStack, FermentationHelper.Stages.MATURE.getTime());
-                                capability.setFluid(fluidStack);
-                                pItems.add(stack1);
-                            }
-                        });
-                    }
-                }
+                pItems.add(pintOf(makeFluid.getFluid().get()));
             }
         }
     }
