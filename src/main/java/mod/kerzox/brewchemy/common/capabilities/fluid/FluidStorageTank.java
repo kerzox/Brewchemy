@@ -21,4 +21,7 @@ public class FluidStorageTank extends FluidTank {
         super.setFluid(stack);
     }
 
+    public boolean isFull() {
+        return this.getFluidAmount() == this.capacity;
+    }
 }

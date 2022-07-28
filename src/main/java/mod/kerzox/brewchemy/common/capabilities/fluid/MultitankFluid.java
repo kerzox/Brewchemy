@@ -1,15 +1,18 @@
 package mod.kerzox.brewchemy.common.capabilities.fluid;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 
-public class MultitankFluid implements IFluidHandler {
+public class MultitankFluid implements IFluidHandler, INBTSerializable<CompoundTag> {
 
     private FluidStorageTank[] storageTanks;
 
@@ -161,5 +164,32 @@ public class MultitankFluid implements IFluidHandler {
 
         }
         return stack;
+    }
+
+    @Override
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
+        ListTag list = new ListTag();
+        for (FluidStorageTank tank : this.storageTanks) {
+            CompoundTag tankTag = new CompoundTag();
+            list.add(tank.writeToNBT(tankTag));
+        }
+        nbt.put("tanks", list);
+        return nbt;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundTag nbt) {
+        if (nbt.contains("tanks")) {
+            ListTag list = nbt.getList("tanks", Tag.TAG_COMPOUND);
+            for (int i = 0; i < list.size(); i++) {
+                this.storageTanks[i].readFromNBT(list.getCompound(i));
+            }
+        }
+        onLoad();
+    }
+
+    protected void onLoad() {
+
     }
 }

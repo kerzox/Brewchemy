@@ -44,9 +44,9 @@ public class FluidIngredient implements Predicate<FluidStack> {
         return stacks;
     }
 
-    public int getAmountFromIngredient() {
+    public int getAmountFromIngredient(FluidStack fluid) {
         for (FluidStack stack : stacks) {
-            return stack.getAmount();
+            if (fluid.getFluid() == stack.getFluid()) return stack.getAmount();
         }
         return 0;
     }
@@ -89,7 +89,21 @@ public class FluidIngredient implements Predicate<FluidStack> {
     public boolean test(FluidStack fluidStack) {
         if (fluidStack == null) return false;
         for (FluidStack stack : stacks) {
-            if (stack.isFluidStackIdentical(fluidStack)) return true;
+            if (stack.getFluid().isSame(fluidStack.getFluid())) {
+                if (stack.getAmount() <= fluidStack.getAmount()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean testPartial(FluidStack fluidStack) {
+        if (fluidStack == null) return false;
+        for (FluidStack stack : stacks) {
+            if (stack.getFluid().isSame(fluidStack.getFluid())) {
+                return true;
+            }
         }
         return false;
     }

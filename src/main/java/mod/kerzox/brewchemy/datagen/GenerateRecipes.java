@@ -1,6 +1,7 @@
 package mod.kerzox.brewchemy.datagen;
 
 import mod.kerzox.brewchemy.Brewchemy;
+import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.*;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
@@ -42,25 +43,27 @@ public class GenerateRecipes extends RecipeProvider {
                 new ItemStack(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get()),
                 Ingredient.of(BrewchemyRegistry.Items.MALTED_BARLEY_ITEM.get()),180)
                 .build(pFinishedRecipeConsumer);
-//
-//        GerminationRecipe.DatagenBuilder.addRecipe(new ResourceLocation(Brewchemy.MODID, "germinate_barley"),
-//                new ItemStack(BrewchemyRegistry.Items.GERMINATED_BARLEY_ITEM.get()),
-//                Ingredient.of(BrewchemyRegistry.Items.SOAKED_BARLEY_ITEM.get()),1200)
-//                .build(pFinishedRecipeConsumer);
 
         FermentJarRecipe.DatagenBuilder.addRecipe(new ResourceLocation(Brewchemy.MODID, "brewers_yeast_from_wort"),
                 new ItemStack(BrewchemyRegistry.Items.BREWERS_YEAST.get()),
                 FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 125)),200)
                 .build(pFinishedRecipeConsumer);
 
-        BrewingRecipe.DatagenBuilder.addRecipe(new ResourceLocation(Brewchemy.MODID, "brewing_beer_from_wort"),
-                new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), PintGlassItem.KEG_VOLUME),
-                Ingredient.of(new ItemStack(BrewchemyRegistry.Blocks.HOPS_CROP_BLOCK.get())),
-                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), PintGlassItem.KEG_VOLUME)),30, BrewingRecipe.FIRE)
+        // for every 500 mb of water you need 1 milled barley to make 500 wortv
+        BrewingRecipe.DatagenBuilder.addRecipe(new ResourceLocation(Brewchemy.MODID, "brewing_wort"),
+                new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 500),
+                CountSpecificIngredient.of(Ingredient.of(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get()), 1, true),
+                FluidIngredient.of(new FluidStack(Fluids.WATER, 500)),200, BrewingRecipe.FIRE)
+                .build(pFinishedRecipeConsumer);
+
+        BrewingRecipe.DatagenBuilder.addRecipe(new ResourceLocation(Brewchemy.MODID, "brewing_beer1"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(),1000),
+                CountSpecificIngredient.of(Ingredient.of(BrewchemyRegistry.Items.HOPS_ITEM.get()), 2, true),
+                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 1000)),1000, BrewingRecipe.FIRE)
                 .build(pFinishedRecipeConsumer);
 
         FermentationRecipe.DatagenBuilder.addRecipe(new ResourceLocation(Brewchemy.MODID, "fermentation_beer"),
-                new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), PintGlassItem.KEG_VOLUME)).build(pFinishedRecipeConsumer);
+                new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), 1)).build(pFinishedRecipeConsumer);
 
         ShapedRecipeBuilder.shaped(BrewchemyRegistry.Blocks.WOODEN_BARREL_BLOCK.get())
                 .define('P', Ingredient.of(ItemTags.PLANKS))

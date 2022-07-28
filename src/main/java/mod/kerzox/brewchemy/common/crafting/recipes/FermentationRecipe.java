@@ -40,7 +40,7 @@ public class FermentationRecipe extends AbstractRecipe {
     @Override
     public boolean matches(RecipeInventoryWrapper inv, Level pLevel) {
         for (FluidIngredient fluidIngredient : fluidIngredients) {
-            if (fluidIngredient.test(new FluidStack(inv.getFluidInventory().getFluidInTank(0).getFluid(), fluidIngredient.getAmountFromIngredient()))) {
+            if (fluidIngredient.testPartial(inv.getFluidInventory().getFluidInTank(0))) {
                 return true;
             }
         }

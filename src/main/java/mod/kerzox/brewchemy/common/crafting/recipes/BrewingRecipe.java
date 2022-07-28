@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
 import mod.kerzox.brewchemy.common.crafting.AbstractRecipe;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
+import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.util.SomeJsonUtil;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
@@ -29,12 +30,12 @@ public class BrewingRecipe extends AbstractRecipe {
     public static final int FIRE = 600;
     public static final int SUPERHEATED = 1000;
 
-    private final NonNullList<Ingredient> ingredients = NonNullList.create();
+    private final NonNullList<CountSpecificIngredient> ingredients = NonNullList.create();
     private final NonNullList<FluidIngredient> fluidIngredients = NonNullList.create();
     private final FluidStack result;
     private final int heat;
 
-    public BrewingRecipe(RecipeType<?> type, ResourceLocation id, String group, FluidStack result, Ingredient[] ingredients, FluidIngredient[] fingredients, int duration, int heat) {
+    public BrewingRecipe(RecipeType<?> type, ResourceLocation id, String group, FluidStack result, CountSpecificIngredient[] ingredients, FluidIngredient[] fingredients, int duration, int heat) {
         super(type, id, group, duration);
         this.result = result;
         this.heat = heat;
@@ -49,12 +50,12 @@ public class BrewingRecipe extends AbstractRecipe {
         for (int i = 0; i < inv.getFluidInventory().getTanks(); i++) {
             FluidStack fluid = inv.getFluidInventory().getFluidInTank(i);
             for (FluidIngredient fluidIngredient : fluidIngredients) {
-                if (fluidIngredient.test(new FluidStack(fluid.getFluid(), fluidIngredient.getAmountFromIngredient()))) {
-                    if (fluid.getAmount() >= fluidIngredient.getAmountFromIngredient()) fluidMatches = true;
+                if (fluidIngredient.test(fluid)) {
+                    fluidMatches = true;
                 }
             }
         }
-        for (Ingredient ingredient : ingredients) {
+        for (CountSpecificIngredient ingredient : getCIngredients()) {
             for (int i = 0; i < inv.getContainerSize(); i++) {
                 if (ingredient.test(inv.getItem(i))) {
                     itemMatches = true;
@@ -73,6 +74,9 @@ public class BrewingRecipe extends AbstractRecipe {
 
     @Override
     public NonNullList<Ingredient> getIngredients() {
+        return NonNullList.create();
+    }
+    public NonNullList<CountSpecificIngredient> getCIngredients() {
         return this.ingredients;
     }
 
@@ -103,7 +107,7 @@ public class BrewingRecipe extends AbstractRecipe {
         @Override
         public BrewingRecipe fromJson(ResourceLocation pRecipeId, JsonObject json) {
             String group = JsonUtils.getStringOr("group", json, "");
-            Ingredient[] ingredients = SomeJsonUtil.deserializeIngredients(json);
+            CountSpecificIngredient[] ingredients = SomeJsonUtil.deserializeCountSpecificIngredients(json);
             FluidIngredient[] fluidIngredients = SomeJsonUtil.deserializeFluidIngredients(json);
             FluidStack resultStack = FluidStack.EMPTY;
             if (json.has("result")) {
@@ -121,9 +125,9 @@ public class BrewingRecipe extends AbstractRecipe {
         public @Nullable BrewingRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
             String group = pBuffer.readUtf();
             int ingredientCount = pBuffer.readVarInt();
-            Ingredient[] ingredients = new Ingredient[ingredientCount];
+            CountSpecificIngredient[] ingredients = new CountSpecificIngredient[ingredientCount];
             for (int i = 0; i < ingredients.length; i++) {
-                ingredients[i] = Ingredient.fromNetwork(pBuffer);
+                ingredients[i] = CountSpecificIngredient.Serializer.INSTANCE.parse(pBuffer);
             }
             int fluidIngredientCount = pBuffer.readVarInt();
             FluidIngredient[] fluidIngredients = new FluidIngredient[fluidIngredientCount];
@@ -140,7 +144,7 @@ public class BrewingRecipe extends AbstractRecipe {
         public void toNetwork(FriendlyByteBuf pBuffer, BrewingRecipe pRecipe) {
             pBuffer.writeUtf(pRecipe.getGroup());
             pBuffer.writeVarInt(pRecipe.getIngredients().size());
-            for (Ingredient ingredient : pRecipe.getIngredients()) {
+            for (CountSpecificIngredient ingredient : pRecipe.getCIngredients()) {
                 ingredient.toNetwork(pBuffer);
             }
             pBuffer.writeVarInt(pRecipe.getFluidIngredients().size());
@@ -156,14 +160,14 @@ public class BrewingRecipe extends AbstractRecipe {
     public static class DatagenBuilder {
         private final ResourceLocation name;
         private final FluidStack result;
-        private final Ingredient ingredient;
+        private final CountSpecificIngredient ingredient;
         private final FluidIngredient fluidIngredient;
         private String group;
         private final int duration;
         private final int heat;
         private final RecipeSerializer<?> supplier;
 
-        public DatagenBuilder(ResourceLocation name, FluidStack result, Ingredient ingredient, FluidIngredient fluidIngredient, int duration, int heat, RecipeSerializer<?> supplier) {
+        public DatagenBuilder(ResourceLocation name, FluidStack result, CountSpecificIngredient ingredient, FluidIngredient fluidIngredient, int duration, int heat, RecipeSerializer<?> supplier) {
             this.name = name;
             this.result = result;
             this.ingredient = ingredient;
@@ -174,7 +178,7 @@ public class BrewingRecipe extends AbstractRecipe {
             this.supplier = supplier;
         }
 
-        public static DatagenBuilder addRecipe(ResourceLocation name, FluidStack result, Ingredient ingredient, FluidIngredient fluidIngredient, int duration, int heat) {
+        public static DatagenBuilder addRecipe(ResourceLocation name, FluidStack result, CountSpecificIngredient ingredient, FluidIngredient fluidIngredient, int duration, int heat) {
             return new DatagenBuilder(name, result, ingredient, fluidIngredient, duration, heat, BrewchemyRegistry.Recipes.BREWING_RECIPE_SERIALIZER.get());
         }
 
@@ -186,25 +190,28 @@ public class BrewingRecipe extends AbstractRecipe {
                     this.ingredient,
                     this.fluidIngredient,
                     this.duration,
+                    this.heat,
                     this.supplier));
         }
 
         public static class Factory implements FinishedRecipe {
             private final ResourceLocation name;
             private final FluidStack result;
-            private final Ingredient ingredient;
+            private final CountSpecificIngredient ingredient;
             private final FluidIngredient fluidIngredient;
+            private int heat;
             private String group;
             final int duration;
             private final RecipeSerializer<?> supplier;
 
-            public Factory(ResourceLocation name, String group, FluidStack result, Ingredient ingredient, FluidIngredient fluidIngredient, int duration, RecipeSerializer<?> supplier) {
+            public Factory(ResourceLocation name, String group, FluidStack result, CountSpecificIngredient ingredient, FluidIngredient fluidIngredient, int duration, int heat, RecipeSerializer<?> supplier) {
                 this.name = name;
                 this.group = group;
                 this.result = result;
                 this.ingredient = ingredient;
                 this.fluidIngredient = fluidIngredient;
                 this.duration = duration;
+                this.heat = heat;
                 this.supplier = supplier;
             }
 
@@ -223,10 +230,11 @@ public class BrewingRecipe extends AbstractRecipe {
                     json.addProperty("group", this.group);
                 }
                 json.addProperty("duration", this.duration);
+                json.addProperty("heat", this.heat);
                 JsonObject ingredient = new JsonObject();
-                ingredient.add("item", this.ingredient.toJson());
-                ingredient.add("fluid", this.fluidIngredient.serialize());
-                json.add("ingredient", ingredient);
+                ingredient.add("item_ingredient", this.ingredient.toJson());
+                ingredient.add("fluid_ingredient", this.fluidIngredient.serialize());
+                json.add("ingredients", ingredient);
                 json.add("result", serializeFluidStacks(this.result));
             }
 

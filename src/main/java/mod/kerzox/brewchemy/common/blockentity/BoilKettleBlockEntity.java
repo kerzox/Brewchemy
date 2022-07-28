@@ -5,6 +5,7 @@ import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SidedMultifluidTank;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
+import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.BrewingRecipe;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
@@ -15,6 +16,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,6 +32,8 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServerTickable {
@@ -42,7 +47,6 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
     private int heat;
     private int currentRecipeHeat;
     private int tick;
-
     private boolean stateChanged = false;
 
     public BoilKettleBlockEntity(BlockPos pWorldPosition, BlockState pBlockState) {
@@ -59,7 +63,14 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
     @Override
     public void onServer() {
         tick++;
+        calculateHeat();
+        Optional<BrewingRecipe> recipe = this.findValidRecipe(new RecipeInventoryWrapper(sidedFluidTank, inventory));
+        recipe.ifPresent(this::doRecipe);
+        syncBlockEntity();
+        System.out.println("Input Tank: " + this.sidedFluidTank.getFluidInTank(0).getAmount() + "\nOutput Tank: " + this.sidedFluidTank.getFluidInTank(1).getAmount() + "\nItems: " + this.inventory.getStackInSlot(0));
+    }
 
+    private void calculateHeat() {
         if (heat < getHeatSource()) {
             heat++;
         } else {
@@ -69,10 +80,43 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
                 }
             }
         }
+    }
 
-        Optional<BrewingRecipe> recipe = level.getRecipeManager().getRecipeFor(BrewchemyRegistry.Recipes.BREWING_RECIPE.get(), new RecipeInventoryWrapper(sidedFluidTank, inventory), level);
-        recipe.ifPresent(this::doRecipe);
-        syncBlockEntity();
+    public Optional<BrewingRecipe> findValidRecipe(RecipeInventoryWrapper wrapper) {
+        return level.getRecipeManager().getRecipeFor(BrewchemyRegistry.Recipes.BREWING_RECIPE.get(), wrapper, level);
+    }
+
+    public void doRecipe(BrewingRecipe recipe) {
+        FluidStack result = recipe.assembleFluid(new RecipeInventoryWrapper(sidedFluidTank, inventory));
+        if (result.isEmpty()) return;
+        if (!hasHeatForRecipe(recipe)) return;
+        if (!running) {
+            duration = recipe.getDuration();
+            running = true;
+        }
+
+        if (duration <= 0) {
+            if (this.sidedFluidTank.getOutputHandler().getStorageTank(0).isFull()) return;
+            for (CountSpecificIngredient cIngredient : recipe.getCIngredients()) {
+                for (ItemStack item : cIngredient.getItems()) {
+                    if (inventory.getStackInSlot(0).is(item.getItem())) {
+                        inventory.getStackInSlot(0).shrink(item.getCount());
+                        break;
+                    }
+                }
+            }
+            for (FluidIngredient fluidIngredient : recipe.getFluidIngredients()) {
+                for (FluidStack fluid : fluidIngredient.getStacks()) {
+                    if (sidedFluidTank.getInputHandler().getFluidInTank(0).getFluid().isSame(fluid.getFluid())) {
+                        sidedFluidTank.getInputHandler().getFluidInTank(0).shrink(fluid.getAmount());
+                        break;
+                    }
+                }
+            }
+            sidedFluidTank.getOutputHandler().forceFill(result, IFluidHandler.FluidAction.EXECUTE);
+            running = false;
+        }
+        duration--;
     }
 
     @Override
@@ -98,9 +142,10 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
     @Override
     protected void write(CompoundTag pTag) {
         pTag.putInt("duration", this.duration);
-        pTag.put("fluidHandler", this.sidedFluidTank.serialize());
         pTag.putInt("heat", this.heat);
         pTag.putInt("recipeHeat", this.currentRecipeHeat);
+        this.sidedFluidTank.serializeNBT();
+        this.inventory.serializeNBT();
     }
 
     @Override
@@ -108,7 +153,8 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
        this.duration = pTag.getInt("duration");
        this.heat = pTag.getInt("heat");
        this.currentRecipeHeat = pTag.getInt("recipeHeat");
-       if (pTag.contains("fluidHandler")) this.sidedFluidTank.deserialize(pTag);
+       this.sidedFluidTank.deserializeNBT(pTag);
+       this.inventory.deserializeNBT(pTag);
     }
 
     @Override
@@ -122,27 +168,9 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
         return super.getCapability(cap, side);
     }
 
-    private void doRecipe(BrewingRecipe recipe) {
-        FluidStack result = recipe.assembleFluid(new RecipeInventoryWrapper(sidedFluidTank, inventory));
-        if (result.isEmpty() || hasHeatForRecipe(recipe)) return;
-        if (!running) {
-            duration = recipe.getDuration();
-            running = true;
-        }
-        if (duration <= 0) {
-            if (this.sidedFluidTank.getOutputHandler().forceFill(result, IFluidHandler.FluidAction.SIMULATE) != 0) {
-                for (FluidIngredient ingredient : recipe.getFluidIngredients()) {
-                    for (FluidStack stack : ingredient.getStacks()) {
-                        this.sidedFluidTank.drain(stack, IFluidHandler.FluidAction.EXECUTE);
-                    }
-                }
-                this.inventory.getStackInSlot(0).shrink(1);
-                this.sidedFluidTank.getOutputHandler().forceFill(result, IFluidHandler.FluidAction.EXECUTE);
-                running = false;
-            }
-        }
-        duration--;
-    }
+//    private void doRecipe(BrewingRecipe recipe) {
+
+//    }
 
     public int getDuration() {
         return duration;
@@ -175,4 +203,6 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
     public void setStateChanged(boolean stateChanged) {
         this.stateChanged = stateChanged;
     }
+
+
 }

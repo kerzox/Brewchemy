@@ -6,6 +6,7 @@ import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SidedMultifluidTank;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
+import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.FermentationRecipe;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
 import mod.kerzox.brewchemy.common.util.FermentationHelper;
@@ -40,7 +41,6 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
 
     private final ItemStackInventory inventory = new ItemStackInventory(1, 1);
     private final SidedMultifluidTank fluidTank = new SidedMultifluidTank(1, PintGlassItem.KEG_VOLUME, 1, PintGlassItem.KEG_VOLUME);
-    private final LazyOptional<SidedMultifluidTank> handler = LazyOptional.of(() -> fluidTank);
     private final FluidStack[] inputStacks = new FluidStack[]{FluidStack.EMPTY};
 
     private boolean running;
@@ -89,12 +89,15 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
         FluidStack input = this.fluidTank.getFluidInTank(0);
         writeNBTtoFluidStack(input);
         if (FermentationHelper.getFermentationStage(input) == FermentationHelper.Stages.MATURE) {
-            if (this.fluidTank.getOutputHandler().forceFill(input, IFluidHandler.FluidAction.SIMULATE) != 0) {
-                this.fluidTank.getOutputHandler().forceFill(this.fluidTank.getInputHandler().forceDrain(input, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+            if (this.fluidTank.getOutputHandler().getStorageTank(0).isFull()) return;
+            this.fluidTank.getOutputHandler().forceFill(input.copy(), IFluidHandler.FluidAction.EXECUTE);
+            for (FluidIngredient fluidIngredient : recipe.getFluidIngredients()) {
+                input.shrink(fluidIngredient.getAmountFromIngredient(input));
             }
             running = false;
         }
         this.setChanged();
+
 
     }
 
@@ -105,15 +108,17 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
     @Override
     protected void write(CompoundTag pTag) {
         pTag.putInt("fermentationTicks", this.fermentationTicks);
-        pTag.put("fluidHandler", this.getFluidTank().serialize());
         pTag.putBoolean("running", this.running);
+        this.fluidTank.serializeNBT();
+        this.inventory.serializeNBT();
     }
 
     @Override
     protected void read(CompoundTag pTag) {
         this.fermentationTicks = pTag.getInt("fermentationTicks");
         this.running = pTag.getBoolean("running");
-        if (pTag.contains("fluidHandler")) this.getFluidTank().deserialize(pTag);
+        this.fluidTank.deserializeNBT(pTag);
+        this.inventory.deserializeNBT(pTag);
     }
 
     // we need to merge stacks together!

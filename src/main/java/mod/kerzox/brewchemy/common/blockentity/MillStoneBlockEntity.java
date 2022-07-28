@@ -10,6 +10,7 @@ import mod.kerzox.brewchemy.common.util.IServerTickable;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -99,6 +100,15 @@ public class MillStoneBlockEntity extends BrewchemyBlockEntity implements IServe
 
     }
 
+    @Override
+    protected void write(CompoundTag pTag) {
+        this.inventory.serializeNBT();
+    }
+
+    @Override
+    protected void read(CompoundTag pTag) {
+        this.inventory.deserializeNBT(pTag);
+    }
 
     @Override
     public @NotNull Component getDisplayName() {

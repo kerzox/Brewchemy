@@ -3,6 +3,7 @@ package mod.kerzox.brewchemy.common.capabilities.fluid;
 import mod.kerzox.brewchemy.common.capabilities.item.IStrictSided;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -14,7 +15,7 @@ import java.util.Set;
 
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 
-public class SidedMultifluidTank extends CombinedFluidInventory implements IStrictSided {
+public class SidedMultifluidTank extends CombinedFluidInventory implements IStrictSided, INBTSerializable<CompoundTag> {
     private Set<Direction> input = new HashSet<>();
     private Set<Direction> output = new HashSet<>();
 
@@ -109,6 +110,32 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
         getOutputHandler().read(tag.getCompound("fluidHandler"));
     }
 
+
+    @Override
+    public CompoundTag serializeNBT()
+    {
+        CompoundTag nbt = new CompoundTag();
+        nbt.put("input", this.getInputHandler().serializeNBT());
+        nbt.put("output", this.getOutputHandler().serializeNBT());
+        return nbt;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundTag nbt)
+    {
+        if (nbt.contains("input")) {
+            getInputHandler().deserializeNBT(nbt.getCompound("input"));
+        }
+        if (nbt.contains("output")) {
+            getOutputHandler().deserializeNBT(nbt.getCompound("output"));
+        }
+        onLoad();
+    }
+
+    protected void onLoad() {
+
+    }
+
     public static class InputWrapper extends MultitankFluid {
 
         private LazyOptional<InputWrapper> handler = LazyOptional.of(()-> this);
@@ -130,17 +157,6 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
             return handler.cast();
         }
 
-        @Override
-        public CompoundTag write(CompoundTag tag) {
-            CompoundTag tag1 = new CompoundTag();
-            tag.put("input", super.write(tag1));
-            return tag;
-        }
-
-        @Override
-        public void read(CompoundTag tag) {
-            super.read(tag.getCompound("input"));
-        }
     }
 
     public static class OutputWrapper extends MultitankFluid {
@@ -164,16 +180,5 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
             return handler.cast();
         }
 
-        @Override
-        public CompoundTag write(CompoundTag tag) {
-            CompoundTag tag1 = new CompoundTag();
-            tag.put("output", super.write(tag1));
-            return tag;
-        }
-
-        @Override
-        public void read(CompoundTag tag) {
-            super.read(tag.getCompound("output"));
-        }
     }
 }

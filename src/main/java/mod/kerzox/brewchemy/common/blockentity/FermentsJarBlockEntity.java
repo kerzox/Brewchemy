@@ -3,7 +3,9 @@ package mod.kerzox.brewchemy.common.blockentity;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.fluid.FluidStorageTank;
 import mod.kerzox.brewchemy.common.capabilities.CapabilityUtils;
+import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
+import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.FermentJarRecipe;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
@@ -31,7 +33,7 @@ import java.util.Optional;
 public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements IServerTickable {
 
     private final int OUTPUT_SLOT = 0;
-    private final ItemStackHandler inventory = new ItemStackHandler(OUTPUT_SLOT);
+    private final ItemStackInventory.OutputHandler inventory = new ItemStackInventory.OutputHandler(OUTPUT_SLOT);
     private final LazyOptional<ItemStackHandler> itemHandler = LazyOptional.of(() -> inventory);
 
     private final FluidStorageTank tank = new FluidStorageTank(1000);
@@ -52,14 +54,16 @@ public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements ISer
 
     @Override
     protected void write(CompoundTag pTag) {
-        this.tank.writeToNBT(pTag);
         pTag.putInt("duration", this.duration);
+        this.tank.writeToNBT(pTag);
+        this.inventory.serializeNBT();
     }
 
     @Override
     protected void read(CompoundTag pTag) {
-        this.tank.setFluid(tank.readFromNBT(pTag).getFluid());
         this.duration = pTag.getInt("duration");
+        this.tank.readFromNBT(pTag);
+        this.inventory.deserializeNBT(pTag);
     }
 
     @Override
@@ -82,11 +86,15 @@ public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements ISer
             running = true;
         }
         if (duration <= 0) {
-            if (this.inventory.insertItem(0, result, true).isEmpty()) {
-                this.tank.drain(r.getFluidIngredients().get(0).getStacks()[0].copy(), IFluidHandler.FluidAction.EXECUTE);
-                this.inventory.insertItem(0, result, false);
-                running = false;
+            if (this.inventory.isSlotFull(OUTPUT_SLOT)) return;
+            this.inventory.insertItem(OUTPUT_SLOT, result, false);
+            FluidStack fluidStack = this.tank.getFluid();
+            for (FluidIngredient fluidIngredient : r.getFluidIngredients()) {
+                if (fluidIngredient.test(fluidStack)) {
+                    fluidStack.shrink(fluidIngredient.getAmountFromIngredient(fluidStack));
+                }
             }
+            running = false;
         }
         syncBlockEntity();
         duration--;
@@ -113,4 +121,5 @@ public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements ISer
         }
         return super.getCapability(cap, side);
     }
+
 }

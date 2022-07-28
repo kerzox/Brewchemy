@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
+import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -42,14 +43,46 @@ public class SomeJsonUtil {
                         ingredients[i] = Ingredient.fromJson(arr.get(i));
                     }
                 } else {
-                    if (ingredient.has("fluid")) {
+                    if (ingredient.has("item")) {
                         ingredients = new Ingredient[1];
-                        ingredients[0] = Ingredient.fromJson(ingredient.getAsJsonObject("item"));
+                        ingredients[0] = Ingredient.fromJson(ingredient);
                     } else {
                         ingredients = new Ingredient[1];
                         ingredients[0] = Ingredient.fromJson(ingredient.getAsJsonObject());
                     }
                 }
+            }
+        }
+        return ingredients;
+    }
+
+    public static CountSpecificIngredient[] deserializeCountSpecificIngredients(JsonObject json) {
+        CountSpecificIngredient[] ingredients = null;
+        if (json.has("ingredients")) {
+            JsonObject ingredient = json.get("ingredients").getAsJsonObject().getAsJsonObject("item_ingredient");
+            if (ingredient.has("item")) {
+                if (ingredient.get("item").isJsonArray()) {
+                    JsonArray arr = ingredient.getAsJsonArray();
+                    ingredients = new CountSpecificIngredient[arr.size()];
+                    for (int i = 0; i < arr.size(); i++) {
+                        ingredients[i] = CountSpecificIngredient.Serializer.INSTANCE.parse(arr.get(i).getAsJsonObject());
+                    }
+                } else {
+                    ingredients = new CountSpecificIngredient[1];
+                    ingredients[0] = CountSpecificIngredient.Serializer.INSTANCE.parse(ingredient);
+                }
+            }
+        } else if (json.has("item_ingredient")) {
+            JsonObject ingredient = json.getAsJsonObject("item_ingredient");
+            if (ingredient.get("item").isJsonArray()) {
+                JsonArray arr = ingredient.getAsJsonArray();
+                ingredients = new CountSpecificIngredient[arr.size()];
+                for (int i = 0; i < arr.size(); i++) {
+                    ingredients[i] = CountSpecificIngredient.Serializer.INSTANCE.parse(arr.get(i).getAsJsonObject());
+                }
+            } else {
+                ingredients = new CountSpecificIngredient[1];
+                ingredients[0] = CountSpecificIngredient.Serializer.INSTANCE.parse(ingredient);
             }
         }
         return ingredients;
@@ -68,8 +101,8 @@ public class SomeJsonUtil {
 
     public static FluidIngredient[] deserializeFluidIngredients(JsonObject json) {
         FluidIngredient[] ingredients = null;
-        if (json.has("ingredient")) {
-            JsonObject fluid = json.get("ingredient").getAsJsonObject();
+        if (json.has("ingredients")) {
+            JsonObject fluid = json.get("ingredients").getAsJsonObject().getAsJsonObject("fluid_ingredient");
             if (fluid.has("fluid")) {
                 if (fluid.get("fluid").isJsonArray()) {
                     JsonArray arr = fluid.getAsJsonArray();
@@ -78,13 +111,23 @@ public class SomeJsonUtil {
                         ingredients[i] = FluidIngredient.deserialize(arr.get(i));
                     }
                 } else {
-                    if (fluid.has("item")) {
-                        ingredients = new FluidIngredient[1];
-                        ingredients[0] = FluidIngredient.deserialize(fluid.getAsJsonObject("fluid"));
-                    } else {
-                        ingredients = new FluidIngredient[1];
-                        ingredients[0] = FluidIngredient.deserialize(fluid);
+                    ingredients = new FluidIngredient[1];
+                    ingredients[0] = FluidIngredient.deserialize(fluid);
+                }
+            }
+        }
+        else if (json.has("fluid_ingredient")) {
+            JsonObject fluid = json.get("fluid_ingredient").getAsJsonObject();
+            if (fluid.has("fluid")) {
+                if (fluid.get("fluid").isJsonArray()) {
+                    JsonArray arr = fluid.getAsJsonArray();
+                    ingredients = new FluidIngredient[arr.size()];
+                    for (int i = 0; i < arr.size(); i++) {
+                        ingredients[i] = FluidIngredient.deserialize(arr.get(i));
                     }
+                } else {
+                    ingredients = new FluidIngredient[1];
+                    ingredients[0] = FluidIngredient.deserialize(fluid);
                 }
             }
         }

@@ -165,6 +165,7 @@ public class BrewchemyRegistry {
         public static final makeBlock<FluidBarrelBlock<WoodenBarrelBlockEntity>> WOODEN_BARREL_BLOCK = makeBlock.build("wooden_barrel_block", p -> new FluidBarrelBlock<>(WOODEN_BARREL.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(1.0F), true);
         public static final makeBlock<BoilKettleBlock> BOIL_KETTLE_BLOCK = makeBlock.build("boil_kettle_block", p -> new BoilKettleBlock(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(3F), true);
         public static final makeBlock<BoilKettleBlock.BoilKettleTop> BOIL_KETTLE_TOP_BLOCK = makeBlock.build("boil_kettle_top_block", BoilKettleBlock.BoilKettleTop::new, BlockBehaviour.Properties.of(Material.GLASS).noCollission().noLootTable().requiresCorrectToolForDrops().strength(1.5F), false);
+        public static final makeBlock<WarehouseBlock> WAREHOUSE_BLOCK = makeBlock.build("warehouse_block",  p -> new WarehouseBlock(WAREHOUSE.getType(), p), BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F), false);
 
 
         public static class makeBlock<T extends Block> implements Supplier<T> {
@@ -219,7 +220,7 @@ public class BrewchemyRegistry {
         public static final makeBlockEntity<RopeTiedFenceBlockEntity> ROPE_FENCE = makeBlockEntity.build("rope_fence_be", RopeTiedFenceBlockEntity::new, ROPE_FENCE_BLOCK);
         //public static final makeBlockEntity<GerminationChamberBlockEntity> GERMINATION_CHAMBER = makeBlockEntity.build("germination_chamber_be", GerminationChamberBlockEntity::new, GERMINATION_CHAMBER_BLOCK);
         public static final makeBlockEntity<WoodenBarrelBlockEntity> WOODEN_BARREL = makeBlockEntity.build("wooden_barrel_be", WoodenBarrelBlockEntity::new, WOODEN_BARREL_BLOCK);
-
+        public static final makeBlockEntity<WarehouseBlockEntity> WAREHOUSE = makeBlockEntity.build("warehouse_be", WarehouseBlockEntity::new, WAREHOUSE_BLOCK);
 
         public static class makeBlockEntity<T extends BlockEntity> implements Supplier<BlockEntityType<T>> {
 

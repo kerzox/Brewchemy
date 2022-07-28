@@ -1,7 +1,13 @@
 package mod.kerzox.brewchemy.common.capabilities.item;
 
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
@@ -11,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ItemStackInventory extends CombinedInvWrapper implements IStrictSided {
+public class ItemStackInventory extends CombinedInvWrapper implements IStrictSided, INBTSerializable<CompoundTag> {
 
     private Set<Direction> input = new HashSet<>();
     private Set<Direction> output = new HashSet<>();
@@ -92,6 +98,31 @@ public class ItemStackInventory extends CombinedInvWrapper implements IStrictSid
         return input;
     }
 
+    @Override
+    public CompoundTag serializeNBT()
+    {
+        CompoundTag nbt = new CompoundTag();
+        nbt.put("input", this.getInputHandler().serializeNBT());
+        nbt.put("output", this.getOutputHandler().serializeNBT());
+        return nbt;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundTag nbt)
+    {
+        if (nbt.contains("input")) {
+            getInputHandler().deserializeNBT(nbt.getCompound("input"));
+        }
+        if (nbt.contains("output")) {
+            getOutputHandler().deserializeNBT(nbt.getCompound("output"));
+        }
+        onLoad();
+    }
+
+    protected void onLoad() {
+
+
+    }
 
     public static class InputHandler extends ItemStackHandler {
 
@@ -115,6 +146,20 @@ public class ItemStackInventory extends CombinedInvWrapper implements IStrictSid
         public <T> LazyOptional<T> getHandler() {
             return handler.cast();
         }
+
+        public int isFull() {
+            for (int i = 0; i < getSlots(); i++) {
+                if (!isSlotFull(i)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public boolean isSlotFull(int slot) {
+            return this.getStackInSlot(slot).getCount() == this.getSlotLimit(0);
+        }
+
     }
 
     public static class OutputHandler extends ItemStackHandler {
@@ -138,6 +183,19 @@ public class ItemStackInventory extends CombinedInvWrapper implements IStrictSid
 
         public <T> LazyOptional <T> getHandler() {
             return handler.cast();
+        }
+
+        public int isFull() {
+            for (int i = 0; i < getSlots(); i++) {
+                if (!isSlotFull(i)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public boolean isSlotFull(int slot) {
+            return this.getStackInSlot(slot).getCount() == this.getSlotLimit(0);
         }
     }
 

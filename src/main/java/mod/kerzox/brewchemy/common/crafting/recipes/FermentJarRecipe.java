@@ -42,8 +42,8 @@ public class FermentJarRecipe extends AbstractRecipe {
         if (!inv.canStorageFluid()) return false;
 
         for (FluidIngredient ingredient : ingredients) {
-            if (ingredient.test(new FluidStack(inv.getFluidInventory().getFluidInTank(0), ingredient.getAmountFromIngredient()))) {
-                return inv.getFluidInventory().getFluidInTank(0).getAmount() >= ingredient.getAmountFromIngredient();
+            if (ingredient.test(new FluidStack(inv.getFluidInventory().getFluidInTank(0), ingredient.getAmountFromIngredient(inv.getFluidInventory().getFluidInTank(0))))) {
+                return true;
             }
         }
         return false;
@@ -168,7 +168,7 @@ public class FermentJarRecipe extends AbstractRecipe {
                     json.addProperty("group", this.group);
                 }
                 json.addProperty("duration", this.duration);
-                json.add("ingredient", this.ingredient.serialize());
+                json.add("fluid_ingredient", this.ingredient.serialize());
                 json.add("result", serializeItemStacks(this.result));
             }
 
