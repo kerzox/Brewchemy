@@ -19,7 +19,6 @@ public class IntoxicatedEffect extends MobEffect {
     public static void overlay(PoseStack poseStack, int renderTick, float partialTick) {
         if (Minecraft.getInstance().player != null) {
             if (Minecraft.getInstance().player.hasEffect(BrewchemyRegistry.Effects.INTOXICATED.get())) {
-                poseStack.pushPose();
                 float f2 = 5.0F / (.02f + 5.0F) - .02f * 0.04F;
                 f2 *= f2;
                 Vector3f vector3f = new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F);
@@ -27,7 +26,6 @@ public class IntoxicatedEffect extends MobEffect {
                 poseStack.scale(1.0F / f2, 1.0F, 1.0F);
                 float f3 = -((float) renderTick + partialTick) * (float) 7;
                 poseStack.mulPose(vector3f.rotationDegrees(f3));
-                poseStack.popPose();
             }
         }
     }

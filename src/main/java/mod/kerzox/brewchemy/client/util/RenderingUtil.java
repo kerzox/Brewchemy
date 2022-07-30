@@ -6,6 +6,8 @@ import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -17,6 +19,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 
@@ -25,6 +29,31 @@ import java.util.Objects;
 import java.util.Random;
 
 public class RenderingUtil {
+
+    public static void renderBlockModel(PoseStack poseStack, MultiBufferSource buffer, BlockState blockState, RenderType type, int brightness) {
+
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState,
+                poseStack,
+                buffer,
+                brightness,
+                0,
+                ModelData.EMPTY,
+                type);
+    }
+
+    public static void renderModelFromHit(PoseStack poseStack, Level level, BlockHitResult block, BlockPos pos, MultiBufferSource source, RenderType type, int brightness) {
+        Minecraft.getInstance().getBlockRenderer().getModelRenderer().tesselateWithAO(
+                Objects.requireNonNull(level),
+                Minecraft.getInstance().getBlockRenderer().getBlockModel(level.getBlockState(block.getBlockPos())),
+                level.getBlockState(block.getBlockPos()),
+                pos,
+                poseStack,
+                source.getBuffer(type),
+                false,
+                RandomSource.create(),
+                0,
+                brightness, ModelData.EMPTY, type);
+    }
 
     public static void renderSolidModel(PoseStack pMatrixStack, MultiBufferSource pBuffer, BakedModel model, BlockEntity te, BlockPos pos, int overlay) {
         Minecraft.getInstance().getBlockRenderer().getModelRenderer().tesselateWithAO(
