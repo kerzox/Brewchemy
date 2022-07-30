@@ -43,8 +43,11 @@ public class IntoxicatedEffect extends MobEffect {
     public void applyEffectTick(LivingEntity pLivingEntity, int pAmplifier) {
         if (pLivingEntity instanceof Player player) {
             if (!pLivingEntity.level.isClientSide) {
-                player.getFoodData().eat(pAmplifier + 1, .5F);
+                if (pAmplifier == 0) {
+                    pAmplifier = 1;
+                }
                 if (pLivingEntity.getHealth() < pLivingEntity.getMaxHealth()) {
+
                     pLivingEntity.heal(.05F * pAmplifier);
                 }
             }

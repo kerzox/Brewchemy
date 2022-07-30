@@ -1,6 +1,5 @@
 package mod.kerzox.brewchemy.registry;
 
-import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.gui.menu.FermentationBarrelMenu;
 import mod.kerzox.brewchemy.client.gui.menu.GerminationChamberMenu;
 import mod.kerzox.brewchemy.client.gui.menu.MillstoneMenu;
@@ -9,6 +8,8 @@ import mod.kerzox.brewchemy.common.block.base.BrewchemyInvisibleBlock;
 import mod.kerzox.brewchemy.common.block.rope.RopeBlock;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.*;
+import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseBlockEntity;
+import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseStorageBlockEntity;
 import mod.kerzox.brewchemy.common.crafting.recipes.*;
 import mod.kerzox.brewchemy.common.effects.IntoxicatedEffect;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluidType;
@@ -17,7 +18,6 @@ import mod.kerzox.brewchemy.common.item.PintGlassItem;
 import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.effect.AttackDamageMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.inventory.MenuType;
@@ -165,7 +165,8 @@ public class BrewchemyRegistry {
         public static final makeBlock<FluidBarrelBlock<WoodenBarrelBlockEntity>> WOODEN_BARREL_BLOCK = makeBlock.build("wooden_barrel_block", p -> new FluidBarrelBlock<>(WOODEN_BARREL.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(1.0F), true);
         public static final makeBlock<BoilKettleBlock> BOIL_KETTLE_BLOCK = makeBlock.build("boil_kettle_block", p -> new BoilKettleBlock(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(3F), true);
         public static final makeBlock<BoilKettleBlock.BoilKettleTop> BOIL_KETTLE_TOP_BLOCK = makeBlock.build("boil_kettle_top_block", BoilKettleBlock.BoilKettleTop::new, BlockBehaviour.Properties.of(Material.GLASS).noCollission().noLootTable().requiresCorrectToolForDrops().strength(1.5F), false);
-        public static final makeBlock<WarehouseBlock> WAREHOUSE_BLOCK = makeBlock.build("warehouse_block",  p -> new WarehouseBlock(WAREHOUSE.getType(), p), BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F), true);
+        public static final makeBlock<WarehouseBlock> WAREHOUSE_BLOCK = makeBlock.buildCustomSuppliedItem("warehouse_block",  p -> new WarehouseBlock(WAREHOUSE.getType(), p), BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F), () -> new WarehouseBlock.Item(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+        public static final makeBlock<WarehouseBlock.WarehouseStorageBlock> WAREHOUSE_STORAGE_BLOCK = makeBlock.build("warehouse_storage_block", WarehouseBlock.WarehouseStorageBlock::new, BlockBehaviour.Properties.of(Material.GLASS).strength(-1.0F, 3600000.0F).noLootTable(), false);
 
 
         public static class makeBlock<T extends Block> implements Supplier<T> {
@@ -221,7 +222,7 @@ public class BrewchemyRegistry {
         //public static final makeBlockEntity<GerminationChamberBlockEntity> GERMINATION_CHAMBER = makeBlockEntity.build("germination_chamber_be", GerminationChamberBlockEntity::new, GERMINATION_CHAMBER_BLOCK);
         public static final makeBlockEntity<WoodenBarrelBlockEntity> WOODEN_BARREL = makeBlockEntity.build("wooden_barrel_be", WoodenBarrelBlockEntity::new, WOODEN_BARREL_BLOCK);
         public static final makeBlockEntity<WarehouseBlockEntity> WAREHOUSE = makeBlockEntity.build("warehouse_be", WarehouseBlockEntity::new, WAREHOUSE_BLOCK);
-
+        public static final makeBlockEntity<WarehouseStorageBlockEntity> WAREHOUSE_STORAGE = makeBlockEntity.build("warehouse_storage_be", WarehouseStorageBlockEntity::new, WAREHOUSE_STORAGE_BLOCK);
         public static class makeBlockEntity<T extends BlockEntity> implements Supplier<BlockEntityType<T>> {
 
             private final RegistryObject<BlockEntityType<T>> type;

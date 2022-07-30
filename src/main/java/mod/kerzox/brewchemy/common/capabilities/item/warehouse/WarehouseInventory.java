@@ -1,22 +1,18 @@
 package mod.kerzox.brewchemy.common.capabilities.item.warehouse;
 
-import mod.kerzox.brewchemy.common.blockentity.WarehouseBlockEntity;
+import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseBlockEntity;
+import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseStorageBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,34 +49,55 @@ public class WarehouseInventory implements IItemHandler, ICapabilitySerializable
         return null;
     }
 
+    public int getIndexFromPos(BlockPos pos) {
+        for (int i = 0; i < itemStackHandlers.length; i++) {
+            if (itemStackHandlers[i].validSlot() && itemStackHandlers[i].validPosition(pos)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
     public static WarehouseInventory recreateInventoryFromTag(WarehouseBlockEntity warehouse, int slots, List<BlockPos> positions, WarehouseInventory oldInv) {
         WarehouseInventory inv = new WarehouseInventory(warehouse, slots, positions);
         inv.deserializeNBT(oldInv.serializeNBT(), true);
         List<WarehouseSlot> temp = new ArrayList<>(List.of(oldInv.getWarehouseSlots()));
         if (inv.getWarehouseSlots().length < oldInv.getWarehouseSlots().length) {
-            for (WarehouseSlot oldSlot : oldInv.getWarehouseSlots()) {
-                for (WarehouseSlot slot : inv.getWarehouseSlots()) {
-                    if (slot.getFullWarehouseItem().getItem() == oldSlot.getFullWarehouseItem().getItem() && oldSlot.getFullWarehouseItem().getCount() == slot.getFullWarehouseItem().getCount()) {
-                        temp.remove(oldSlot);
-                    }
+            int availableSlotsNewInv = 0;
+            for (WarehouseSlot slot : inv.itemStackHandlers) {
+                if (slot.isEmpty()) {
+                    availableSlotsNewInv = 1;
+                }
+            }
+            int availableSlotsOldInv = 0;
+            for (WarehouseSlot slot : oldInv.itemStackHandlers) {
+                if (slot.isEmpty()) {
+                    availableSlotsOldInv = 1;
                 }
             }
 
-            for (WarehouseSlot slot : temp) {
-                for (ItemStack itemStack : slot.getFullWarehouseItem().getEntireWarehouseItemAsStacks()) {
-                    ItemEntity entity = new ItemEntity(warehouse.getLevel(),
-                            warehouse.getBlockPos().getX(),
-                            warehouse.getBlockPos().getY(),
-                            warehouse.getBlockPos().getZ(),
-                            itemStack);
-                    warehouse.getLevel().addFreshEntity(entity);
+            int occupiedNewIn = inv.getWarehouseSlots().length - availableSlotsNewInv;
+            int occupiedOldIn = oldInv.getWarehouseSlots().length - availableSlotsOldInv;
+            if (occupiedNewIn < occupiedOldIn) {
+                for (int i = occupiedNewIn; i < oldInv.getWarehouseSlots().length; i++) {
+                    for (ItemStack itemStack : oldInv.getWarehouseSlots()[i].getFullWarehouseItem().getEntireWarehouseItemAsStacks()) {
+                        ItemEntity entity = new ItemEntity(warehouse.getLevel(),
+                                warehouse.getBlockPos().getX(),
+                                warehouse.getBlockPos().getY(),
+                                warehouse.getBlockPos().getZ(),
+                                itemStack);
+                        warehouse.getLevel().addFreshEntity(entity);
+                    }
                 }
-
             }
         }
 
         return inv;
     }
+
+//    public int countEmptySlots() {
+//        return (int) Arrays.stream(this.itemStackHandlers).map(WarehouseSlot::isEmpty).count();
+//    }
 
     public WarehouseSlot[] getWarehouseSlots() {
         return itemStackHandlers;
@@ -115,13 +132,22 @@ public class WarehouseInventory implements IItemHandler, ICapabilitySerializable
         return handler.cast();
     }
 
-    public WarehouseItem getStackByPos(BlockPos pos) {
+    public WarehouseItem getWarehouseItemByPos(BlockPos pos) {
         for (WarehouseSlot warehouseSlot : this.itemStackHandlers) {
             if (warehouseSlot.fromPos(pos) != null) {
                 return warehouseSlot.getFullWarehouseItem();
             }
         }
         return null;
+    }
+
+    public boolean hasValidSlot(ItemStack stack) {
+        for (WarehouseSlot stackHandler : this.itemStackHandlers) {
+            if (stackHandler.isEmpty() || stackHandler.addItem(stack, true).isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public ItemStack addToFreeSlot(ItemStack stack) {
@@ -131,6 +157,28 @@ public class WarehouseInventory implements IItemHandler, ICapabilitySerializable
             }
         }
         return stack;
+    }
+
+    public WarehouseItem addToFreeSlot(WarehouseItem stack) {
+        for (WarehouseSlot stackHandler : this.itemStackHandlers) {
+            if (stackHandler.addItem(stack, true).isEmpty()) {
+                return stackHandler.addItem(stack, false);
+            }
+        }
+        return stack;
+    }
+
+
+    public @NotNull WarehouseItem insertAsWarehouseItem(int slot, @NotNull WarehouseItem stack, boolean simulate) {
+        return this.itemStackHandlers[slot].addItem(stack, simulate);
+    }
+
+    public @NotNull WarehouseItem extractAsWarehouseItem(int slot, int amount, boolean simulate) {
+        return this.itemStackHandlers[slot].retrieveWarehouseItem(amount, simulate);
+    }
+
+    public @NotNull WarehouseItem getWarehouseItemFromSlot(int slot) {
+        return this.itemStackHandlers[slot].getFullWarehouseItem();
     }
 
     @Override
@@ -165,6 +213,9 @@ public class WarehouseInventory implements IItemHandler, ICapabilitySerializable
 
     public void onContentsChanged(WarehouseSlot slot) {
         warehouse.syncBlockEntity();
+        if (warehouse.getLevel().getBlockEntity(slot.getPos()) instanceof WarehouseStorageBlockEntity stor) {
+            stor.syncBlockEntity();
+        }
     }
 
 }

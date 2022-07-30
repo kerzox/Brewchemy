@@ -21,6 +21,36 @@ public class WarehouseSlot implements INBTSerializable<CompoundTag> {
         this.stored = WarehouseItem.EMPTY;
     }
 
+    public WarehouseItem addItem(WarehouseItem stack, boolean simulation) {
+        if (stack.isEmpty()) return WarehouseItem.EMPTY;
+
+        int limit = getSlotLimit();
+
+        if (!stored.isEmpty()) {
+            if (!WarehouseItem.isValidInsert(stored, stack)) {
+                return stack;
+            }
+            limit -= stored.getCount();
+        }
+
+        if (limit <= 0)
+            return stack;
+
+        boolean reachedLimit = stack.getCount() > limit;
+
+        if (!simulation) {
+            if (!stored.isEmpty()) {
+                if (WarehouseItem.isValidInsert(stored, stack)) {
+                    this.stored.grow(reachedLimit ? limit : stack.getCount());
+                }
+            } else {
+                this.stored = new WarehouseItem(stack.getItem(), reachedLimit ? limit : stack.getCount());
+            }
+            onContentsChanged(this);
+        }
+        return reachedLimit ? new WarehouseItem(stack.getItem(), stack.getCount() - limit) : WarehouseItem.EMPTY;
+    }
+
     public ItemStack addItem(ItemStack stack, boolean simulation) {
         if (stack.isEmpty()) return ItemStack.EMPTY;
 
@@ -49,6 +79,10 @@ public class WarehouseSlot implements INBTSerializable<CompoundTag> {
             onContentsChanged(this);
         }
         return reachedLimit ? ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - limit) : ItemStack.EMPTY;
+    }
+
+    public ItemStack getSimulationStack() {
+        return getFullWarehouseItem().getFakeItemStack();
     }
 
     public ItemStack getItemStack() {

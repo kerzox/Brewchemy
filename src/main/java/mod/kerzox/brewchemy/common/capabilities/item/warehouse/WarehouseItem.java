@@ -60,6 +60,10 @@ public class WarehouseItem {
         return this.getItemStacksByAmount(64);
     }
 
+    public ItemStack getFakeItemStack() {
+        return new ItemStack(this.item, Math.min(64, count));
+    }
+
     public void shrink(int count) {
         this.count -= count;
     }
@@ -111,6 +115,20 @@ public class WarehouseItem {
             return false;
         }
         return true;
+    }
+
+    public static boolean isValidInsert(WarehouseItem warehouseItem, WarehouseItem other) {
+
+        if (warehouseItem.isEmpty() || other.isEmpty()) return false;
+
+        if (warehouseItem.getItem() != other.getItem()) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isSame(WarehouseSlot slot) {
+        return this.item == slot.getFullWarehouseItem().getItem() && slot.getFullWarehouseItem().getCount() == this.count;
     }
 
 }

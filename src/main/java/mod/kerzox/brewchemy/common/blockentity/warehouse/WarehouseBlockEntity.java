@@ -1,10 +1,8 @@
-package mod.kerzox.brewchemy.common.blockentity;
+package mod.kerzox.brewchemy.common.blockentity.warehouse;
 
-import com.mojang.math.Vector3f;
-import mod.kerzox.brewchemy.common.block.WarehouseBlock;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
-import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
 import mod.kerzox.brewchemy.common.capabilities.item.warehouse.WarehouseInventory;
+import mod.kerzox.brewchemy.common.capabilities.item.warehouse.WarehouseItem;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
@@ -19,21 +17,20 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static mod.kerzox.brewchemy.common.capabilities.item.warehouse.WarehouseInventory.SINGLE_CHEST;
 
 public class WarehouseBlockEntity extends BrewchemyBlockEntity implements IServerTickable {
 
@@ -76,24 +73,11 @@ public class WarehouseBlockEntity extends BrewchemyBlockEntity implements IServe
     @Override
     public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
         if (!pLevel.isClientSide) {
-            if (pPlayer.getItemInHand(pHand).getItem() == Items.BLAZE_ROD) {
-                this.warehouseInventory.addToFreeSlot(new ItemStack(Blocks.DIAMOND_BLOCK.asItem(), 32));
-                syncBlockEntity();
-            }
-            if (pPlayer.getItemInHand(pHand).getItem() == Items.DIAMOND) {
-                this.warehouseInventory.extractItem(0, 32, false);
-                syncBlockEntity();
-            }
-            if (pPlayer.getItemInHand(pHand).getItem() == Items.STICK) {
-                if (pHit.getDirection().getAxis() == Direction.Axis.X) {
-                    moveX(pHit.getDirection().getAxisDirection() == Direction.AxisDirection.POSITIVE ? -1 : 1);
-                }
-                else if (pHit.getDirection().getAxis() == Direction.Axis.Y) {
-                    moveY(pHit.getDirection().getAxisDirection() == Direction.AxisDirection.POSITIVE ? -1 : 1);
-                }
-                else if (pHit.getDirection().getAxis() == Direction.Axis.Z) {
-                    moveZ(pHit.getDirection().getAxisDirection() == Direction.AxisDirection.POSITIVE ? -1 : 1);
-                }
+            ItemStack stack = pPlayer.getItemInHand(pHand);
+            if (warehouseInventory.hasValidSlot(stack)) {
+                ItemStack ret = warehouseInventory.addToFreeSlot(stack);
+                pPlayer.setItemInHand(pHand, ret);
+                return true;
             }
         }
         return super.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit);
@@ -105,6 +89,9 @@ public class WarehouseBlockEntity extends BrewchemyBlockEntity implements IServe
     
     public void calculatePositions() {
         Direction facing = getBlockState().getValue(HorizontalDirectionalBlock.FACING).getOpposite();
+        for (BlockPos position : positions) {
+            level.setBlockAndUpdate(position, Blocks.AIR.defaultBlockState());
+        }
         positions.clear();
         for (int x = position1.getX(); x < position2.getX(); x++) {
             for (int y = position1.getY(); y < position2.getY(); y++) {
@@ -122,6 +109,9 @@ public class WarehouseBlockEntity extends BrewchemyBlockEntity implements IServe
             }
         }
         this.warehouseInventory = WarehouseInventory.recreateInventoryFromTag(this, positions.size(), positions, this.warehouseInventory);
+        for (BlockPos position : positions) {
+              WarehouseStorageBlockEntity.addStorageBlock(this, position);
+        }
         syncBlockEntity();
     }
 

@@ -78,14 +78,10 @@ public class PintGlassItem extends BrewchemyItem {
         if (handler.isPresent()) {
             if (handler.get() instanceof ItemStackTankFluidCapability capability) {
 
-                if (FermentationHelper.getFermentationStage(capability.getFluid()) == FermentationHelper.Stages.MATURE) {
-                    player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.INTOXICATED.get(), 200, 1));
-
-                }
-
                 if (!pLevel.isClientSide) {
                     if (capability.getFluid().isEmpty()) return pStack;
-                    // do something
+                    int duration = Math.round(FermentationHelper.getFermentationTime(capability.getFluid()) * .2f);
+                    player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.INTOXICATED.get(), duration, 0));
                 }
 
                 if (!player.getAbilities().instabuild) {
