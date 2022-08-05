@@ -144,8 +144,8 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
         pTag.putInt("duration", this.duration);
         pTag.putInt("heat", this.heat);
         pTag.putInt("recipeHeat", this.currentRecipeHeat);
-        pTag.put("fluid", this.sidedFluidTank.serializeNBT());
-        pTag.put("item", this.inventory.serializeNBT());
+        pTag.put("fluidHandler", this.sidedFluidTank.serializeNBT());
+        pTag.put("itemHandler", this.inventory.serializeNBT());
     }
 
     @Override
@@ -153,8 +153,8 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
        this.duration = pTag.getInt("duration");
        this.heat = pTag.getInt("heat");
        this.currentRecipeHeat = pTag.getInt("recipeHeat");
-       this.sidedFluidTank.deserializeNBT(pTag.getCompound("fluid"));
-       this.inventory.deserializeNBT(pTag.getCompound("item"));
+       this.sidedFluidTank.deserializeNBT(pTag.getCompound("fluidHandler"));
+       this.inventory.deserializeNBT(pTag.getCompound("itemHandler"));
     }
 
     @Override

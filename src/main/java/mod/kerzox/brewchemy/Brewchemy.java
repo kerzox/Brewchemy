@@ -6,14 +6,18 @@ import mod.kerzox.brewchemy.client.RenderEvent;
 import mod.kerzox.brewchemy.client.gui.screen.FermentationBarrelScreen;
 import mod.kerzox.brewchemy.client.gui.screen.GerminationScreen;
 import mod.kerzox.brewchemy.client.gui.screen.MillstoneScreen;
+import mod.kerzox.brewchemy.client.particles.BoilingBubbleParticle;
 import mod.kerzox.brewchemy.client.render.*;
 import mod.kerzox.brewchemy.common.capabilities.BrewchemyCapabilities;
 import mod.kerzox.brewchemy.common.crafting.misc.CauldronRecipes;
 import mod.kerzox.brewchemy.common.network.PacketHandler;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -40,10 +44,15 @@ public class Brewchemy
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonLoad);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientLoad);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onEntityRenderRegister);
+//        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerParticleProvider);
         FMLJavaModLoadingContext.get().getModEventBus().register(new BrewchemyCapabilities());
         MinecraftForge.EVENT_BUS.register(new RenderEvent());
         MinecraftForge.EVENT_BUS.register(this);
     }
+
+//    private void registerParticleProvider(RegisterParticleProvidersEvent event) {
+//        event.register(BrewchemyRegistry.Particles.BOILING_BUBBLE_TYPE.get(), () -> new BoilingBubbleParticle.Provider());
+//    }
 
     private void commonLoad(final FMLCommonSetupEvent event) {
         event.enqueueWork(CauldronRecipes::register);

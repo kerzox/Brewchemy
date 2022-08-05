@@ -10,6 +10,8 @@ import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -30,6 +32,11 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -42,6 +49,8 @@ import net.minecraftforge.registries.RegistryObject;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity> {
@@ -342,6 +351,19 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
                 }
             }
 
+        }
+
+        @Override
+        public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+            ResourceLocation resourcelocation = BrewchemyRegistry.Blocks.BOIL_KETTLE_BLOCK.get().getLootTable();
+            if (resourcelocation == BuiltInLootTables.EMPTY) {
+                return Collections.emptyList();
+            } else {
+                LootContext lootcontext = pBuilder.withParameter(LootContextParams.BLOCK_STATE, pState).create(LootContextParamSets.BLOCK);
+                ServerLevel serverlevel = lootcontext.getLevel();
+                LootTable loottable = serverlevel.getServer().getLootTables().get(resourcelocation);
+                return loottable.getRandomItems(lootcontext);
+            }
         }
 
         @Override

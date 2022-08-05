@@ -3,6 +3,7 @@ package mod.kerzox.brewchemy.registry;
 import mod.kerzox.brewchemy.client.gui.menu.FermentationBarrelMenu;
 import mod.kerzox.brewchemy.client.gui.menu.GerminationChamberMenu;
 import mod.kerzox.brewchemy.client.gui.menu.MillstoneMenu;
+import mod.kerzox.brewchemy.client.particles.BoilingBubbleParticle;
 import mod.kerzox.brewchemy.common.block.*;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyInvisibleBlock;
 import mod.kerzox.brewchemy.common.block.rope.RopeBlock;
@@ -17,6 +18,7 @@ import mod.kerzox.brewchemy.common.fluid.BrewchemyLiquidBlock;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
 import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
@@ -61,6 +63,7 @@ public class BrewchemyRegistry {
     private static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(ForgeRegistries.RECIPE_TYPES, MODID);
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, MODID);
     private static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(ForgeRegistries.MOB_EFFECTS, MODID);
+    private static final DeferredRegister<ParticleType<?>> PARTICLE_TYPES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, MODID);
 
     public static void init(IEventBus bus) {
         BLOCKS.register(bus);
@@ -72,6 +75,7 @@ public class BrewchemyRegistry {
         RECIPES.register(bus);
         MENUS.register(bus);
         EFFECTS.register(bus);
+        PARTICLE_TYPES.register(bus);
 
         Items.init();
         Effects.init();
@@ -80,6 +84,18 @@ public class BrewchemyRegistry {
         Fluids.init();
         Recipes.init();
         Menus.init();
+//        Particles.init();
+    }
+
+    public static class Particles {
+
+        public static void init() {
+
+        }
+
+        public static final RegistryObject<BoilingBubbleParticle.BoilingBubbleType> BOILING_BUBBLE_TYPE = PARTICLE_TYPES.register("boilingbubble",
+                () -> new BoilingBubbleParticle.BoilingBubbleType(false));
+
     }
 
     public static final class Effects {
@@ -138,6 +154,7 @@ public class BrewchemyRegistry {
         }
 
         public static final RegistryObject<BrewchemyItem> HOPS_ITEM = ITEMS.register("hops_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
+        public static final RegistryObject<BrewchemyItem> BARLEY_ITEM = ITEMS.register("barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
         public static final RegistryObject<BrewchemyItem> SOAKED_BARLEY_ITEM = ITEMS.register("soaked_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
         //public static final RegistryObject<BrewchemyItem> GERMINATED_BARLEY_ITEM = ITEMS.register("germinated_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
         public static final RegistryObject<BrewchemyItem> MALTED_BARLEY_ITEM = ITEMS.register("malted_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));

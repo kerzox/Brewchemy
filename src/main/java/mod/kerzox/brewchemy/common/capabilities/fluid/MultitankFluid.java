@@ -72,10 +72,6 @@ public class MultitankFluid implements IFluidHandler, INBTSerializable<CompoundT
                 if (!getFluidInTank(i).isEmpty()) {
                     if (getFluidInTank(i).isFluidEqual(resource)) {
                         return Math.min(getTankCapacity(i) - getFluidInTank(i).getAmount(), resource.getAmount());
-                    } else {
-                        if (getFluidInTank(i).getFluid() == resource.getFluid()) {
-                            return Math.min(getTankCapacity(i) - getFluidInTank(i).getAmount(), resource.getAmount());
-                        }
                     }
                 }
             }

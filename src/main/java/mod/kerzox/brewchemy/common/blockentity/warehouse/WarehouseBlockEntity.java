@@ -87,7 +87,8 @@ public class WarehouseBlockEntity extends BrewchemyBlockEntity implements IServe
         return positions.size();
     }
     
-    public void calculatePositions() {
+    public void
+    calculatePositions() {
         Direction facing = getBlockState().getValue(HorizontalDirectionalBlock.FACING).getOpposite();
         for (BlockPos position : positions) {
             level.setBlockAndUpdate(position, Blocks.AIR.defaultBlockState());
@@ -195,7 +196,7 @@ public class WarehouseBlockEntity extends BrewchemyBlockEntity implements IServe
         pTag.put("opposing", tag1);
         savePositions(pTag);
         pTag.putString("warehouse_type", this.getWarehouseType().getSerializedName());
-        pTag.put("item_handler", this.warehouseInventory.serializeNBT());
+        pTag.put("itemHandler", this.warehouseInventory.serializeNBT());
     }
 
     @Override
@@ -208,7 +209,7 @@ public class WarehouseBlockEntity extends BrewchemyBlockEntity implements IServe
         }
         if (!positions.isEmpty()) warehouseInventory = new WarehouseInventory(this, getStorageSlots());
         this.currentType = Type.valueOf("INVISIBLE");
-        this.warehouseInventory.deserializeNBT(pTag.getCompound("item_handler"));
+        this.warehouseInventory.deserializeNBT(pTag.getCompound("itemHandler"));
     }
 
     @Override

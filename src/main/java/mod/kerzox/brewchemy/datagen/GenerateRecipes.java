@@ -63,7 +63,8 @@ public class GenerateRecipes extends RecipeProvider {
                 .build(pFinishedRecipeConsumer);
 
         FermentationRecipe.DatagenBuilder.addRecipe(new ResourceLocation(Brewchemy.MODID, "fermentation_beer"),
-                new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), 1)).build(pFinishedRecipeConsumer);
+                CountSpecificIngredient.of(Ingredient.of(BrewchemyRegistry.Items.BREWERS_YEAST.get()), 1),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER.getFluid().get(), 5000)).build(pFinishedRecipeConsumer);
 
         ShapedRecipeBuilder.shaped(BrewchemyRegistry.Blocks.WOODEN_BARREL_BLOCK.get())
                 .define('P', Ingredient.of(ItemTags.PLANKS))

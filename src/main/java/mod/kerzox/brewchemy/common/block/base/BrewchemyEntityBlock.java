@@ -49,13 +49,16 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (FluidUtil.getFluidHandler(pPlayer.getItemInHand(pHand)).isPresent()) {
             if (!pLevel.isClientSide) {
-                if (pLevel.getBlockEntity(pPos) instanceof WoodenBarrelBlockEntity barrel) {
-                    barrel.tryMergeFluid(pLevel, pPlayer, pHand, pHit);
-                } else {
-                    FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pPos, pHit.getDirection());
+//                if (pLevel.getBlockEntity(pPos) instanceof WoodenBarrelBlockEntity barrel) {
+//                    if (barrel.tryMergeFluid(pLevel, pPlayer, pHand, pHit)) {
+//                        return InteractionResult.SUCCESS;
+//                    }
+//                } else {
+                if (FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pPos, pHit.getDirection())) {
+                    return InteractionResult.SUCCESS;
                 }
+
             }
-            return InteractionResult.SUCCESS;
         }
         if (pLevel.getBlockEntity(pPos) instanceof BrewchemyBlockEntity onClick && pHand == InteractionHand.MAIN_HAND) {
             if (onClick.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit)) {

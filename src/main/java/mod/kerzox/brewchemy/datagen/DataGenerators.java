@@ -16,6 +16,7 @@ public class DataGenerators {
         gen.addProvider(event.includeServer(), new GenerateRecipes(gen));
         gen.addProvider(event.includeClient(), new GenerateBlockModels(gen, existingFileHelper));
         gen.addProvider(event.includeClient(), new GenerateItemModels(gen, existingFileHelper));
+        gen.addProvider(event.includeServer(), new GenerateLootTables(gen));
     }
 
 

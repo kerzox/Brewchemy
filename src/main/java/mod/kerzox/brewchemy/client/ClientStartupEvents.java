@@ -1,8 +1,10 @@
 package mod.kerzox.brewchemy.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.baked.PintGlassBakedModel;
 import mod.kerzox.brewchemy.client.baked.RopeTiedFenceBakedModel;
+import mod.kerzox.brewchemy.client.overlay.WarehouseOverlay;
 import mod.kerzox.brewchemy.client.render.MillstoneCrankBlockEntityRenderer;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.client.renderer.block.BlockModelShaper;
@@ -16,10 +18,12 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.ModelEvent.BakingCompleted;
 import net.minecraftforge.client.event.ModelEvent.RegisterGeometryLoaders;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.model.DynamicFluidContainerModel;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import static mod.kerzox.brewchemy.client.overlay.WarehouseOverlay.WAREHOUSE_STOCK;
 import static mod.kerzox.brewchemy.client.render.MillstoneCrankBlockEntityRenderer.CRANK_MODEL;
 
 @Mod.EventBusSubscriber(modid = Brewchemy.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -44,6 +48,11 @@ public class ClientStartupEvents {
         if (event.getAtlas().location() == TextureAtlas.LOCATION_BLOCKS) {
 //            event.addSprite(CRANK_TEXTURE);
         }
+    }
+
+    @SubscribeEvent
+    public static void onRegisterGuiOverlays(RegisterGuiOverlaysEvent event) {
+        event.registerAboveAll("warehouse_stock_view", WAREHOUSE_STOCK);
     }
 
     @SubscribeEvent

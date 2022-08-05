@@ -3,15 +3,15 @@ package mod.kerzox.brewchemy.client.gui.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mod.kerzox.brewchemy.client.gui.components.WidgetComponent;
-import net.minecraft.client.gui.components.Widget;
+import mod.kerzox.brewchemy.client.gui.menu.DefaultMenu;
+import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
-public abstract class DefaultScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
+public abstract class DefaultScreen<T extends DefaultMenu<?>> extends AbstractContainerScreen<T> {
 
     protected static final int DEFAULT_X_POS = 0;
     protected static final int DEFAULT_Y_POS = 0;
@@ -65,6 +65,11 @@ public abstract class DefaultScreen<T extends AbstractContainerMenu> extends Abs
     protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
         super.renderLabels(pPoseStack, pMouseX, pMouseY);
         addToForeground(pPoseStack, pMouseX, pMouseY);
+    }
+
+    @Override
+    public T getMenu() {
+        return super.getMenu();
     }
 
     protected void addWidgetComponent(WidgetComponent<?> widget) {

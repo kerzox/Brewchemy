@@ -1,12 +1,9 @@
 package mod.kerzox.brewchemy.common.capabilities.item.warehouse;
 
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
@@ -18,17 +15,39 @@ public class WarehouseItem {
 
     private Item item;
     private int count;
+    private CompoundTag tag;
 
     public static WarehouseItem EMPTY = new WarehouseItem(AIR, 0);
 
     public WarehouseItem(Item item, int count) {
+        this(item, count, null);
+    }
+
+    public WarehouseItem(Item item, int count, CompoundTag tag) {
         this.item = item;
         this.count = count;
+        this.tag = tag;
+    }
+
+    public static WarehouseItem ofWithSize(ItemStack itemstack, int count) {
+        ItemStack copy = itemstack.copy();
+        CompoundTag tag = copy.serializeNBT();
+        if (tag.contains("tag")) {
+            return new WarehouseItem(copy.getItem(), count, tag.getCompound("tag"));
+        } else return new WarehouseItem(copy.getItem(), count, null);
+
+
+//        if (tag.contains("ForgeCaps")) return new WarehouseItem(itemstack.getItem(), itemstack.getCount(), tag.getCompound("ForgeCaps"));
+
+    }
+
+    public static WarehouseItem of(ItemStack itemstack) {
+        return ofWithSize(itemstack, itemstack.getCount());
     }
 
     public static WarehouseItem of(CompoundTag nbt) {
         WarehouseItem item = new WarehouseItem(AIR, 0);
-        item.deSerialize(nbt);
+        item.deserialize(nbt);
         return item;
     }
 
@@ -53,7 +72,9 @@ public class WarehouseItem {
             this.count -= extract;
         }
 
-        return new ItemStack(copied.item, extract);
+        ItemStack stack = new ItemStack(copied.item, extract);
+        stack.setTag(copied.tag);
+        return stack;
     }
 
     public ItemStack getAsItemStack() {
@@ -61,7 +82,9 @@ public class WarehouseItem {
     }
 
     public ItemStack getFakeItemStack() {
-        return new ItemStack(this.item, Math.min(64, count));
+        ItemStack stack = new ItemStack(this.item, Math.max(64, this.count));
+        stack.setTag(this.tag);
+        return stack;
     }
 
     public void shrink(int count) {
@@ -80,12 +103,16 @@ public class WarehouseItem {
         return count;
     }
 
+    public CompoundTag getTag() {
+        return tag;
+    }
+
     public boolean isEmpty() {
         return this.item == AIR || count == 0;
     }
 
     public WarehouseItem copy() {
-        return new WarehouseItem(this.item, this.count);
+        return new WarehouseItem(this.item, this.count, this.tag);
     }
 
     public CompoundTag serialize() {
@@ -93,13 +120,25 @@ public class WarehouseItem {
         ResourceLocation resourcelocation = ForgeRegistries.ITEMS.getKey(this.item);
         tag.putString("id", resourcelocation == null ? "minecraft:air" : resourcelocation.toString());
         tag.putInt("count", this.count);
+        if (this.tag != null) {
+            tag.put("item_tags", this.tag);
+        }
         return tag;
     }
 
-    public void deSerialize(CompoundTag tag) {
+    public void deserialize(CompoundTag tag) {
         ResourceLocation location = new ResourceLocation(tag.getString("id"));
         this.item = ForgeRegistries.ITEMS.getValue(location);
         this.count = tag.getInt("count");
+        if (tag.contains("item_tags")) {
+            this.tag = tag.getCompound("item_tags");
+        }
+    }
+
+    public boolean isValidInsert(ItemStack other) {
+        if (this.item != other.getItem()) return false;
+        else if (this.tag == null && other.getTag() != null) return false;
+        else return this.tag == null || this.tag.equals(other.getTag());
     }
 
     /*

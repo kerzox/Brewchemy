@@ -26,12 +26,12 @@ public class ProgressComponent<T extends DefaultMenu<?>> extends WidgetComponent
         this.v1 = v1;
         this.v2 = v2;
     }
-
     public void update(int min, int max, Direction direction) {
         this.minimum = min;
         this.maximum = max;
         this.direction = direction;
     }
+
 
     @Override
     public void drawComponent(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {

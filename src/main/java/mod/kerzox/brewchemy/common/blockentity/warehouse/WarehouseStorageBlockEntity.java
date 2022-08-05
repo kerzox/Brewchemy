@@ -32,14 +32,12 @@ public class WarehouseStorageBlockEntity extends BrewchemyBlockEntity {
     }
 
     public WarehouseSlot getSlot() {
-        if (warehouse != null) {
-            return warehouse.getWarehouseInventory().getSlotFromBlockPos(getBlockPos());
-        }
-        return null;
+        if (getWarehouse() == null) return null;
+        return getWarehouse().getWarehouseInventory().getSlotFromBlockPos(getBlockPos());
     }
 
     public WarehouseBlockEntity getWarehouse() {
-        if (warehouse != null) {
+        if (warehouse == null) {
             if (warehousePos != null) {
                 if (level.getBlockEntity(warehousePos) instanceof WarehouseBlockEntity ware) {
                     this.warehouse = ware;
@@ -57,17 +55,13 @@ public class WarehouseStorageBlockEntity extends BrewchemyBlockEntity {
     @Override
     protected void read(CompoundTag pTag) {
         warehousePos = NbtUtils.readBlockPos(pTag.getCompound("warehouse"));
-        if (level != null) {
-            if (level.getBlockEntity(warehousePos) instanceof WarehouseBlockEntity ware) {
-                this.warehouse = ware;
-            }
-        }
     }
 
     @Override
     public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
         if (!pLevel.isClientSide && pHand == InteractionHand.MAIN_HAND) {
-            pPlayer.addItem(warehouse.getWarehouseInventory().extractItem(warehouse.getWarehouseInventory().getIndexFromPos(pPos), pPlayer.isShiftKeyDown() ? 64 : 1, false));
+            if (getWarehouse() == null) return false;
+            pPlayer.addItem(getWarehouse().getWarehouseInventory().extractItem(getWarehouse().getWarehouseInventory().getIndexFromPos(pPos), pPlayer.isShiftKeyDown() ? 64 : 1, false));
             syncBlockEntity();
             return true;
 

@@ -33,7 +33,7 @@ import java.util.Optional;
 public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements IServerTickable {
 
     private final int OUTPUT_SLOT = 0;
-    private final ItemStackInventory.OutputHandler inventory = new ItemStackInventory.OutputHandler(OUTPUT_SLOT);
+    private final ItemStackInventory.OutputHandler inventory = new ItemStackInventory.OutputHandler(1);
     private final LazyOptional<ItemStackHandler> itemHandler = LazyOptional.of(() -> inventory);
 
     private final FluidStorageTank tank = new FluidStorageTank(1000);
@@ -55,15 +55,15 @@ public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements ISer
     @Override
     protected void write(CompoundTag pTag) {
         pTag.putInt("duration", this.duration);
-        this.tank.writeToNBT(pTag);
-        this.inventory.serializeNBT();
+        pTag.put("fluidHandler", this.tank.writeToNBT(new CompoundTag()));
+        pTag.put("itemHandler", this.inventory.serializeNBT());
     }
 
     @Override
     protected void read(CompoundTag pTag) {
         this.duration = pTag.getInt("duration");
-        this.tank.readFromNBT(pTag);
-        this.inventory.deserializeNBT(pTag);
+        this.tank.readFromNBT(pTag.getCompound("fluidHandler"));
+        this.inventory.deserializeNBT(pTag.getCompound("itemHandler"));
     }
 
     @Override

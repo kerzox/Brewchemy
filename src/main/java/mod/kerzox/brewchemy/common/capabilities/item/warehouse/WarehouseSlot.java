@@ -44,11 +44,11 @@ public class WarehouseSlot implements INBTSerializable<CompoundTag> {
                     this.stored.grow(reachedLimit ? limit : stack.getCount());
                 }
             } else {
-                this.stored = new WarehouseItem(stack.getItem(), reachedLimit ? limit : stack.getCount());
+                this.stored = new WarehouseItem(stack.getItem(), reachedLimit ? limit : stack.getCount(), stack.getTag());
             }
             onContentsChanged(this);
         }
-        return reachedLimit ? new WarehouseItem(stack.getItem(), stack.getCount() - limit) : WarehouseItem.EMPTY;
+        return reachedLimit ? new WarehouseItem(stack.getItem(), stack.getCount() - limit, stack.getTag()) : WarehouseItem.EMPTY;
     }
 
     public ItemStack addItem(ItemStack stack, boolean simulation) {
@@ -57,7 +57,7 @@ public class WarehouseSlot implements INBTSerializable<CompoundTag> {
         int limit = getSlotLimit();
 
         if (!stored.isEmpty()) {
-            if (!WarehouseItem.isValidInsert(stored, stack)) {
+            if (!stored.isValidInsert(stack)) {
                 return stack;
             }
             limit -= stored.getCount();
@@ -70,11 +70,12 @@ public class WarehouseSlot implements INBTSerializable<CompoundTag> {
 
         if (!simulation) {
             if (!stored.isEmpty()) {
-                if (WarehouseItem.isValidInsert(stored, stack)) {
+                if (stored.isValidInsert(stack)) {
                     this.stored.grow(reachedLimit ? limit : stack.getCount());
                 }
             } else {
-                this.stored = new WarehouseItem(stack.getItem(), reachedLimit ? limit : stack.getCount());
+                this.stored = WarehouseItem.ofWithSize(stack, reachedLimit ? limit : stack.getCount());
+//                this.stored = new WarehouseItem(stack.getItem(), reachedLimit ? limit : stack.getCount());
             }
             onContentsChanged(this);
         }
@@ -111,11 +112,19 @@ public class WarehouseSlot implements INBTSerializable<CompoundTag> {
             }
         } else {
             if (!simulation) {
-                this.stored = new WarehouseItem(copied.getItem(), copied.getCount() - toExtract);
+                this.stored = new WarehouseItem(copied.getItem(), copied.getCount() - toExtract, copied.getTag());
                 onContentsChanged(this);
             }
-            return new WarehouseItem(copied.getItem(), toExtract);
+            return new WarehouseItem(copied.getItem(), toExtract, copied.getTag());
         }
+    }
+
+    public int getAmountInStorage() {
+        return stored.getCount();
+    }
+
+    public CompoundTag getTagFromStorage() {
+        return stored.getTag();
     }
 
     public int getSlotLimit() {

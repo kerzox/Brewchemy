@@ -51,7 +51,7 @@ import net.minecraft.world.item.Item.Properties;
 public class PintGlassItem extends BrewchemyItem {
 
     public static final int PINT_SIZE = 500;
-    public static final int PINTS_PER_KEG = 200;
+    public static final int PINTS_PER_KEG = 128;
     public static final int KEG_VOLUME = PINT_SIZE * PINTS_PER_KEG;
 
     public static final ModelProperty<FluidStack> FLUID = new ModelProperty<>();
@@ -63,12 +63,15 @@ public class PintGlassItem extends BrewchemyItem {
     @Override
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
         Optional<IFluidHandlerItem> handler = pPlayer.getItemInHand(pUsedHand).getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).resolve();
-        if (handler.isPresent()) {
-            if (handler.get() instanceof ItemStackTankFluidCapability capability) {
-                if (capability.getFluid().isEmpty()) return super.use(pLevel, pPlayer, pUsedHand);
+        if(!pPlayer.isShiftKeyDown()) {
+            if (handler.isPresent()) {
+                if (handler.get() instanceof ItemStackTankFluidCapability capability) {
+                    if (capability.getFluid().isEmpty()) return super.use(pLevel, pPlayer, pUsedHand);
+                    else return ItemUtils.startUsingInstantly(pLevel, pPlayer, pUsedHand);
+                }
             }
         }
-        return ItemUtils.startUsingInstantly(pLevel, pPlayer, pUsedHand);
+        return super.use(pLevel, pPlayer, pUsedHand);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package mod.kerzox.brewchemy.common.block.rope;
 
 import mod.kerzox.brewchemy.common.block.HopsCropBlock;
+import mod.kerzox.brewchemy.common.block.RopeTiedFenceBlock;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.RopeBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.RopeTiedFenceBlockEntity;
@@ -146,7 +147,11 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
 
         @Override
         public InteractionResult useOn(UseOnContext pContext) {
-            if (pContext.getLevel().getBlockState(pContext.getClickedPos()).getBlock() instanceof FenceBlock fence) {
+            Block block = pContext.getLevel().getBlockState(pContext.getClickedPos()).getBlock();
+            if (block instanceof FenceBlock fence) {
+                if (block instanceof RopeTiedFenceBlock ropeTiedFenceBlock){
+                    return super.useOn(pContext);
+                }
                 BlockState oldState = pContext.getLevel().getBlockState(pContext.getClickedPos());
                 pContext.getLevel().setBlockAndUpdate(pContext.getClickedPos(), BrewchemyRegistry.Blocks.ROPE_FENCE_BLOCK.get().defaultBlockState());
                 if (pContext.getLevel().getBlockEntity(pContext.getClickedPos()) instanceof RopeTiedFenceBlockEntity rope) {

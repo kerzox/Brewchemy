@@ -5,6 +5,7 @@ import mod.kerzox.brewchemy.common.block.rope.RopeBlock;
 import mod.kerzox.brewchemy.common.block.rope.RopeConnections;
 import mod.kerzox.brewchemy.common.blockentity.RopeBlockEntity;
 import mod.kerzox.brewchemy.common.util.IRopeConnectable;
+import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +27,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +52,18 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
             Block.box(5.0D, 0.0D, 5.0D, 11.0D, 14.0D, 11.0D),
             Block.box(5.0D, 0.0D, 5.0D, 11.0D, 16.0D, 11.0D)};
 
+    @Override
+    public VoxelShape getBlockSupportShape(BlockState pState, BlockGetter pReader, BlockPos pPos) {
+        return Shapes.empty();
+    }
 
+    @Override
+    public VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        if (pContext instanceof EntityCollisionContext ctx) {
+            return Shapes.empty();
+        }
+        return super.getCollisionShape(pState, pLevel, pPos, pContext);
+    }
 
     public HopsCropBlock(Properties properties) {
         super(properties);
@@ -175,7 +189,7 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
 
     @Override
     protected void harvest(Level level, BlockPos pos, BlockState state) {
-        ItemStack drop = new ItemStack(this.asItem(), level.random.nextInt(1, 3));
+        ItemStack drop = new ItemStack(BrewchemyRegistry.Items.HOPS_ITEM.get(), level.random.nextInt(1, 3));
         level.setBlockAndUpdate(pos, this.getStateForAge(4).setValue(HAS_TRELLIS, true));
         ItemEntity entity = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), drop);
         level.addFreshEntity(entity);

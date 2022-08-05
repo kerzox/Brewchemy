@@ -102,12 +102,12 @@ public class MillStoneBlockEntity extends BrewchemyBlockEntity implements IServe
 
     @Override
     protected void write(CompoundTag pTag) {
-        this.inventory.serializeNBT();
+        pTag.put("itemHandler", this.inventory.serializeNBT());
     }
 
     @Override
     protected void read(CompoundTag pTag) {
-        this.inventory.deserializeNBT(pTag);
+        this.inventory.deserializeNBT(pTag.getCompound("itemHandler"));
     }
 
     @Override

@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class MouseOverComponent <T extends DefaultMenu<?>> extends WidgetComponent<T>  {
 
-    protected Component[] textToDisplay;
+    protected Component[] textToDisplay = new Component[]{Component.empty()};
 
     public MouseOverComponent(DefaultScreen<T> screen, int x, int y, int width, int height) {
         super(screen, x, y, width, height, null);
