@@ -106,7 +106,7 @@ public class FermentationBarrelScreen extends DefaultScreen<FermentationBarrelMe
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         fill(stack, getGuiLeft() + 108, (int) ((getGuiTop() + 69) - percentage), getGuiLeft() + 60, (getGuiTop() + 19), 0xFF8b8b8b);
-        RenderSystem.setShaderTexture(0, this.texture);
+        RenderSystem.setShaderTexture(0, texture);
         this.blit(stack, this.getGuiLeft() + 59,
                 this.getGuiTop() + 19,
                 176,

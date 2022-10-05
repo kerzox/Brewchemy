@@ -40,6 +40,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements IServerTickable, MenuProvider {
