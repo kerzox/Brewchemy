@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -22,8 +23,8 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,15 +73,21 @@ public class WarehouseBlockEntity extends BrewchemyBlockEntity implements IServe
 
     @Override
     public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
-        if (!pLevel.isClientSide) {
-            ItemStack stack = pPlayer.getItemInHand(pHand);
+        ItemStack stack = pPlayer.getItemInHand(pHand);
+        if (stack.isEmpty()) {
+            if (!level.isClientSide) pPlayer.sendSystemMessage(Component.literal("You have no items to store"));
+            return super.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit);
+        }
+
+        // attempt item transfer
+
+        if (!level.isClientSide) {
             if (warehouseInventory.hasValidSlot(stack)) {
                 ItemStack ret = warehouseInventory.addToFreeSlot(stack);
                 pPlayer.setItemInHand(pHand, ret);
-                return true;
             }
         }
-        return super.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit);
+        return true;
     }
 
     public int getStorageSlots() {
@@ -172,7 +179,7 @@ public class WarehouseBlockEntity extends BrewchemyBlockEntity implements IServe
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return warehouseInventory.getCapability(cap, side);
         }
         return super.getCapability(cap, side);

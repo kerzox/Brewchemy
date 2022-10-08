@@ -12,12 +12,16 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.FaceBakery;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -39,6 +43,23 @@ public class RenderingUtil {
                 0,
                 ModelData.EMPTY,
                 type);
+    }
+
+    public static void renderBlockModelWithColor(BlockState pState, PoseStack pPoseStack, MultiBufferSource pBufferSource, RenderType type, int brightness, float r, float g, float b) {
+        RenderShape rendershape = pState.getRenderShape();
+        if (rendershape != RenderShape.INVISIBLE) {
+            switch (rendershape) {
+                case MODEL:
+                    BakedModel bakedmodel = Minecraft.getInstance().getBlockRenderer().getBlockModel(pState);
+                    for (net.minecraft.client.renderer.RenderType rt : bakedmodel.getRenderTypes(pState, RandomSource.create(42), ModelData.EMPTY))
+                        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(pPoseStack.last(), pBufferSource.getBuffer(type != null ? type : net.minecraftforge.client.RenderTypeHelper.getEntityRenderType(rt, false)), pState, bakedmodel, r, g, b, brightness, 0, ModelData.EMPTY, rt);
+                    break;
+                case ENTITYBLOCK_ANIMATED:
+                    ItemStack stack = new ItemStack(pState.getBlock());
+                    net.minecraftforge.client.extensions.common.IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemTransforms.TransformType.NONE, pPoseStack, pBufferSource, brightness, 0);
+            }
+
+        }
     }
 
     public static void renderModelFromHit(PoseStack poseStack, Level level, BlockHitResult block, BlockPos pos, MultiBufferSource source, RenderType type, int brightness) {

@@ -139,7 +139,22 @@ public class CombinedFluidInventory implements IFluidHandler {
     @Override
     public FluidStack drain(int maxDrain, FluidAction action)
     {
-        return FluidStack.EMPTY;
+        int toDrain = maxDrain;
+        FluidStack ret = FluidStack.EMPTY;
+        for (int i = 0; i < slotCount; i++) {
+
+            if (getFluidInTank(i).getAmount() < maxDrain) {
+                toDrain = getFluidInTank(i).getAmount();
+            }
+
+            FluidStack resource = new FluidStack(getFluidInTank(i), toDrain);
+
+            ret = getHandlerFromSlot(i).drain(resource, action);
+            if (!ret.isEmpty()) {
+                return ret;
+            }
+        }
+        return ret;
     }
 
 

@@ -1,14 +1,12 @@
 package mod.kerzox.brewchemy.common.capabilities.item;
 
+import mod.kerzox.brewchemy.common.capabilities.IStrictSided;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
@@ -21,6 +19,7 @@ public class ItemStackInventory extends CombinedInvWrapper implements IStrictSid
 
     private Set<Direction> input = new HashSet<>();
     private Set<Direction> output = new HashSet<>();
+    private PlayerWrapper playerWrapper = new PlayerWrapper(this);
 
     private final LazyOptional<ItemStackInventory> handler = LazyOptional.of(() -> this);
 
@@ -41,10 +40,9 @@ public class ItemStackInventory extends CombinedInvWrapper implements IStrictSid
     }
 
     public <T> LazyOptional<T> getHandler(Direction side) {
-        if (getInputs().contains(side) && getOutputs().contains(side) || side == null) {
-            return handler.cast();
-        }
-        if (getInputs().contains(side)) return getInputHandler().getHandler();
+        if (side == null) return playerWrapper.getHandler().cast();
+        else if (getInputs().contains(side) && getOutputs().contains(side)) return handler.cast();
+        else if (getInputs().contains(side)) return getInputHandler().getHandler();
         else if (getOutputs().contains(side)) return getOutputHandler().getHandler();
         return LazyOptional.empty();
     }
@@ -58,34 +56,13 @@ public class ItemStackInventory extends CombinedInvWrapper implements IStrictSid
     }
 
     @Override
-    protected IItemHandlerModifiable getHandlerFromIndex(int index) {
+    public IItemHandlerModifiable getHandlerFromIndex(int index) {
         return super.getHandlerFromIndex(index);
     }
 
     @Override
-    protected int getSlotFromIndex(int slot, int index) {
+    public int getSlotFromIndex(int slot, int index) {
         return super.getSlotFromIndex(slot, index);
-    }
-
-    @Override
-    @NotNull
-    public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate)
-    {
-        int index = getIndexForSlot(slot);
-        IItemHandlerModifiable handler = getHandlerFromIndex(index);
-        slot = getSlotFromIndex(slot, index);
-        return handler.insertItem(slot, stack, simulate);
-    }
-
-    @Override
-    @NotNull
-    public ItemStack extractItem(int slot, int amount, boolean simulate)
-    {
-        int index = getIndexForSlot(slot);
-        IItemHandlerModifiable handler = getHandlerFromIndex(index);
-        slot = getSlotFromIndex(slot, index);
-        if (handler instanceof InputHandler inputHandler) return inputHandler.forceExtractItem(slot, amount, simulate);
-        return handler.extractItem(slot, amount, simulate);
     }
 
     @Override
@@ -196,6 +173,65 @@ public class ItemStackInventory extends CombinedInvWrapper implements IStrictSid
 
         public boolean isSlotFull(int slot) {
             return this.getStackInSlot(slot).getCount() == this.getSlotLimit(0);
+        }
+    }
+
+    public static class PlayerWrapper implements IItemHandler, IItemHandlerModifiable {
+
+        // basically a wrapper over the top of the inventory to allow players to insert and extract from either wrappers without their respective locks
+
+        private ItemStackInventory inventory;
+        private LazyOptional<PlayerWrapper> handler = LazyOptional.of(()-> this);
+
+        public PlayerWrapper(ItemStackInventory wrapper) {
+            this.inventory = wrapper;
+        }
+
+        @Override
+        public int getSlots() {
+            return inventory.slotCount;
+        }
+
+        @Override
+        public @NotNull ItemStack getStackInSlot(int slot) {
+            return inventory.getStackInSlot(slot);
+        }
+
+        @Override
+        public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+            int index = inventory.getIndexForSlot(slot);
+            IItemHandlerModifiable handler = inventory.getHandlerFromIndex(index);
+            slot = inventory.getSlotFromIndex(slot, index);
+            if (handler instanceof OutputHandler outputHandler) return outputHandler.forceInsertItem(slot, stack, simulate);
+            return handler.insertItem(slot, stack, simulate);
+        }
+
+        @Override
+        public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
+            int index = inventory.getIndexForSlot(slot);
+            IItemHandlerModifiable handler = inventory.getHandlerFromIndex(index);
+            slot = inventory.getSlotFromIndex(slot, index);
+            if (handler instanceof InputHandler inputHandler) return inputHandler.forceExtractItem(slot, amount, simulate);
+            return handler.extractItem(slot, amount, simulate);
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return inventory.getSlotLimit(slot);
+        }
+
+        @Override
+        public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+            return inventory.isItemValid(slot, stack);
+        }
+
+        public LazyOptional<PlayerWrapper> getHandler() {
+            return handler;
+        }
+
+        @Override
+        public void setStackInSlot(int slot, @NotNull ItemStack stack) {
+            inventory.setStackInSlot(slot, stack);
         }
     }
 

@@ -124,6 +124,21 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
+
+    maven {
+        // location of the maven that hosts JEI files
+        name "Progwml6 maven"
+        url "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        name 'Modmaven'
+        url 'https://modmaven.dev/'
+        content {
+            includeGroup 'appeng'
+            includeGroup 'mekanism'
+
+        }
+    }
 }
 
 dependencies {
@@ -132,19 +147,20 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.19.2-43.1.27'
 
-    // Real mod deobf dependency examples - these get remapped to your current mappings
-    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
-    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
-    // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
+    compileOnly "mekanism:Mekanism:${mekanism_version}:api"
 
-    // Examples using mod jars from ./libs
-    // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
+    runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}")// core
+    runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}:additions")// Mekanism: Additions
+    runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}:generators")// Mekanism: Generators
+    runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}:tools")// Mekanism: Tools
 
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
+
+
+    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
 }
-
 // Example for how to get properties into the manifest for reading at runtime.
 jar {
     manifest {

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "invisible=true": {
+      "model": "brewchemy:block/invisible_model"
+    },
+    "invisible=false": {
+      "model": "brewchemy:block/warehouse"
+    }
+  }
+}

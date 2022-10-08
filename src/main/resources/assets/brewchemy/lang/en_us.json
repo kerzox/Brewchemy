@@ -9,6 +9,7 @@
   "block.brewchemy.wooden_barrel_block": "Fermentation Barrel",
   "block.brewchemy.hops_crop": "Hop seeds",
   "block.brewchemy.barley_crop": "Barley seeds",
+  "block.brewchemy.warehouse_block": "Storage Warehouse",
 
   "item.brewchemy.barley_item": "Barley",
   "item.brewchemy.soaked_barley_item": "Soaked Barley",
@@ -19,6 +20,7 @@
   "item.brewchemy.hops_item": "Hops",
   "item.brewchemy.pint_glass_item": "Pint Glass",
   "item.brewchemy.wort_fluid_bucket": "Wort Bucket",
+  "item.brewchemy.soft_mallet": "Soft Mallet",
 
   "fluid_type.brewchemy.wort_fluid": "Wort",
   "fluid_type.brewchemy.beer_fluid": "Beer",

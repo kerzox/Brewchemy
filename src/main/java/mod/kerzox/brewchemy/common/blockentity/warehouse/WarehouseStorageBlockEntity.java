@@ -59,12 +59,12 @@ public class WarehouseStorageBlockEntity extends BrewchemyBlockEntity {
 
     @Override
     public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
-        if (!pLevel.isClientSide && pHand == InteractionHand.MAIN_HAND) {
+        if (pHand == InteractionHand.MAIN_HAND) {
+            if (level.isClientSide) return true;
             if (getWarehouse() == null) return false;
             pPlayer.addItem(getWarehouse().getWarehouseInventory().extractItem(getWarehouse().getWarehouseInventory().getIndexFromPos(pPos), pPlayer.isShiftKeyDown() ? 64 : 1, false));
             syncBlockEntity();
             return true;
-
         }
         return false;
     }

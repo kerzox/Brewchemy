@@ -1,9 +1,11 @@
 package mod.kerzox.brewchemy.common.block.base;
 
+import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.common.blockentity.WoodenBarrelBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.util.IClientTickable;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
+import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -47,18 +49,14 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
 
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+        if (pPlayer.getItemInHand(pHand).getItem() == BrewchemyRegistry.Items.SOFT_MALLET.get() && pState.getBlock() != BrewchemyRegistry.Blocks.WAREHOUSE_BLOCK.get()) {
+            return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
+        }
         if (FluidUtil.getFluidHandler(pPlayer.getItemInHand(pHand)).isPresent()) {
             if (!pLevel.isClientSide) {
-//                if (pLevel.getBlockEntity(pPos) instanceof WoodenBarrelBlockEntity barrel) {
-//                    if (barrel.tryMergeFluid(pLevel, pPlayer, pHand, pHit)) {
-//                        return InteractionResult.SUCCESS;
-//                    }
-//                } else {
-                if (FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pPos, pHit.getDirection())) {
-                    return InteractionResult.SUCCESS;
-                }
-
+                FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pHit.getBlockPos(), pHit.getDirection());
             }
+            return InteractionResult.SUCCESS;
         }
         if (pLevel.getBlockEntity(pPos) instanceof BrewchemyBlockEntity onClick && pHand == InteractionHand.MAIN_HAND) {
             if (onClick.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit)) {

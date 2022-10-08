@@ -16,6 +16,7 @@ import mod.kerzox.brewchemy.common.effects.IntoxicatedEffect;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluidType;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyLiquidBlock;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
+import mod.kerzox.brewchemy.common.item.SoftMalletUtilityItem;
 import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleType;
@@ -87,6 +88,13 @@ public class BrewchemyRegistry {
 //        Particles.init();
     }
 
+    public static final CreativeModeTab BREWCHEMY_TAB = new CreativeModeTab("brewchemy") {
+        @Override
+        public ItemStack makeIcon() {
+            return new ItemStack(Items.PINT_GLASS.get());
+        }
+    };
+
     public static class Particles {
 
         public static void init() {
@@ -153,15 +161,15 @@ public class BrewchemyRegistry {
         public static void init() {
         }
 
-        public static final RegistryObject<BrewchemyItem> HOPS_ITEM = ITEMS.register("hops_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
-        public static final RegistryObject<BrewchemyItem> BARLEY_ITEM = ITEMS.register("barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
-        public static final RegistryObject<BrewchemyItem> SOAKED_BARLEY_ITEM = ITEMS.register("soaked_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
-        //public static final RegistryObject<BrewchemyItem> GERMINATED_BARLEY_ITEM = ITEMS.register("germinated_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
-        public static final RegistryObject<BrewchemyItem> MALTED_BARLEY_ITEM = ITEMS.register("malted_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
-        public static final RegistryObject<BrewchemyItem> MILLED_BARLEY_ITEM = ITEMS.register("milled_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
-        public static final RegistryObject<BrewchemyItem> BREWERS_YEAST = ITEMS.register("brewers_yeast_item", () -> new BrewchemyItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
-        public static final RegistryObject<PintGlassItem> PINT_GLASS = ITEMS.register("pint_glass_item", () -> new PintGlassItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).stacksTo(1)));
-
+        public static final RegistryObject<BrewchemyItem> HOPS_ITEM = ITEMS.register("hops_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
+        public static final RegistryObject<BrewchemyItem> BARLEY_ITEM = ITEMS.register("barley_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
+        public static final RegistryObject<BrewchemyItem> SOAKED_BARLEY_ITEM = ITEMS.register("soaked_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
+        //public static final RegistryObject<BrewchemyItem> GERMINATED_BARLEY_ITEM = ITEMS.register("germinated_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
+        public static final RegistryObject<BrewchemyItem> MALTED_BARLEY_ITEM = ITEMS.register("malted_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
+        public static final RegistryObject<BrewchemyItem> MILLED_BARLEY_ITEM = ITEMS.register("milled_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
+        public static final RegistryObject<BrewchemyItem> BREWERS_YEAST = ITEMS.register("brewers_yeast_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
+        public static final RegistryObject<PintGlassItem> PINT_GLASS = ITEMS.register("pint_glass_item", () -> new PintGlassItem(new Item.Properties().tab(BREWCHEMY_TAB).stacksTo(1)));
+        public static final RegistryObject<SoftMalletUtilityItem> SOFT_MALLET = ITEMS.register("soft_mallet", () -> new SoftMalletUtilityItem(new Item.Properties().tab(BREWCHEMY_TAB).stacksTo(1)));
     }
 
     public static final class Blocks {
@@ -171,10 +179,10 @@ public class BrewchemyRegistry {
 
         public static final makeBlock<BrewchemyInvisibleBlock> INVISIBLE_BLOCK = makeBlock.build("invisible_block", BrewchemyInvisibleBlock::new, BlockBehaviour.Properties.of(Material.GLASS).noCollission().noLootTable(), false);
         public static final makeBlock<BrewchemyEntityBlock<MillStoneBlockEntity>> MILL_STONE_BLOCK = makeBlock.build("millstone_block", p -> new BrewchemyEntityBlock<>(MILL_STONE.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(1.5F), true);
-        public static final makeBlock<BarleyCropBlock> BARLEY_CROP_BLOCK = makeBlock.build("barley_crop", BarleyCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
-        public static final makeBlock<HopsCropBlock> HOPS_CROP_BLOCK = makeBlock.build("hops_crop", HopsCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT), true);
+        public static final makeBlock<BarleyCropBlock> BARLEY_CROP_BLOCK = makeBlock.build("barley_crop", BarleyCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.CROP), true);
+        public static final makeBlock<HopsCropBlock> HOPS_CROP_BLOCK = makeBlock.build("hops_crop", HopsCropBlock::new, BlockBehaviour.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.CROP), true);
         //public static final makeBlock<SupportStickBlock> SUPPORT_STICK_BLOCK = makeBlock.build("support_stick_block", SupportStickBlock::new, BlockBehaviour.Properties.of(Material.WOOD), true);
-        public static final makeBlock<RopeBlock> ROPE_BLOCK = makeBlock.buildCustomSuppliedItem("rope_block", RopeBlock::new, BlockBehaviour.Properties.of(Material.AIR).sound(SoundType.WOOL), () -> new RopeBlock.Item(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+        public static final makeBlock<RopeBlock> ROPE_BLOCK = makeBlock.buildCustomSuppliedItem("rope_block", RopeBlock::new, BlockBehaviour.Properties.of(Material.AIR).sound(SoundType.WOOL), () -> new RopeBlock.Item(new Item.Properties().tab(BREWCHEMY_TAB)));
         public static final makeBlock<RopeTiedFenceBlock> ROPE_FENCE_BLOCK = makeBlock.build("rope_fence_block", RopeTiedFenceBlock::new, BlockBehaviour.Properties.of(Material.WOOD).strength(1F), false);
         public static final makeBlock<FermentsJarBlock> FERMENTS_JAR_BLOCK = makeBlock.build("ferments_jar_block", FermentsJarBlock::new, BlockBehaviour.Properties.of(Material.GLASS).strength(0.5F), true);
         public static final makeBlock<MillstoneCrankBlock> MILLSTONE_CRANK_BLOCK = makeBlock.build("millstone_crank_block", MillstoneCrankBlock::new, BlockBehaviour.Properties.of(Material.METAL).noCollission().requiresCorrectToolForDrops().strength(1.5F), true);
@@ -182,7 +190,7 @@ public class BrewchemyRegistry {
         public static final makeBlock<FluidBarrelBlock<WoodenBarrelBlockEntity>> WOODEN_BARREL_BLOCK = makeBlock.build("wooden_barrel_block", p -> new FluidBarrelBlock<>(WOODEN_BARREL.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(1.0F), true);
         public static final makeBlock<BoilKettleBlock> BOIL_KETTLE_BLOCK = makeBlock.build("boil_kettle_block", p -> new BoilKettleBlock(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(3F), true);
         public static final makeBlock<BoilKettleBlock.BoilKettleTop> BOIL_KETTLE_TOP_BLOCK = makeBlock.build("boil_kettle_top_block", BoilKettleBlock.BoilKettleTop::new, BlockBehaviour.Properties.of(Material.GLASS).noCollission().noLootTable().requiresCorrectToolForDrops().strength(1.5F), false);
-        public static final makeBlock<WarehouseBlock> WAREHOUSE_BLOCK = makeBlock.buildCustomSuppliedItem("warehouse_block",  p -> new WarehouseBlock(WAREHOUSE.getType(), p), BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F), () -> new WarehouseBlock.Item(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+        public static final makeBlock<WarehouseBlock> WAREHOUSE_BLOCK = makeBlock.buildCustomSuppliedItem("warehouse_block",  p -> new WarehouseBlock(WAREHOUSE.getType(), p), BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F), () -> new WarehouseBlock.Item(new Item.Properties().tab(BREWCHEMY_TAB)));
         public static final makeBlock<WarehouseBlock.WarehouseStorageBlock> WAREHOUSE_STORAGE_BLOCK = makeBlock.build("warehouse_storage_block", WarehouseBlock.WarehouseStorageBlock::new, BlockBehaviour.Properties.of(Material.GLASS).strength(-1.0F, 3600000.0F).noLootTable(), false);
 
 
@@ -203,7 +211,7 @@ public class BrewchemyRegistry {
             public static <T extends Block> makeBlock<T> build(String name, Function<BlockBehaviour.Properties, T> block, BlockBehaviour.Properties prop, boolean asItem) {
                 RegistryObject<T> ret = BLOCKS.register(name, () -> block.apply(prop));
                 if (asItem)
-                    ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS)));
+                    ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties().tab(BREWCHEMY_TAB)));
                 return new makeBlock<>(name, ret);
             }
 
@@ -335,7 +343,7 @@ public class BrewchemyRegistry {
                         () -> new BucketItem(this.fluid, new Item.Properties()
                                 .craftRemainder(net.minecraft.world.item.Items.BUCKET)
                                 .stacksTo(1)
-                                .tab(CreativeModeTab.TAB_MISC)));
+                                .tab(BREWCHEMY_TAB)));
                 return bucket;
             }
 

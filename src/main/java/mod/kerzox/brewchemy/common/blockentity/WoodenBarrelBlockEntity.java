@@ -5,6 +5,7 @@ import mod.kerzox.brewchemy.client.gui.menu.FermentationBarrelMenu;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SidedMultifluidTank;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
+import mod.kerzox.brewchemy.common.capabilities.utility.IUtilityItem;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
 import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
@@ -73,12 +75,37 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
     public void onServer() {
         ItemStack item = this.inventory.getStackFromInputHandler(1);
         if (!item.isEmpty()) {
-            FluidActionResult result = FluidUtil.tryFillContainer(item, this.fluidTank.getOutputHandler().getStorageTank(0), 1000, null, true);
+            FluidActionResult result = FluidUtil.tryEmptyContainer(item, this.fluidTank.getInputHandler().getStorageTank(0), 1000, null, false);
             if (result.success) {
-                this.inventory.getOutputHandler().setStackInSlot(0, result.getResult().copy());
-                item.shrink(1);
+                if (this.inventory.getOutputHandler().forceInsertItem(0, result.getResult(), true).isEmpty()) {
+                    FluidActionResult doEmpty = FluidUtil.tryEmptyContainer(item, this.fluidTank.getInputHandler().getStorageTank(0), 1000, null, true);
+                    item.shrink(1);
+                    this.inventory.getOutputHandler().forceInsertItem(0, doEmpty.getResult(), false);
+                }
+                return;
+            }
+            FluidActionResult result1 = FluidUtil.tryFillContainer(item, this.fluidTank.getOutputHandler().getStorageTank(0), 1000, null, false);
+            if (result1.success) {
+                if (this.inventory.getOutputHandler().forceInsertItem(0, result1.getResult(), true).isEmpty()) {
+                    FluidActionResult doFillFromOutput = FluidUtil.tryFillContainer(item, this.fluidTank.getOutputHandler().getStorageTank(0), 1000, null, true);
+                    item.shrink(1);
+                    this.inventory.getOutputHandler().forceInsertItem(0, doFillFromOutput.getResult(), false);
+                }
+                return;
+            }
+            if (!running) {
+                FluidActionResult result2 = FluidUtil.tryFillContainer(item, this.fluidTank.getInputHandler().getStorageTank(0), 1000, null, false);
+                if (result2.success) {
+                    if (this.inventory.getOutputHandler().forceInsertItem(0, result2.getResult(), true).isEmpty()) {
+                        FluidActionResult doFillFromInput = FluidUtil.tryFillContainer(item, this.fluidTank.getInputHandler().getStorageTank(0), 1000, null, true);
+                        item.shrink(1);
+                        this.inventory.getOutputHandler().forceInsertItem(0, doFillFromInput.getResult(), false);
+                    }
+                    return;
+                }
             }
         }
+
         if (!blockFermentation) {
             if (recipeInventoryWrapper == null) {
                 ItemStackHandler stackHandler = new ItemStackHandler(1);
@@ -105,7 +132,7 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
         FluidStack input = this.fluidTank.getFluidInTank(0);
         ItemStack catalyst = inventory.getStackFromInputHandler(0);
         int recipeAmount = recipe.getCatalystIngredient().getItems()[0].getCount();
-        float amountNeeded = (((float)recipeAmount * input.getAmount()) / recipe.getFermentationFluid().getAmountFromIngredient(input));
+        float amountNeeded = (((float) recipeAmount * input.getAmount()) / recipe.getFermentationFluid().getAmountFromIngredient(input));
         if (result.isEmpty()) return;
 
         if (!running) {
@@ -188,10 +215,10 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return inventory.getHandler(side);
         }
-        if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.FLUID_HANDLER) {
             return fluidTank.getHandler(side);
         }
         return super.getCapability(cap, side);

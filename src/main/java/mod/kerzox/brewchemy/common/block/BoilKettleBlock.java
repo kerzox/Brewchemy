@@ -32,6 +32,7 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -215,6 +216,15 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
 
     }
 
+    public void playerWillDestroy(Level pLevel, BlockPos pPos, BlockState pState, Player pPlayer) {
+        if (!pLevel.isClientSide && pPlayer.isCreative()) {
+            if (pLevel.getBlockState(pPos.above()).getBlock() instanceof BoilKettleTop) {
+                pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
+            }
+        }
+        super.playerWillDestroy(pLevel, pPos, pState, pPlayer);
+    }
+
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return isOpened(pState) ? shapeLidOpen(pState.getValue(HorizontalDirectionalBlock.FACING)) : shapeLidClosed(pState.getValue(HorizontalDirectionalBlock.FACING));
@@ -233,10 +243,19 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
             }
             return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
         }
+//
+//        @Override
+//        public boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+//            return pLevel.getBlockState(pPos.below()).getBlock() == BrewchemyRegistry.Blocks.BOIL_KETTLE_BLOCK.get();
+//        }
 
-        @Override
-        public boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
-            return pLevel.getBlockState(pPos.below()).getBlock() == BrewchemyRegistry.Blocks.BOIL_KETTLE_BLOCK.get();
+        public void playerWillDestroy(Level pLevel, BlockPos pPos, BlockState pState, Player pPlayer) {
+            if (!pLevel.isClientSide && pPlayer.isCreative()) {
+                if (pLevel.getBlockState(pPos.below()).getBlock() instanceof BoilKettleBlock) {
+                    pLevel.setBlockAndUpdate(pPos.below(), Blocks.AIR.defaultBlockState());
+                }
+            }
+            super.playerWillDestroy(pLevel, pPos, pState, pPlayer);
         }
 
         @Override
@@ -355,15 +374,7 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
 
         @Override
         public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
-            ResourceLocation resourcelocation = BrewchemyRegistry.Blocks.BOIL_KETTLE_BLOCK.get().getLootTable();
-            if (resourcelocation == BuiltInLootTables.EMPTY) {
-                return Collections.emptyList();
-            } else {
-                LootContext lootcontext = pBuilder.withParameter(LootContextParams.BLOCK_STATE, pState).create(LootContextParamSets.BLOCK);
-                ServerLevel serverlevel = lootcontext.getLevel();
-                LootTable loottable = serverlevel.getServer().getLootTables().get(resourcelocation);
-                return loottable.getRandomItems(lootcontext);
-            }
+            return super.getDrops(pState, pBuilder);
         }
 
         @Override

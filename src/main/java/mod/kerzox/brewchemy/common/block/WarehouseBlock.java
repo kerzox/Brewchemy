@@ -8,6 +8,7 @@ import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseStorageBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.item.warehouse.WarehouseSlot;
+import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
@@ -18,6 +19,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -30,6 +32,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -37,6 +40,8 @@ import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
+
+import static mod.kerzox.brewchemy.common.block.rope.RopeBlock.HAS_TRELLIS;
 
 public class WarehouseBlock extends BrewchemyEntityBlock<WarehouseBlockEntity> {
 
@@ -52,12 +57,30 @@ public class WarehouseBlock extends BrewchemyEntityBlock<WarehouseBlockEntity> {
     }
 
     @Override
+    public VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return shouldRenderInvisible(pState) ? Shapes.empty() : getShape(pState, pLevel, pPos, pContext);
+    }
+
+    @Override
+    public boolean propagatesSkylightDown(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+        return shouldRenderInvisible(pState);
+    }
+
+    @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        if (pContext.isHoldingItem(BrewchemyRegistry.Items.SOFT_MALLET.get())) {
+            return Shapes.block();
+        }
         return shouldRenderInvisible(pState) ? Shapes.empty() : Shapes.block();
     }
 
     public boolean shouldRenderInvisible(BlockState pState) {
         return pState.getValue(INVISIBLE);
+    }
+
+    public BlockState toggleInvisibility(BlockState state) {
+        if (shouldRenderInvisible(state)) return state.setValue(INVISIBLE, false);
+        return state.setValue(INVISIBLE, true);
     }
 
     @Override
@@ -78,6 +101,15 @@ public class WarehouseBlock extends BrewchemyEntityBlock<WarehouseBlockEntity> {
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext pContext) {
         return super.getStateForPlacement(pContext).setValue(HorizontalDirectionalBlock.FACING, pContext.getHorizontalDirection().getOpposite());
+    }
+
+    @Override
+    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+        if (pPlayer.getItemInHand(pHand).getItem() == BrewchemyRegistry.Items.SOFT_MALLET.get()) {
+            pLevel.setBlockAndUpdate(pPos, toggleInvisibility(pState));
+            return InteractionResult.CONSUME;
+        }
+        return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
     }
 
     @Override
@@ -142,6 +174,16 @@ public class WarehouseBlock extends BrewchemyEntityBlock<WarehouseBlockEntity> {
             return false;
         }
 
+        @Override
+        public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+            if (level.getBlockEntity(pos) instanceof WarehouseStorageBlockEntity warehouseStorageBlockEntity) {
+                if (warehouseStorageBlockEntity.getSlot() != null) {
+                    return new ItemStack(warehouseStorageBlockEntity.getSlot().getFullWarehouseItem().getItem());
+                }
+            }
+            return super.getCloneItemStack(state, target, level, pos, player);
+        }
+
         @Nullable
         @Override
         public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
@@ -151,6 +193,7 @@ public class WarehouseBlock extends BrewchemyEntityBlock<WarehouseBlockEntity> {
         @Override
         public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
             if (pLevel.getBlockEntity(pPos) instanceof BrewchemyBlockEntity onClick && pHand == InteractionHand.MAIN_HAND) {
+
                 if (onClick.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit)) {
                     return InteractionResult.SUCCESS;
                 }

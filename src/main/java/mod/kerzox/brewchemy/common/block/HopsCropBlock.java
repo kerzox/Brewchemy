@@ -71,6 +71,14 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
                 .setValue(HAS_TRELLIS, false));
     }
 
+    @Override
+    public void harvest(Level level, BlockPos pos, BlockState state) {
+        ItemStack drop = new ItemStack(BrewchemyRegistry.Items.HOPS_ITEM.get(), level.random.nextInt(1, 3));
+        level.setBlockAndUpdate(pos, this.getStateForAge(4).setValue(HAS_TRELLIS, true));
+        ItemEntity entity = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), drop);
+        level.addFreshEntity(entity);
+    }
+
     private boolean isSupported(BlockState state) {
         return state.getValue(HAS_TRELLIS);
     }
@@ -125,9 +133,7 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
         return currentShapeByGrowth[pState.getValue(this.getAgeProperty())];
     }
 
-    private boolean isFruiting(BlockState state) {
-        return getAge(state) == getMaxAge();
-    }
+
 
     @Override
     public int getMaxAge() {
@@ -187,24 +193,6 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
         }
     }
 
-    @Override
-    protected void harvest(Level level, BlockPos pos, BlockState state) {
-        ItemStack drop = new ItemStack(BrewchemyRegistry.Items.HOPS_ITEM.get(), level.random.nextInt(1, 3));
-        level.setBlockAndUpdate(pos, this.getStateForAge(4).setValue(HAS_TRELLIS, true));
-        ItemEntity entity = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), drop);
-        level.addFreshEntity(entity);
-    }
-
-    @Override
-    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (isFruiting(pState)) {
-            if (!pLevel.isClientSide) {
-                harvest(pLevel, pPos, pState);
-                return InteractionResult.SUCCESS;
-            }
-        }
-        return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
-    }
 
     private void growBine(BlockPos pos, Level pLevel) {
         pLevel.setBlockAndUpdate(pos, this.getStateForAge(2).setValue(HAS_TRELLIS, true));

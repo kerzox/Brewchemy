@@ -21,12 +21,19 @@ public class BarleyCropBlock extends BrewchemyCropBlock {
     public BarleyCropBlock(Properties properties) {
         super(properties);
     }
+
     @Override
-    protected void harvest(Level level, BlockPos pos, BlockState state) {
-        ItemStack drop = new ItemStack(BrewchemyRegistry.Items.BARLEY_ITEM.get() , level.random.nextInt(1, 3));
+    public void harvest(Level level, BlockPos pos, BlockState state) {
+        ItemStack seedDrop = new ItemStack(BrewchemyRegistry.Blocks.BARLEY_CROP_BLOCK.get(), level.random.nextInt(0, 2));
+        ItemStack itemDrop = new ItemStack(BrewchemyRegistry.Items.BARLEY_ITEM.get() , 1);
         level.setBlockAndUpdate(pos, this.defaultBlockState());
-        ItemEntity entity = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), drop);
-        level.addFreshEntity(entity);
+
+        ItemEntity item = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), itemDrop);
+        level.addFreshEntity(item);
+        if (!seedDrop.isEmpty()) {
+            ItemEntity seed = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), seedDrop);
+            level.addFreshEntity(seed);
+        }
     }
 
 }

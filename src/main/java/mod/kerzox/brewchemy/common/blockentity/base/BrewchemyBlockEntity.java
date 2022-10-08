@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.common.blockentity.base;
 
+import mod.kerzox.brewchemy.common.util.IUtilityInteractable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -15,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class BrewchemyBlockEntity extends BlockEntity {
+public abstract class BrewchemyBlockEntity extends BlockEntity implements IUtilityInteractable {
 
     public BrewchemyBlockEntity(BlockEntityType<?> pType, BlockPos pWorldPosition, BlockState pBlockState) {
         super(pType, pWorldPosition, pBlockState);

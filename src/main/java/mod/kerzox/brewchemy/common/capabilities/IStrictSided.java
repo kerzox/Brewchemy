@@ -1,4 +1,4 @@
-package mod.kerzox.brewchemy.common.capabilities.item;
+package mod.kerzox.brewchemy.common.capabilities;
 
 import net.minecraft.core.Direction;
 
@@ -32,4 +32,13 @@ public interface IStrictSided {
     default void removeOutput(Direction side) {
         getOutputs().remove(side);
     }
+
+    default boolean hasInput(Direction side) {
+        return getInputs().contains(side);
+    }
+
+    default boolean hasOutput(Direction side) {
+        return getOutputs().contains(side);
+    }
+
 }
