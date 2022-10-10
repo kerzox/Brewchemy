@@ -1,0 +1,12 @@
+{
+  "type": "brewchemy:fermentation_serializer",
+  "item_ingredient": {
+    "count": 1,
+    "item": "brewchemy:brewers_yeast_item",
+    "partial_match": true
+  },
+  "result": {
+    "amount": 5000,
+    "fluid": "brewchemy:beer_fluid"
+  }
+}

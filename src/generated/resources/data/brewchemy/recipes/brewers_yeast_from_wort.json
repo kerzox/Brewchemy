@@ -1,0 +1,12 @@
+{
+  "type": "brewchemy:fermentsjar_serializer",
+  "duration": 200,
+  "fluid_ingredient": {
+    "amount": 125,
+    "fluid": "brewchemy:wort_fluid"
+  },
+  "result": {
+    "count": 1,
+    "item": "brewchemy:brewers_yeast_item"
+  }
+}

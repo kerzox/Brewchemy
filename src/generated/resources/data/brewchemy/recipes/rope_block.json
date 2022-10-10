@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "S": {
+      "tag": "forge:string"
+    }
+  },
+  "pattern": [
+    " S ",
+    " S ",
+    " S "
+  ],
+  "result": {
+    "item": "brewchemy:rope_block"
+  }
+}

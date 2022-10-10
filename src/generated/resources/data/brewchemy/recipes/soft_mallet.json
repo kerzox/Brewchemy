@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "W": {
+      "tag": "minecraft:planks"
+    },
+    "s": {
+      "tag": "forge:rods"
+    }
+  },
+  "pattern": [
+    "WWW",
+    "WWW",
+    " s "
+  ],
+  "result": {
+    "item": "brewchemy:soft_mallet"
+  }
+}

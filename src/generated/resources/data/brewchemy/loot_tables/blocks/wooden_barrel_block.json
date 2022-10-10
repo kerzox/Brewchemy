@@ -1,0 +1,50 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_name",
+              "source": "block_entity"
+            },
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "itemHandler",
+                  "target": "BlockEntityTag.itemHandler"
+                },
+                {
+                  "op": "replace",
+                  "source": "fluidHandler",
+                  "target": "BlockEntityTag.fluidHandler"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "brewchemy:wooden_barrel_block"
+        }
+      ],
+      "functions": [
+        {
+          "type": "brewchemy:wooden_barrel_be",
+          "entries": [
+            {
+              "type": "minecraft:dynamic",
+              "name": "minecraft:contents"
+            }
+          ],
+          "function": "minecraft:set_contents"
+        }
+      ],
+      "name": "wooden_barrel",
+      "rolls": 1.0
+    }
+  ]
+}

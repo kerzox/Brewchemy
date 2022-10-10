@@ -1,0 +1,10 @@
+// 1.19.2	2022-10-08T22:19:27.7142513	LootTables
+ccba010d2b951816ae7d83dc5a2b3513a1c03bb3 data/brewchemy/loot_tables/blocks/barley_crop.json
+9e1d87356aa8e3424b388c52e143c7d38d00cc56 data/brewchemy/loot_tables/blocks/boil_kettle_block.json
+0439a1128462cf3e86a37d9432cdf32d5d609308 data/brewchemy/loot_tables/blocks/ferments_jar_block.json
+483ce330843a79e444b24d47319e100e5136bfc3 data/brewchemy/loot_tables/blocks/hops_crop.json
+25cf11cb47c96074ad6246aea3b2e0737cb3ffff data/brewchemy/loot_tables/blocks/millstone_block.json
+d277dc25177e5d21e4248bd6a6df262ba773eace data/brewchemy/loot_tables/blocks/millstone_crank_block.json
+68bfbe51e30f80f4bcfec05311be839e67aa8600 data/brewchemy/loot_tables/blocks/rope_block.json
+04ab70688e9d25f8e3b719782047dde09e35b393 data/brewchemy/loot_tables/blocks/warehouse_block.json
+96fe47459822c2b5da746681cbfc52d5d104586b data/brewchemy/loot_tables/blocks/wooden_barrel_block.json

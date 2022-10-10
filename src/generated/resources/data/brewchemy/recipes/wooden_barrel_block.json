@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "brewchemy",
+  "key": {
+    "i": {
+      "tag": "forge:ingots/iron"
+    },
+    "p": {
+      "tag": "minecraft:planks"
+    },
+    "s": {
+      "tag": "minecraft:slabs"
+    }
+  },
+  "pattern": [
+    "psp",
+    "pip",
+    "psp"
+  ],
+  "result": {
+    "item": "brewchemy:wooden_barrel_block"
+  }
+}

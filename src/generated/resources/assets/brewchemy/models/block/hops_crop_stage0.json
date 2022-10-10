@@ -1,0 +1,6 @@
+{
+  "parent": "brewchemy:block/brewchemycrops",
+  "textures": {
+    "crop": "brewchemy:block/hops_crop_stage0"
+  }
+}

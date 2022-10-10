@@ -1,0 +1,11 @@
+{
+  "values": [
+    "brewchemy:boil_kettle_block",
+    "brewchemy:boil_kettle_top_block",
+    "brewchemy:ferments_jar_block",
+    "brewchemy:millstone_block",
+    "brewchemy:millstone_crank_block",
+    "brewchemy:warehouse_block",
+    "brewchemy:wooden_barrel_block"
+  ]
+}

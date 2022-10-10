@@ -96,16 +96,21 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
             if (ropeBlockEntity.hasHorizontalConnections()) {
                 for (Direction value : Direction.values()) {
                     if (value.getAxis() != Direction.Axis.Y) {
-                        if (pLevel.getBlockEntity(pPos.relative(value)) instanceof RopeBlockEntity) {
+                        int stepsTowards = 1;
+                        while (pLevel.getBlockEntity(pPos.relative(value, stepsTowards)) instanceof RopeBlockEntity) {
                             int steps = 1;
-                            while (pLevel.getBlockEntity(pPos.relative(value).below(steps)) != null) {
+                            while (pLevel.getBlockEntity(pPos.relative(value, stepsTowards).below(steps)) != null) {
                                 steps++;
                             }
-                            if (pLevel.getBlockState(pPos.relative(value).below(steps)).getBlock() instanceof HopsCropBlock) {
+                            if (pLevel.getBlockState(pPos.relative(value, stepsTowards).below(steps)).getBlock() instanceof HopsCropBlock) {
                                 for (int i = 0; i < steps; i++) {
-                                    pLevel.destroyBlock(pPos.relative(value).below(i), true);
+                                    pLevel.destroyBlock(pPos.relative(value, stepsTowards).below(i), true);
+                                }
+                                for (int i = 0; i < stepsTowards; i++) {
+                                    pLevel.destroyBlock(pPos.relative(value, i), true);
                                 }
                             }
+                            stepsTowards++;
                         }
                     }
                 }
