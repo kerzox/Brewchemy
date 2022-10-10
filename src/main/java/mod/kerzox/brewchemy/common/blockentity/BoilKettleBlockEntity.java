@@ -69,7 +69,7 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
         tick++;
         calculateHeat();
         double x = getBlockPos().above().getX(), y = getBlockPos().above().getY(), z = getBlockPos().above().getZ();
-        List<Entity> entities = level.getEntitiesOfClass(Entity.class, new AABB(x, y, z, x, y +.5, z), EntitySelector.ENTITY_STILL_ALIVE);
+        List<Entity> entities = level.getEntitiesOfClass(Entity.class, new AABB(x, y, z, x + 1, y +.5, z + 1), EntitySelector.ENTITY_STILL_ALIVE);
         for (Entity entity : entities) {
             if (entity instanceof ItemEntity itemEntity) {
                 ItemStack stack = itemEntity.getItem().copy();
@@ -81,10 +81,10 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
         }
         Optional<BrewingRecipe> recipe = this.findValidRecipe(new RecipeInventoryWrapper(sidedFluidTank, inventory));
         recipe.ifPresent(this::doRecipe);
-        syncBlockEntity();
    }
 
     private void calculateHeat() {
+        int pastH = heat;
         if (heat < getHeatSource()) {
             heat++;
         } else {
@@ -93,6 +93,10 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
                     heat--;
                 }
             }
+        }
+
+        if (heat != pastH) {
+            syncBlockEntity();
         }
     }
 
@@ -108,7 +112,6 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
             duration = recipe.getDuration();
             running = true;
         }
-
         if (duration <= 0) {
             if (this.sidedFluidTank.getOutputHandler().getStorageTank(0).isFull()) return;
             for (CountSpecificIngredient cIngredient : recipe.getCIngredients()) {
@@ -131,6 +134,7 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
             running = false;
         }
         duration--;
+        syncBlockEntity();
     }
 
     @Override
@@ -206,13 +210,8 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
         return heat;
     }
 
-    public void onTopRemoved() {
-
-    }
-
     public void setStateChanged(boolean stateChanged) {
         this.stateChanged = stateChanged;
     }
-
 
 }

@@ -1,9 +1,14 @@
 package mod.kerzox.brewchemy.common.blockentity;
 
+import mod.kerzox.brewchemy.common.block.HopsCropBlock;
+import mod.kerzox.brewchemy.common.block.rope.RopeBlock;
 import mod.kerzox.brewchemy.common.block.rope.RopeConnections;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -23,6 +28,53 @@ public class RopeBlockEntity extends BrewchemyBlockEntity {
                 || state.getValue(SOUTH) == RopeConnections.CONNECTED;
     }
 
+    public static boolean isStable(Level level, BlockPos startingPos) {
+        RopeBlockEntity entity = findRope(level, startingPos);
+        if (entity == null) return false;
+        RopeBlockEntity topRope = entity.getTopMostRope();
+        if (!topRope.hasHorizontalConnections()) return false;
+        int fences = 0;
+
+        if (level.getBlockEntity(topRope.getBlockPos().west()) instanceof RopeTiedFenceBlockEntity fence) {
+            fences++;
+        }
+        if (level.getBlockEntity(topRope.getBlockPos().east()) instanceof RopeTiedFenceBlockEntity fence) {
+            fences++;
+        }
+        if (level.getBlockEntity(topRope.getBlockPos().north()) instanceof RopeTiedFenceBlockEntity fence) {
+            fences++;
+        }
+        if (level.getBlockEntity(topRope.getBlockPos().south()) instanceof RopeTiedFenceBlockEntity fence) {
+            fences++;
+        }
+
+        return fences >= 2;
+    }
+
+    public static RopeBlockEntity findRope(Level level, BlockPos pos) {
+        int steps = 1;
+        while (true) {
+            BlockEntity be = level.getBlockEntity(pos.above(steps));
+            if (be == null) {
+                if (!(level.getBlockState(pos).getBlock() instanceof HopsCropBlock hop)) {
+                    break;
+                }
+            }
+            if (be instanceof RopeBlockEntity ropeBlockEntity) {
+                return ropeBlockEntity;
+            }
+            steps++;
+        }
+        return null;
+    }
+
+    public RopeBlockEntity getTopMostRope() {
+        int steps = 0;
+        while (level.getBlockEntity(getBlockPos().above(steps)) instanceof RopeBlockEntity rope) {
+            steps++;
+        }
+        return (RopeBlockEntity) level.getBlockEntity(getBlockPos().above(steps - 1));
+    }
 
     public int getHeight() {
         int count;
@@ -42,5 +94,7 @@ public class RopeBlockEntity extends BrewchemyBlockEntity {
         return count;
 
     }
+
+
 
 }

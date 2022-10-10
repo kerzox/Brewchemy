@@ -49,7 +49,7 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
 
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (pPlayer.getItemInHand(pHand).getItem() == BrewchemyRegistry.Items.SOFT_MALLET.get() && pState.getBlock() != BrewchemyRegistry.Blocks.WAREHOUSE_BLOCK.get()) {
+        if (pPlayer.getMainHandItem().getItem() == BrewchemyRegistry.Items.SOFT_MALLET.get() && pState.getBlock() != BrewchemyRegistry.Blocks.WAREHOUSE_BLOCK.get()) {
             return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
         }
         if (FluidUtil.getFluidHandler(pPlayer.getItemInHand(pHand)).isPresent()) {

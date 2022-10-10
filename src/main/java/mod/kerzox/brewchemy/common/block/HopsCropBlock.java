@@ -22,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -99,18 +100,50 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
         /* TODO
             Hops must have upwards facing twine to grow as trellis. Needs light level higher than 10.
          */
-        if (!isSupported(pState)) return false;
-        if (!(pLevel.getBlockState(pPos.below()).is(Blocks.FARMLAND) || (pLevel.getBlockState(pPos.below()).is(this)))) {
-            return false;
+
+        BlockState below = pLevel.getBlockState(pPos.below());
+
+
+        // check if we are replacing rope
+        if (pLevel.getBlockEntity(pPos) instanceof RopeBlockEntity rope) {
+            if (rope.isRemoved()) return false;
+            RopeBlockEntity rope1 = rope.getTopMostRope();
+            if (rope1 == null) return false;
+            if (rope1.isRemoved()) return false;
+            if (!rope1.hasHorizontalConnections()) return false;
+            if (!(below.getBlock() == Blocks.FARMLAND || below.getBlock() == BrewchemyRegistry.Blocks.HOPS_CROP_BLOCK.get())) return false;
+        } else {
+            if (below.getBlock() instanceof FarmBlock) {
+                if (pLevel.getBlockState(pPos).getBlock() instanceof HopsCropBlock crop) {
+                    if (!pLevel.getBlockState(pPos).getValue(HAS_TRELLIS)) {
+                        return false;
+                    }
+                } else return false;
+            } else {
+                if (!below.is(this)) {
+                    return false;
+                }
+            }
         }
         return true;
     }
 
+
+//    @Override
+//    public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
+//        if (!RopeBlockEntity.isStable(pLevel, pPos)) {
+//            pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
+//        }
+//        super.neighborChanged(pState, pLevel, pPos, pBlock, pFromPos, pIsMoving);
+//    }
+
     @Override
     public void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
         if (!pLevel.isClientSide) {
-            if (pLevel.getBlockState(pPos).getBlock() instanceof RopeBlock) {
-                pState.setValue(HAS_TRELLIS, true);
+            if (pLevel.getBlockEntity(pPos) instanceof RopeBlockEntity ropeBlockEntity) {
+                if (ropeBlockEntity.getTopMostRope().hasHorizontalConnections()) {
+                    pState.setValue(HAS_TRELLIS, true);
+                }
             }
         }
         super.onPlace(pState, pLevel, pPos, pOldState, pIsMoving);
@@ -132,8 +165,6 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return currentShapeByGrowth[pState.getValue(this.getAgeProperty())];
     }
-
-
 
     @Override
     public int getMaxAge() {

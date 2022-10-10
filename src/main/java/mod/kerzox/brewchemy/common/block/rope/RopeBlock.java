@@ -1,7 +1,9 @@
 package mod.kerzox.brewchemy.common.block.rope;
 
+import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.common.block.HopsCropBlock;
 import mod.kerzox.brewchemy.common.block.RopeTiedFenceBlock;
+import mod.kerzox.brewchemy.common.block.base.BrewchemyCropBlock;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.RopeBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.RopeTiedFenceBlockEntity;
@@ -11,13 +13,18 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -79,6 +86,38 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
         initializeShapeCache();
     }
 
+    @Override
+    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        if (!(pNewState.getBlock() instanceof AirBlock)) {
+            super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+            return;
+        }
+        if (pLevel.getBlockEntity(pPos) instanceof RopeBlockEntity ropeBlockEntity) {
+            if (ropeBlockEntity.hasHorizontalConnections()) {
+                for (Direction value : Direction.values()) {
+                    if (value.getAxis() != Direction.Axis.Y) {
+                        if (pLevel.getBlockEntity(pPos.relative(value)) instanceof RopeBlockEntity) {
+                            int steps = 1;
+                            while (pLevel.getBlockEntity(pPos.relative(value).below(steps)) != null) {
+                                steps++;
+                            }
+                            if (pLevel.getBlockState(pPos.relative(value).below(steps)).getBlock() instanceof HopsCropBlock) {
+                                for (int i = 0; i < steps; i++) {
+                                    pLevel.destroyBlock(pPos.relative(value).below(i), true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        int steps = 1;
+        while (pLevel.getBlockState(pPos.below(steps)).getBlock() instanceof HopsCropBlock || pLevel.getBlockState(pPos.below(steps)).getBlock() instanceof RopeBlock) {
+            pLevel.destroyBlock(pPos.below(steps), true);
+            steps++;
+        }
+        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+    }
 
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
@@ -95,6 +134,7 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
         BlockState state = super.getStateForPlacement(pContext);
         return attachValidToNeighbours(state, pContext.getLevel(), pContext.getClickedPos(), false);
     }
+
 
     @Override
     public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState, LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pNeighborPos) {

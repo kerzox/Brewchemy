@@ -48,6 +48,11 @@ public abstract class BrewchemyBlockEntity extends BlockEntity implements IUtili
         read(pTag);
     }
 
+    @Override
+    public void update() {
+        syncBlockEntity();
+    }
+
     /** DON"T OVERRIDE THIS USE WRITE
      *
      * @param pTag

@@ -19,11 +19,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -87,7 +85,7 @@ public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements ISer
         }
         if (duration <= 0) {
             if (this.inventory.isSlotFull(OUTPUT_SLOT)) return;
-            this.inventory.insertItem(OUTPUT_SLOT, result, false);
+            this.inventory.forceInsertItem(OUTPUT_SLOT, result, false);
             FluidStack fluidStack = this.tank.getFluid();
             for (FluidIngredient fluidIngredient : r.getFluidIngredients()) {
                 if (fluidIngredient.test(fluidStack)) {
@@ -113,10 +111,10 @@ public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements ISer
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.FLUID_HANDLER) {
             return fluidHandler.cast();
         }
-        else if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        else if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return itemHandler.cast();
         }
         return super.getCapability(cap, side);

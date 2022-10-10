@@ -6,5 +6,6 @@ import net.minecraftforge.common.util.LazyOptional;
 
 public interface IUtilityInteractable {
 
+    void update();
 
 }

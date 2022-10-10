@@ -1,10 +1,13 @@
 package mod.kerzox.brewchemy.common.util;
 
 import mod.kerzox.brewchemy.common.block.rope.RopeConnections;
+import mod.kerzox.brewchemy.common.blockentity.RopeBlockEntity;
+import mod.kerzox.brewchemy.common.blockentity.RopeTiedFenceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 
@@ -18,6 +21,8 @@ public interface IRopeConnectable {
 
     boolean canConnectTo(BlockState state, Direction connectingFrom);
 
+
+
     default BlockState attachValidToNeighbours(BlockState ourState, LevelAccessor level, BlockPos pos, boolean ignoreVertical) {
         HashMap<Direction, RopeConnections> newSides = new HashMap<>(Map.of(
                 Direction.NORTH, RopeConnections.NONE,
@@ -29,8 +34,17 @@ public interface IRopeConnectable {
         for (Direction direction : Direction.values()) {
             BlockState state = level.getBlockState(pos.relative(direction));
             if (state.getBlock() instanceof IRopeConnectable connectable) {
-                if (connectable.canConnectTo(ourState, direction.getOpposite()))
-                newSides.put(direction, RopeConnections.CONNECTED);
+                if (connectable.canConnectTo(ourState, direction.getOpposite())) {
+                    if (direction.getAxis() != Direction.Axis.Y) {
+                        if (level.getBlockEntity(pos.relative(direction)) instanceof RopeBlockEntity rope) {
+                            if (rope.hasHorizontalConnections()) {
+                                newSides.put(direction, RopeConnections.CONNECTED);
+                            }
+                        } else if (level.getBlockEntity(pos.relative(direction)) instanceof RopeTiedFenceBlockEntity) {
+                            newSides.put(direction, RopeConnections.CONNECTED);
+                        }
+                    } else newSides.put(direction, RopeConnections.CONNECTED);
+                }
             }
         }
 
@@ -65,10 +79,21 @@ public interface IRopeConnectable {
                 Direction.WEST, RopeConnections.NONE,
                 Direction.UP, RopeConnections.NONE,
                 Direction.DOWN, RopeConnections.NONE));
+
         for (Direction direction : Direction.values()) {
             BlockState state = level.getBlockState(pos.relative(direction));
             if (state.getBlock() instanceof IRopeConnectable connectable) {
-                newSides.put(direction, RopeConnections.CONNECTED);
+                if (connectable.canConnectTo(ourState, direction.getOpposite())) {
+                    if (direction.getAxis() != Direction.Axis.Y) {
+                        if (level.getBlockEntity(pos.relative(direction)) instanceof RopeBlockEntity rope) {
+                            if (rope.hasHorizontalConnections()) {
+                                newSides.put(direction, RopeConnections.CONNECTED);
+                            }
+                        } else if (level.getBlockEntity(pos.relative(direction)) instanceof RopeTiedFenceBlockEntity) {
+                            newSides.put(direction, RopeConnections.CONNECTED);
+                        }
+                    } else newSides.put(direction, RopeConnections.CONNECTED);
+                }
             }
         }
 

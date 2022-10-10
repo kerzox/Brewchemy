@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,53 +43,50 @@ public class SoftMalletUtilityItem extends BrewchemyItem {
 
         if (capability.isPresent()) {
             UtilityHandler handler = (UtilityHandler) capability.get();
-            if (level.getBlockEntity(pos) != null) {
-                level.getBlockEntity(pos).getCapability(handler.getCurrent()).ifPresent(blockCapability -> {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be != null) {
+                be.getCapability(handler.getCurrent()).ifPresent(blockCapability -> {
                     if (blockCapability instanceof IStrictSided strictSided) {
                         if (player.isShiftKeyDown()) {
-                            if (handler.getUseAmount() == 0) {
-                                strictSided.removeOutput(clicked.getOpposite());
-                                strictSided.addInput(clicked.getOpposite());
-                                player.sendSystemMessage(Component.literal("Added input to side: " + clicked.getOpposite()));
-                                handler.add();
-                            } else if (handler.getUseAmount() == 1) {
-                                strictSided.addOutput(clicked.getOpposite());
-                                strictSided.removeInput(clicked.getOpposite());
-                                player.sendSystemMessage(Component.literal("Added Output to side: " + clicked.getOpposite()));
-                                handler.add();
-                            } else if (handler.getUseAmount() == 2) {
-                                strictSided.addInput(clicked.getOpposite());
-                                strictSided.addOutput(clicked.getOpposite());
-                                player.sendSystemMessage(Component.literal("Added Input/Output to side: " + clicked.getOpposite()));
-                                handler.add();
+                            Direction opp = clicked.getOpposite();
+                            if (strictSided.hasOutput(opp) && strictSided.hasInput(opp)) {
+                                strictSided.removeInput(opp);
+                                strictSided.removeOutput(opp);
+                                player.sendSystemMessage(Component.literal("Removed all connections to side: " + opp));
+                            } else if (strictSided.hasInput(opp)) {
+                                strictSided.addOutput(opp);
+                                strictSided.removeInput(opp);
+                                player.sendSystemMessage(Component.literal("Added Output to side: " + opp));
+                            } else if (strictSided.hasOutput(opp)) {
+                                strictSided.addInput(opp);
+                                strictSided.addOutput(opp);
+                                player.sendSystemMessage(Component.literal("Added Input/Output to side: " + opp));
                             } else {
-                                strictSided.removeOutput(clicked.getOpposite());
-                                strictSided.removeInput(clicked.getOpposite());
-                                player.sendSystemMessage(Component.literal("Removed all connections to side: " + clicked.getOpposite()));
-                                handler.add();
+                                strictSided.addInput(opp);
+                                strictSided.removeOutput(opp);
+                                player.sendSystemMessage(Component.literal("Added input to side: " + opp));
                             }
                         } else {
-                            if (handler.getUseAmount() == 0) {
+                            if (strictSided.hasOutput(clicked) && strictSided.hasInput(clicked)) {
+                                strictSided.removeInput(clicked);
                                 strictSided.removeOutput(clicked);
-                                strictSided.addInput(clicked);
-                                player.sendSystemMessage(Component.literal("Added input to side: " + clicked));
-                                handler.add();
-                            } else if (handler.getUseAmount() == 1) {
+                                player.sendSystemMessage(Component.literal("Removed all connections to side: " + clicked));
+                            } else if (strictSided.hasInput(clicked)) {
                                 strictSided.addOutput(clicked);
                                 strictSided.removeInput(clicked);
                                 player.sendSystemMessage(Component.literal("Added Output to side: " + clicked));
-                                handler.add();
-                            } else if (handler.getUseAmount() == 2) {
+                            } else if (strictSided.hasOutput(clicked)) {
                                 strictSided.addInput(clicked);
                                 strictSided.addOutput(clicked);
                                 player.sendSystemMessage(Component.literal("Added Input/Output to side: " + clicked));
-                                handler.add();
                             } else {
+                                strictSided.addInput(clicked);
                                 strictSided.removeOutput(clicked);
-                                strictSided.removeInput(clicked);
-                                player.sendSystemMessage(Component.literal("Removed all connections to side: " + clicked));
-                                handler.add();
+                                player.sendSystemMessage(Component.literal("Added input to side: " + clicked));
                             }
+                        }
+                        if (be instanceof IUtilityInteractable utilityInteractable) {
+                            utilityInteractable.update();
                         }
                     }
                 });
