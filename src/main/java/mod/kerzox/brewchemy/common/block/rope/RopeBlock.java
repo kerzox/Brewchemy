@@ -86,6 +86,8 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
         initializeShapeCache();
     }
 
+
+
     @Override
     public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
         if (!(pNewState.getBlock() instanceof AirBlock)) {
@@ -97,23 +99,36 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
                 for (Direction value : Direction.values()) {
                     if (value.getAxis() != Direction.Axis.Y) {
                         boolean hasCrops = false;
-                        int stepsTowards = 1;
-                        while (pLevel.getBlockEntity(pPos.relative(value, stepsTowards)) instanceof RopeBlockEntity) {
-                            int steps = 1;
-                            while (pLevel.getBlockEntity(pPos.relative(value, stepsTowards).below(steps)) != null) {
+                        int stepsToFence = 1;
+                        int stepsToFenceInOpposite = 1;
+                        while (pLevel.getBlockEntity(pPos.relative(value, stepsToFence)) instanceof RopeBlockEntity) {
+                            stepsToFence++;
+                        }
+                        if (pLevel.getBlockEntity(pPos.relative(value, stepsToFence)) instanceof RopeTiedFenceBlockEntity fence) {
+                            while (pLevel.getBlockEntity(pPos.relative(value.getOpposite(), stepsToFenceInOpposite)) instanceof RopeBlockEntity) {
+                                stepsToFenceInOpposite++;
+                            }
+                        } else {
+                            continue;
+                        }
+
+                        int steps = 1;
+                        int total = Math.max(stepsToFence, stepsToFenceInOpposite);
+
+                        Direction direction = stepsToFenceInOpposite > stepsToFence ? value.getOpposite() : value;
+
+                        for (int i = 0; i < total; i++) {
+                            while(pLevel.getBlockEntity(pPos.relative(direction, i).below(steps)) instanceof RopeBlockEntity rope) {
                                 steps++;
                             }
-                            if (pLevel.getBlockState(pPos.relative(value, stepsTowards).below(steps)).getBlock() instanceof HopsCropBlock) {
+                            if (pLevel.getBlockState(pPos.relative(direction, i).below(steps)).getBlock() instanceof HopsCropBlock) {
                                 hasCrops = true;
-                                for (int i = 0; i < steps; i++) {
-                                    pLevel.destroyBlock(pPos.relative(value, stepsTowards).below(i), true);
-                                }
                             }
-                            stepsTowards++;
                         }
+
                         if (hasCrops) {
-                            for (int i = 0; i < stepsTowards; i++) {
-                                pLevel.destroyBlock(pPos.relative(value, i), true);
+                            for (int i = 0; i < total; i++) {
+                                pLevel.destroyBlock(pPos.relative(direction, i), true);
                             }
                         }
                     }
