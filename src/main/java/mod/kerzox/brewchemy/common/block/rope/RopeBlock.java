@@ -106,11 +106,11 @@ public class RopeBlock extends BrewchemyEntityBlock<RopeBlockEntity> implements 
                                 for (int i = 0; i < steps; i++) {
                                     pLevel.destroyBlock(pPos.relative(value, stepsTowards).below(i), true);
                                 }
-                                for (int i = 0; i < stepsTowards; i++) {
-                                    pLevel.destroyBlock(pPos.relative(value, i), true);
-                                }
                             }
                             stepsTowards++;
+                        }
+                        for (int i = 0; i < stepsTowards; i++) {
+                            pLevel.destroyBlock(pPos.relative(value, i), true);
                         }
                     }
                 }
