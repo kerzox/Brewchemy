@@ -118,6 +118,10 @@ public class HopsCropBlock extends BrewchemyCropBlock implements IRopeConnectabl
                     if (!pLevel.getBlockState(pPos).getValue(HAS_TRELLIS)) {
                         return false;
                     }
+                    if (!(pLevel.getBlockEntity(pPos.above()) instanceof RopeBlockEntity rope)) {
+                        if (pLevel.getBlockState(pPos.above()).getBlock() == BrewchemyRegistry.Blocks.HOPS_CROP_BLOCK.get()) return true;
+                        return false;
+                    }
                 } else return false;
             } else {
                 if (!below.is(this)) {
