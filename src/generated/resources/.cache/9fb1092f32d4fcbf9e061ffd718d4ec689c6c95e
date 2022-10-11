@@ -1,8 +1,9 @@
-// 1.19.2	2022-10-08T16:57:55.1769949	Recipes
+// 1.19.2	2022-10-10T22:06:20.4313181	Recipes
 00d13110bc09678bd21739f7f976a1878ea8b9c5 data/brewchemy/advancements/recipes/brewchemy/boil_kettle_block.json
 95ac3615fd851695491f953aff61f54e29340f8e data/brewchemy/advancements/recipes/brewchemy/ferments_jar_block.json
 eedb2e91eba23d077cdf952852527f6f414812f3 data/brewchemy/advancements/recipes/brewchemy/millstone_block.json
 aef33be8f0de660dbc3cabd5f53a3a5cc511e754 data/brewchemy/advancements/recipes/brewchemy/millstone_crank_block.json
+1c7b90b5b4b53101eec573a7aaed11ca7b8f449f data/brewchemy/advancements/recipes/brewchemy/pint_glass_item.json
 c658d75dd518d2db887e6e17b34ced57022bdae5 data/brewchemy/advancements/recipes/brewchemy/rope_block.json
 74acc0128889eb07a7b570db2d88598f6156e15f data/brewchemy/advancements/recipes/brewchemy/soft_mallet.json
 5b5943529fcdf7153470882e1c423f0de32bd039 data/brewchemy/advancements/recipes/brewchemy/warehouse_block.json
@@ -16,6 +17,7 @@ f4185658edf72ed9f07e821092582e0986a9073a data/brewchemy/recipes/fermentation_bee
 97d3e09fc83e0ac43ddf68b5a431fbb0ee01dd53 data/brewchemy/recipes/milled_barley_from_malted_barley.json
 08c1398965f503e55596b8241097980d641056b3 data/brewchemy/recipes/millstone_block.json
 5bb1f2af8b84d810a422f9f989487845cf9a9228 data/brewchemy/recipes/millstone_crank_block.json
+eba8ff9107ecc0b3a8c682c24e19e343ef02ba20 data/brewchemy/recipes/pint_glass_item.json
 8799df0256b1745101979c59c5beacb34ecfcbd8 data/brewchemy/recipes/rope_block.json
 fbf46435aa26607523955aeb3a9e9ab25e9ece7c data/brewchemy/recipes/soft_mallet.json
 dd5b99e18e4961c226c40e7dd148b4d8c4715d85 data/brewchemy/recipes/warehouse_block.json

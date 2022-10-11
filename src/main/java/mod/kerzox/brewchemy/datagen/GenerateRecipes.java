@@ -114,6 +114,10 @@ public class GenerateRecipes extends RecipeProvider {
                 .define('I', Tags.Items.INGOTS_IRON)
                 .pattern(" I ").pattern("I I").pattern("ICI").unlockedBy("has_cauldron", has(Items.CAULDRON)).save(pFinishedRecipeConsumer);
 
+        ShapedRecipeBuilder.shaped(BrewchemyRegistry.Items.PINT_GLASS.get())
+                .define('G', Tags.Items.GLASS)
+                .pattern("G G").pattern("G G").pattern(" G ").unlockedBy("has_glass", has(Tags.Items.GLASS)).save(pFinishedRecipeConsumer);
+
         SimpleCookingRecipeBuilder.smoking(Ingredient.of(BrewchemyRegistry.Items.SOAKED_BARLEY_ITEM.get()), BrewchemyRegistry.Items.MALTED_BARLEY_ITEM.get(), 2f, 100);
 
 

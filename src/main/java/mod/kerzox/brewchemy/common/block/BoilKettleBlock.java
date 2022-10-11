@@ -25,6 +25,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -49,6 +50,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import org.jetbrains.annotations.Nullable;
+import org.w3c.dom.Entity;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -176,7 +178,7 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
             Block.box(6, 25, 7, 10, 26, 9),
             Block.box(1, 24, 1, 15, 25, 15),
             Block.box(5.5, 3, 0, 10.5, 8, 1)
-            ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get());
+    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get());
 
     public void playerWillDestroy(Level pLevel, BlockPos pPos, BlockState pState, Player pPlayer) {
         if (!pLevel.isClientSide && pPlayer.isCreative()) {
@@ -187,6 +189,11 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
         super.playerWillDestroy(pLevel, pPos, pState, pPlayer);
     }
 
+    @Override
+    public boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return true;
+    }
+
 
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
@@ -194,7 +201,7 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
         return isOpened(pState) ? this.lidOpenCached.get(pState.getValue(HorizontalDirectionalBlock.FACING)) : this.lidClosedCached.get(pState.getValue(HorizontalDirectionalBlock.FACING));
     }
 
-    public static class BoilKettleTop extends BrewchemyInvisibleBlock {
+    public static class BoilKettleTop extends BrewchemyInvisibleBlock implements EntityBlock {
 
         public BoilKettleTop(Properties properties) {
             super(properties);
@@ -207,16 +214,26 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
             }
             return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
         }
-//
-//        @Override
-//        public boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
-//            return pLevel.getBlockState(pPos.below()).getBlock() == BrewchemyRegistry.Blocks.BOIL_KETTLE_BLOCK.get();
-//        }
+
+        @Override
+        public void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+            super.onPlace(pState, pLevel, pPos, pOldState, pIsMoving);
+            if (pLevel.getBlockEntity(pPos) instanceof BoilKettleBlockEntity.TopBlockEntity top) {
+                if (pLevel.getBlockEntity(pPos.below()) instanceof BoilKettleBlockEntity be) {
+                    top.setBody(be);
+                }
+            }
+        }
+
+        @Override
+        public boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+            return pLevel.getBlockState(pPos.below()).getBlock() == BrewchemyRegistry.Blocks.BOIL_KETTLE_BLOCK.get();
+        }
 
         public void playerWillDestroy(Level pLevel, BlockPos pPos, BlockState pState, Player pPlayer) {
-            if (!pLevel.isClientSide && pPlayer.isCreative()) {
+            if (!pLevel.isClientSide ) {
                 if (pLevel.getBlockState(pPos.below()).getBlock() instanceof BoilKettleBlock) {
-                    pLevel.setBlockAndUpdate(pPos.below(), Blocks.AIR.defaultBlockState());
+                    pLevel.destroyBlock(pPos.below(), !pPlayer.isCreative());
                 }
             }
             super.playerWillDestroy(pLevel, pPos, pState, pPlayer);
@@ -318,6 +335,12 @@ public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity>
                 return kettle.isOpened(pLevel.getBlockState(pPos.below())) ? this.lidOpenCached.get(pLevel.getBlockState(pPos.below()).getValue(HorizontalDirectionalBlock.FACING)) : this.lidClosedCached.get(pLevel.getBlockState(pPos.below()).getValue(HorizontalDirectionalBlock.FACING));
             }
             return Shapes.empty();
+        }
+
+        @Nullable
+        @Override
+        public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+            return new BoilKettleBlockEntity.TopBlockEntity(pPos, pState);
         }
     }
 

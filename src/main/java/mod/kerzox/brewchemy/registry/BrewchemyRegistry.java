@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.registry;
 
+import com.mojang.serialization.Codec;
 import mod.kerzox.brewchemy.client.gui.menu.FermentationBarrelMenu;
 import mod.kerzox.brewchemy.client.gui.menu.GerminationChamberMenu;
 import mod.kerzox.brewchemy.client.gui.menu.MillstoneMenu;
@@ -18,6 +19,7 @@ import mod.kerzox.brewchemy.common.fluid.BrewchemyLiquidBlock;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
 import mod.kerzox.brewchemy.common.item.SoftMalletUtilityItem;
 import mod.kerzox.brewchemy.common.item.base.BrewchemyItem;
+import mod.kerzox.brewchemy.common.loot.BrewchemyLootRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
@@ -37,6 +39,7 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.minecraftforge.common.loot.IGlobalLootModifier;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
@@ -85,6 +88,7 @@ public class BrewchemyRegistry {
         Fluids.init();
         Recipes.init();
         Menus.init();
+        BrewchemyLootRegistry.init(bus);
 //        Particles.init();
     }
 
@@ -189,7 +193,7 @@ public class BrewchemyRegistry {
         //public static final makeBlock<BrewchemyEntityBlock<GerminationChamberBlockEntity>> GERMINATION_CHAMBER_BLOCK = makeBlock.build("germination_chamber_block", p -> new BrewchemyEntityBlock<>(GERMINATION_CHAMBER.getType(), p), BlockBehaviour.Properties.of(Material.METAL), true);
         public static final makeBlock<FluidBarrelBlock<WoodenBarrelBlockEntity>> WOODEN_BARREL_BLOCK = makeBlock.build("wooden_barrel_block", p -> new FluidBarrelBlock<>(WOODEN_BARREL.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(1.0F), true);
         public static final makeBlock<BoilKettleBlock> BOIL_KETTLE_BLOCK = makeBlock.build("boil_kettle_block", p -> new BoilKettleBlock(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(3F), true);
-        public static final makeBlock<BoilKettleBlock.BoilKettleTop> BOIL_KETTLE_TOP_BLOCK = makeBlock.build("boil_kettle_top_block", BoilKettleBlock.BoilKettleTop::new, BlockBehaviour.Properties.of(Material.GLASS).noCollission().noLootTable().requiresCorrectToolForDrops().strength(1.5F), false);
+        public static final makeBlock<BoilKettleBlock.BoilKettleTop> BOIL_KETTLE_TOP_BLOCK = makeBlock.build("boil_kettle_top_block", BoilKettleBlock.BoilKettleTop::new, BlockBehaviour.Properties.of(Material.METAL).noCollission().noLootTable().requiresCorrectToolForDrops().strength(3F), false);
         public static final makeBlock<WarehouseBlock> WAREHOUSE_BLOCK = makeBlock.buildCustomSuppliedItem("warehouse_block",  p -> new WarehouseBlock(WAREHOUSE.getType(), p), BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F), () -> new WarehouseBlock.Item(new Item.Properties().tab(BREWCHEMY_TAB)));
         public static final makeBlock<WarehouseBlock.WarehouseStorageBlock> WAREHOUSE_STORAGE_BLOCK = makeBlock.build("warehouse_storage_block", WarehouseBlock.WarehouseStorageBlock::new, BlockBehaviour.Properties.of(Material.GLASS).strength(-1.0F, 3600000.0F).noLootTable(), false);
 
@@ -241,6 +245,7 @@ public class BrewchemyRegistry {
         public static final makeBlockEntity<MillStoneBlockEntity> MILL_STONE = makeBlockEntity.build("millstone_be", MillStoneBlockEntity::new, MILL_STONE_BLOCK);
         public static final makeBlockEntity<FermentsJarBlockEntity> FERMENTS_JAR = makeBlockEntity.build("ferments_jar_be", FermentsJarBlockEntity::new, FERMENTS_JAR_BLOCK);
         public static final makeBlockEntity<BoilKettleBlockEntity> BREWING_POT = makeBlockEntity.build("brewing_pot_be", BoilKettleBlockEntity::new, BOIL_KETTLE_BLOCK);
+        public static final makeBlockEntity<BoilKettleBlockEntity.TopBlockEntity> BREWING_TOP_POT = makeBlockEntity.build("brewing_pot_top_be", BoilKettleBlockEntity.TopBlockEntity::new, BOIL_KETTLE_TOP_BLOCK);
        // public static final makeBlockEntity<SupportStickEntityBlock> SUPPORT_STICK = makeBlockEntity.build("support_stick_be", SupportStickEntityBlock::new, SUPPORT_STICK_BLOCK);
         public static final makeBlockEntity<RopeBlockEntity> ROPE = makeBlockEntity.build("rope_be", RopeBlockEntity::new, ROPE_BLOCK);
         public static final makeBlockEntity<RopeTiedFenceBlockEntity> ROPE_FENCE = makeBlockEntity.build("rope_fence_be", RopeTiedFenceBlockEntity::new, ROPE_FENCE_BLOCK);

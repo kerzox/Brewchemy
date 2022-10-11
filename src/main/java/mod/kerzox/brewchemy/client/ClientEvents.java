@@ -2,9 +2,12 @@ package mod.kerzox.brewchemy.client;
 
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Vector3f;
+import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseStorageBlockEntity;
 import mod.kerzox.brewchemy.common.effects.IntoxicatedEffect;
+import mod.kerzox.brewchemy.common.network.PacketHandler;
+import mod.kerzox.brewchemy.common.network.UtilityModeCycle;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -24,8 +27,18 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.*;
 
-public class RenderEvent {
+public class ClientEvents {
 
+    @SubscribeEvent
+    public void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+        Player player = Minecraft.getInstance().player;
+        if (player.isShiftKeyDown()) {
+            if (player.getMainHandItem().getItem() == BrewchemyRegistry.Items.SOFT_MALLET.get()) {
+                PacketHandler.sendToServer(new UtilityModeCycle(event.getScrollDelta() < 0));
+                event.setCanceled(true);
+            }
+        }
+    }
 
     @SubscribeEvent
     public void onLevelRender(RenderLevelStageEvent event) {

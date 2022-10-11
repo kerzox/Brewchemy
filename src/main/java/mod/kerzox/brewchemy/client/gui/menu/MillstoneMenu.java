@@ -28,6 +28,9 @@ public class MillstoneMenu extends DefaultMenu<MillStoneBlockEntity>{
 
     @Override
     protected ItemStack attemptToShiftIntoMenu(Player player, ItemStack returnStack, ItemStack copied, int index) {
-        return null;
+        if (!this.moveItemStackTo(copied, 36, 37, false)) {
+            return ItemStack.EMPTY;
+        }
+        return copied;
     }
 }

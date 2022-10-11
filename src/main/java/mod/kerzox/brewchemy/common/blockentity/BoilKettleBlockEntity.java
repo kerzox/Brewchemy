@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -39,6 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static mod.kerzox.brewchemy.registry.BrewchemyRegistry.BlockEntities.BREWING_TOP_POT;
 
 public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServerTickable {
 
@@ -212,6 +215,33 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
 
     public void setStateChanged(boolean stateChanged) {
         this.stateChanged = stateChanged;
+    }
+
+    public static class TopBlockEntity extends BrewchemyBlockEntity {
+
+        private BoilKettleBlockEntity body;
+
+        public TopBlockEntity(BlockPos pWorldPosition, BlockState pBlockState) {
+            super(BREWING_TOP_POT.get(), pWorldPosition, pBlockState);
+        }
+
+        @Override
+        public void onLoad() {
+            super.onLoad();
+            if (level.getBlockEntity(getBlockPos().below()) instanceof BoilKettleBlockEntity boilKettleBlockEntity) {
+                setBody(boilKettleBlockEntity);
+            }
+        }
+
+        public void setBody(BoilKettleBlockEntity body) {
+            this.body = body;
+        }
+
+        @Override
+        public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+            if (body != null) return body.getCapability(cap, side);
+            return super.getCapability(cap, side);
+        }
     }
 
 }

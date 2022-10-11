@@ -22,7 +22,7 @@ public class GerminationChamberMenu extends DefaultMenu<GerminationChamberBlockE
 
     @Override
     protected ItemStack attemptToShiftIntoMenu(Player player, ItemStack returnStack, ItemStack copied, int index) {
-        if (!this.moveItemStackTo(copied, 36, 42, false)) {
+        if (!this.moveItemStackTo(copied, 36, 37, false)) {
             return ItemStack.EMPTY;
         }
         return copied;

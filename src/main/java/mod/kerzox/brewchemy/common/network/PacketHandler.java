@@ -1,6 +1,8 @@
 package mod.kerzox.brewchemy.common.network;
 
 import mod.kerzox.brewchemy.Brewchemy;
+import mod.kerzox.brewchemy.common.capabilities.utility.UtilityHandler;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -29,6 +31,12 @@ public class PacketHandler {
                 .encoder((p, b) -> {})
                 .decoder(SyncContainer::new)
                 .consumer(SyncContainer::handle)
+                .add();
+
+        INSTANCE.messageBuilder(UtilityModeCycle.class, nextID())
+                .encoder(UtilityModeCycle::toBytes)
+                .decoder(UtilityModeCycle::new)
+                .consumerMainThread(UtilityModeCycle::handle)
                 .add();
     }
 

@@ -1,6 +1,7 @@
 {
   "parent": "block/block",
   "textures": {
+    "particle": "brewchemy:block/barrel_side",
     "down": "brewchemy:block/barrel_side",
     "up": "brewchemy:block/barrel_side",
     "north": "brewchemy:block/barrel_top",

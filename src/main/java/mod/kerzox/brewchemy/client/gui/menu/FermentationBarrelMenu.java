@@ -27,7 +27,7 @@ public class FermentationBarrelMenu extends DefaultMenu<WoodenBarrelBlockEntity>
                 return ItemStack.EMPTY;
             }
         }
-        else if (!this.moveItemStackTo(copied, 36, 39, false)) {
+        else if (!this.moveItemStackTo(copied, 36, 38, false)) {
             return ItemStack.EMPTY;
         }
         return copied;
