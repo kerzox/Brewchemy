@@ -54,7 +54,9 @@ public class BrewchemyEntityBlock<T extends BlockEntity> extends BrewchemyBlock 
         }
         if (FluidUtil.getFluidHandler(pPlayer.getItemInHand(pHand)).isPresent()) {
             if (!pLevel.isClientSide) {
-                FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pHit.getBlockPos(), pHit.getDirection());
+                if (FluidUtil.interactWithFluidHandler(pPlayer, pHand, pLevel, pHit.getBlockPos(), pHit.getDirection())) {
+                    return InteractionResult.SUCCESS;
+                }
             }
             return InteractionResult.SUCCESS;
         }

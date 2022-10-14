@@ -173,6 +173,7 @@ public class BrewchemyRegistry {
 
         public static final RegistryObject<BrewchemyItem> HOPS_ITEM = ITEMS.register("hops_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
         public static final RegistryObject<BrewchemyItem> BARLEY_ITEM = ITEMS.register("barley_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
+        public static final RegistryObject<BrewchemyItem> GRAPE_ITEM = ITEMS.register("grape_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
         public static final RegistryObject<BrewchemyItem> SOAKED_BARLEY_ITEM = ITEMS.register("soaked_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
         //public static final RegistryObject<BrewchemyItem> GERMINATED_BARLEY_ITEM = ITEMS.register("germinated_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
         public static final RegistryObject<BrewchemyItem> MALTED_BARLEY_ITEM = ITEMS.register("malted_barley_item", () -> new BrewchemyItem(new Item.Properties().tab(BREWCHEMY_TAB)));
@@ -202,7 +203,8 @@ public class BrewchemyRegistry {
         public static final makeBlock<BoilKettleBlock.BoilKettleTop> BOIL_KETTLE_TOP_BLOCK = makeBlock.build("boil_kettle_top_block", BoilKettleBlock.BoilKettleTop::new, BlockBehaviour.Properties.of(Material.METAL).noCollission().noLootTable().requiresCorrectToolForDrops().strength(3F), false);
         public static final makeBlock<WarehouseBlock> WAREHOUSE_BLOCK = makeBlock.buildCustomSuppliedItem("warehouse_block",  p -> new WarehouseBlock(WAREHOUSE.getType(), p), BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F), () -> new WarehouseBlock.Item(new Item.Properties().tab(BREWCHEMY_TAB)));
         public static final makeBlock<WarehouseBlock.WarehouseStorageBlock> WAREHOUSE_STORAGE_BLOCK = makeBlock.build("warehouse_storage_block", WarehouseBlock.WarehouseStorageBlock::new, BlockBehaviour.Properties.of(Material.GLASS).strength(-1.0F, 3600000.0F).noLootTable(), false);
-
+        public static final makeBlock<GrapeFlowerBlock.GrapeTrunkBlock> GRAPE_TRUNK_BLOCK = makeBlock.build("grape_trunk_block", GrapeFlowerBlock.GrapeTrunkBlock::new, BlockBehaviour.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.WOOD), true);
+        public static final makeBlock<GrapeFlowerBlock> GRAPE_FLOWER_BLOCK = makeBlock.build("grape_flower_block", GrapeFlowerBlock::new, BlockBehaviour.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.CROP), false);
 
         public static class makeBlock<T extends Block> implements Supplier<T> {
 

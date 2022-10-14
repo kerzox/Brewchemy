@@ -8,15 +8,13 @@ import mod.kerzox.brewchemy.common.crafting.ingredient.SizeSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.*;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
+import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.fluids.FluidStack;
@@ -114,6 +112,9 @@ public class GenerateRecipes extends RecipeProvider {
         ShapedRecipeBuilder.shaped(BrewchemyRegistry.Items.PINT_GLASS.get())
                 .define('G', Tags.Items.GLASS)
                 .pattern("G G").pattern("G G").pattern(" G ").unlockedBy("has_glass", has(Tags.Items.GLASS)).save(pFinishedRecipeConsumer);
+
+        ShapelessRecipeBuilder.shapeless(BrewchemyRegistry.Blocks.BOIL_KETTLE_BLOCK.get()).requires(BrewchemyRegistry.Blocks.BOIL_KETTLE_BLOCK.get()).unlockedBy("has_brewkettle", has(BrewchemyRegistry.Blocks.BOIL_KETTLE_BLOCK.get())).save(pFinishedRecipeConsumer,
+                new ResourceLocation(Brewchemy.MODID, "boil_kettle_block_reset"));
 
         SimpleCookingRecipeBuilder.smoking(Ingredient.of(BrewchemyRegistry.Items.SOAKED_BARLEY_ITEM.get()), BrewchemyRegistry.Items.MALTED_BARLEY_ITEM.get(), 2f, 100);
 
