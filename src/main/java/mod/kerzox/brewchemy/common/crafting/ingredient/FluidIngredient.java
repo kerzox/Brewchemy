@@ -10,11 +10,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.crafting.AbstractIngredient;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
 import net.minecraftforge.fluids.FluidStack;
@@ -150,6 +152,16 @@ public class FluidIngredient extends AbstractIngredient {
 
     public static class ProxyFluid {
 
+        private static TagKey<Fluid> vanilla(String name)
+        {
+            return FluidTags.create(new ResourceLocation("minecraft", name));
+        }
+
+        private static TagKey<Fluid> forgeTag(String name)
+        {
+            return FluidTags.create(new ResourceLocation("forge", name));
+        }
+
         private Either<TagKey<Fluid>, List<ResourceLocation>> fluid;
         private int amount;
 
@@ -163,7 +175,7 @@ public class FluidIngredient extends AbstractIngredient {
         }
 
         public static ProxyFluid of(ResourceLocation resource, int amount) {
-            return ProxyFluid.of(TagKey.create(Registry.FLUID_REGISTRY, resource), amount);
+            return resource.getNamespace().contains("minecraft") ? ProxyFluid.of(vanilla(resource.getPath()),amount) : ProxyFluid.of(forgeTag(resource.getPath()), amount);
         }
 
         public static ProxyFluid of(TagKey<Fluid> tag, int amount) {
@@ -172,7 +184,7 @@ public class FluidIngredient extends AbstractIngredient {
 
         public static ProxyFluid of(@Nonnull FluidStack stack) {
             ResourceLocation location = Registry.FLUID.getKey(stack.getFluid());
-            return ProxyFluid.of(TagKey.create(Registry.FLUID_REGISTRY, location), stack.getAmount());
+            return location.getNamespace().contains("minecraft") ? ProxyFluid.of(vanilla(location.getPath()), stack.getAmount()) : ProxyFluid.of(forgeTag(location.getPath()), stack.getAmount());
         }
 
         public List<FluidStack> asFluidStacks() {

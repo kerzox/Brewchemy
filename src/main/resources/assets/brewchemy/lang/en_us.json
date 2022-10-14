@@ -22,8 +22,8 @@
   "item.brewchemy.wort_fluid_bucket": "Wort Bucket",
   "item.brewchemy.soft_mallet": "Soft Mallet",
 
-  "fluid_type.brewchemy.wort_fluid": "Wort",
-  "fluid_type.brewchemy.beer_fluid": "Beer",
+  "fluid_type.brewchemy.wort": "Wort",
+  "fluid_type.brewchemy.beer": "Beer",
 
   "menu.brewchemy.millstone": "Millstone",
   "menu.brewchemy.wooden_barrel": "Fermentation Barrel",

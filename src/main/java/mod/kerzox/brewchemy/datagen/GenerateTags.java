@@ -6,13 +6,18 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.data.tags.FluidTagsProvider;
+import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 public class GenerateTags {
@@ -25,16 +30,45 @@ public class GenerateTags {
         return new Fluids(pGenerator, Brewchemy.MODID, existingFileHelper);
     }
 
+    public static Items Items (DataGenerator pGenerator, BlockTagsProvider pBlockTagsProvider, @Nullable ExistingFileHelper existingFileHelper) {
+        return new Items(pGenerator, pBlockTagsProvider, Brewchemy.MODID, existingFileHelper);
+    }
+
+    public static class Items extends ItemTagsProvider {
+
+        public Items(DataGenerator pGenerator, BlockTagsProvider pBlockTagsProvider, String modId, @Nullable ExistingFileHelper existingFileHelper) {
+            super(pGenerator, pBlockTagsProvider, modId, existingFileHelper);
+        }
+
+        public void itemTag(ResourceLocation rl, Item... items) {
+            this.tag(TagKey.create(ForgeRegistries.ITEMS.getRegistryKey(), rl)).add(items);
+        }
+
+        @Override
+        protected void addTags() {
+            itemTag(new ResourceLocation("forge", "crops/hops"), BrewchemyRegistry.Items.HOPS_ITEM.get());
+            itemTag(new ResourceLocation("forge", "crops/barley"), BrewchemyRegistry.Items.BARLEY_ITEM.get());
+        }
+
+
+    }
+
     public static class Fluids extends FluidTagsProvider {
 
         private Fluids(DataGenerator pGenerator, String modId, @Nullable ExistingFileHelper existingFileHelper) {
             super(pGenerator, modId, existingFileHelper);
         }
 
+        public void fluidTag(ResourceLocation rl, Fluid... fluids) {
+            this.tag(TagKey.create(ForgeRegistries.FLUIDS.getRegistryKey(), rl)).add(fluids);
+        }
+
         @Override
         protected void addTags() {
-            this.tag(FluidTags.create(new ResourceLocation(Brewchemy.MODID, "beer_fluid"))).add(BrewchemyRegistry.Fluids.BEER.getFluid().get());
-            this.tag(FluidTags.create(new ResourceLocation(Brewchemy.MODID, "wort_fluid"))).add(BrewchemyRegistry.Fluids.WORT.getFluid().get());
+            fluidTag(new ResourceLocation("forge", "beer"), BrewchemyRegistry.Fluids.BEER.getFluid().get());
+            fluidTag(new ResourceLocation("forge", "wort"), BrewchemyRegistry.Fluids.WORT.getFluid().get());
+//            this.tag(FluidTags.create(new ResourceLocation(Brewchemy.MODID, "beer_fluid"))).add(BrewchemyRegistry.Fluids.BEER.getFluid().get());
+//            this.tag(FluidTags.create(new ResourceLocation(Brewchemy.MODID, "wort_fluid"))).add(BrewchemyRegistry.Fluids.WORT.getFluid().get());
         }
     }
 
