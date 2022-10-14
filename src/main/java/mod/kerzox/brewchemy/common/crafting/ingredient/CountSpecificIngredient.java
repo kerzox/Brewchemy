@@ -3,7 +3,7 @@ package mod.kerzox.brewchemy.common.crafting.ingredient;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
+import mod.kerzox.brewchemy.common.util.SomeJsonUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -71,6 +71,8 @@ public class CountSpecificIngredient extends AbstractIngredient {
         }
     }
 
+
+
     @Override
     public boolean isSimple() {
         return false;
@@ -114,8 +116,8 @@ public class CountSpecificIngredient extends AbstractIngredient {
 
         @Override
         public CountSpecificIngredient parse(JsonObject json) {
-            boolean partial = JsonUtils.getBooleanOr("partial_match", json, true);
-            int count = JsonUtils.getIntOr("count", json, 1);
+            boolean partial = SomeJsonUtil.getBooleanOr("partial_match", json, true);
+            int count = SomeJsonUtil.getIntOr("count", json, 1);
             return CountSpecificIngredient.of(Ingredient.fromJson(json), count, partial);
         }
 
@@ -123,7 +125,7 @@ public class CountSpecificIngredient extends AbstractIngredient {
         public void write(FriendlyByteBuf buffer, CountSpecificIngredient ingredient) {
             buffer.writeBoolean(ingredient.partialMatch);
             buffer.writeInt(ingredient.count);
-            ingredient.vanillaIngredient.toNetwork(buffer);
+            //ingredient.vanillaIngredient.toNetwork(buffer);
         }
     }
 }

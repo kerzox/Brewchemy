@@ -5,7 +5,7 @@ import mod.kerzox.brewchemy.common.capabilities.fluid.FluidStorageTank;
 import mod.kerzox.brewchemy.common.capabilities.CapabilityUtils;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
-import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
+import mod.kerzox.brewchemy.common.crafting.ingredient.OldFluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.FermentJarRecipe;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
@@ -87,11 +87,7 @@ public class FermentsJarBlockEntity extends BrewchemyBlockEntity implements ISer
             if (this.inventory.isSlotFull(OUTPUT_SLOT)) return;
             this.inventory.forceInsertItem(OUTPUT_SLOT, result, false);
             FluidStack fluidStack = this.tank.getFluid();
-            for (FluidIngredient fluidIngredient : r.getFluidIngredients()) {
-                if (fluidIngredient.test(fluidStack)) {
-                    fluidStack.shrink(fluidIngredient.getAmountFromIngredient(fluidStack));
-                }
-            }
+            r.getFluidIngredient().drain(fluidStack, false);
             running = false;
         }
         syncBlockEntity();

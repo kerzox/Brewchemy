@@ -5,10 +5,7 @@ import mod.kerzox.brewchemy.client.gui.menu.FermentationBarrelMenu;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SidedMultifluidTank;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
-import mod.kerzox.brewchemy.common.capabilities.utility.IUtilityItem;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
-import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
-import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.FermentationRecipe;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
 import mod.kerzox.brewchemy.common.util.FermentationHelper;
@@ -26,7 +23,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -34,15 +30,11 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements IServerTickable, MenuProvider {
@@ -110,7 +102,7 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
             if (recipeInventoryWrapper == null) {
                 ItemStackHandler stackHandler = new ItemStackHandler(1);
                 stackHandler.setStackInSlot(0, this.inventory.getStackFromInputHandler(0).copy());
-                recipeInventoryWrapper = new RecipeInventoryWrapper(this.fluidTank, stackHandler);
+                recipeInventoryWrapper = new RecipeInventoryWrapper(this.fluidTank, stackHandler, false);
             }
             Optional<FermentationRecipe> recipe = level.getRecipeManager().getRecipeFor(BrewchemyRegistry.Recipes.FERMENTATION_RECIPE.get(), recipeInventoryWrapper, level);
             recipe.ifPresent(this::doRecipe);
@@ -128,11 +120,11 @@ public class WoodenBarrelBlockEntity extends BrewchemyBlockEntity implements ISe
     }
 
     private void doRecipe(FermentationRecipe recipe) {
-        FluidStack result = recipe.assembleFluid(new RecipeInventoryWrapper(this.fluidTank, inventory));
+        FluidStack result = recipe.assembleFluid(new RecipeInventoryWrapper(this.fluidTank, inventory, false));
         FluidStack input = this.fluidTank.getFluidInTank(0);
         ItemStack catalyst = inventory.getStackFromInputHandler(0);
-        int recipeAmount = recipe.getCatalystIngredient().getItems()[0].getCount();
-        float amountNeeded = (((float) recipeAmount * input.getAmount()) / recipe.getFermentationFluid().getAmountFromIngredient(input));
+        int recipeAmount = recipe.getCatalystIngredient().getSize();
+        float amountNeeded = (((float) recipeAmount * input.getAmount()) / recipe.getFluidIngredient().getProxy().getAmount());
         if (result.isEmpty()) return;
 
         if (!running) {

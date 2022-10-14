@@ -14,11 +14,12 @@ public abstract class AbstractRecipe implements Recipe<RecipeInventoryWrapper> {
 
     protected RecipeSerializer<?> serializer;
 
-    public AbstractRecipe(RecipeType<?> type, ResourceLocation id, String group, int duration) {
+    public AbstractRecipe(RecipeType<?> type, ResourceLocation id, String group, int duration, RecipeSerializer<?> serializer) {
         this.type = type;
         this.id = id;
         this.group = group;
         this.duration = duration;
+        this.serializer = serializer;
     }
 
     public int getDuration() {

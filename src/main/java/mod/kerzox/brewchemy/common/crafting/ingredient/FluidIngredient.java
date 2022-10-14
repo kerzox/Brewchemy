@@ -1,96 +1,108 @@
 package mod.kerzox.brewchemy.common.crafting.ingredient;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
-import net.minecraft.nbt.CompoundTag;
+import com.mojang.datafixers.util.Either;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.common.crafting.AbstractIngredient;
+import net.minecraftforge.common.crafting.IIngredientSerializer;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITag;
 import org.jetbrains.annotations.Nullable;
 
-import javax.json.Json;
+import javax.annotation.Nonnull;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import static net.minecraftforge.common.crafting.CraftingHelper.getNBT;
+public class FluidIngredient extends AbstractIngredient {
 
-public class FluidIngredient implements Predicate<FluidStack> {
+    private ProxyFluid fluid;
 
-    private FluidStack[] stacks;
-    private boolean isTag;
-    private TagKey<Fluid> tag;
-
-    public FluidIngredient(FluidStack[] stacks, boolean isTag, TagKey<Fluid> tag) {
-        this.stacks = stacks;
-        this.isTag = isTag;
-        this.tag = tag;
+    protected FluidIngredient(ProxyFluid fluid) {
+        super(Stream.empty());
+        this.fluid = fluid;
     }
 
-    public FluidStack[] getStacks() {
-        return stacks;
+    public static FluidIngredient of(ProxyFluid fluid) {
+        return new FluidIngredient(fluid);
     }
 
-    public int getAmountFromIngredient(FluidStack fluid) {
-        for (FluidStack stack : stacks) {
-            if (fluid.getFluid() == stack.getFluid()) return stack.getAmount();
+    public static FluidIngredient of(FluidStack fluid) {
+        return new FluidIngredient(ProxyFluid.of(fluid));
+    }
+
+    public static FluidIngredient of(ResourceLocation fluid, int amount) {
+        return new FluidIngredient(ProxyFluid.of(fluid, amount));
+    }
+
+    public static FluidIngredient of(TagKey<Fluid> fluid, int amount) {
+        return new FluidIngredient(ProxyFluid.of(fluid, amount));
+    }
+
+    public static FluidIngredient of(FriendlyByteBuf fromBuffer) {
+        return new FluidIngredient(ProxyFluid.parse(fromBuffer));
+    }
+
+    public static FluidIngredient of(JsonObject json) {
+        return new FluidIngredient(ProxyFluid.parse(json));
+    }
+
+    public List<FluidStack> getFluidStacks() {
+        return getProxy().asFluidStacks();
+    }
+
+    ItemStack[] cached;
+
+    @Override
+    public ItemStack[] getItems() {
+        if (cached == null) {
+            cached = fluid.asFluidStacks().stream().map(FluidUtil::getFilledBucket).filter(i -> !i.isEmpty()).toArray(ItemStack[]::new);
         }
-        return 0;
-    }
-
-    public static FluidIngredient of(CompoundTag tag) {
-        List<FluidStack> fluidStacks = new ArrayList<>();
-        fluidStacks.add(FluidStack.loadFluidStackFromNBT(tag));
-        return new FluidIngredient((FluidStack[]) fluidStacks.toArray(), false, null);
-    }
-
-    public static FluidStack fromResourceId(ResourceLocation fluidId, int amount) {
-        return new FluidStack(Objects.requireNonNull(ForgeRegistries.FLUIDS.getValue(fluidId)), amount);
-    }
-
-    public static FluidIngredient of(FluidStack... fluid) {
-        return new FluidIngredient(fluid, false, null);
-    }
-
-    public static FluidIngredient of(FluidStack[] fluid, boolean isTag, TagKey<Fluid> tag) {
-        return new FluidIngredient(fluid, isTag, tag);
-    }
-
-    public static FluidIngredient of(List<FluidStack> fluid) {
-        return new FluidIngredient(fluid.toArray(new FluidStack[0]), false, null);
-    }
-
-    public static FluidIngredient of(List<FluidStack> fluid, boolean isTag, TagKey<Fluid> tag) {
-        return new FluidIngredient(fluid.toArray(new FluidStack[0]), isTag, tag);
-    }
-
-    public static FluidIngredient fromTag(TagKey<Fluid> tag, int amount) {
-        List<FluidStack> ret = new ArrayList<>();
-        for (Fluid fluid : ForgeRegistries.FLUIDS.tags().getTag(tag)) {
-            ret.add(new FluidStack(fluid, amount));
-        }
-        return FluidIngredient.of(ret, true, tag);
+        return cached;
     }
 
     @Override
-    public boolean test(FluidStack fluidStack) {
-        if (fluidStack == null) return false;
-        for (FluidStack stack : stacks) {
-            if (stack.getFluid().isSame(fluidStack.getFluid())) {
-                if (stack.getAmount() <= fluidStack.getAmount()) {
+    public boolean isEmpty()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean test(@Nullable ItemStack pStack) {
+        if (pStack == null) {
+            return false;
+        }
+        Optional<IFluidHandlerItem> handlerItem = FluidUtil.getFluidHandler(pStack).resolve();
+        if (handlerItem.isEmpty()) return false;
+
+        IFluidHandlerItem capability = handlerItem.get();
+
+        for (int i = 0; i < capability.getTanks(); i++) {
+            FluidStack tankStack = capability.getFluidInTank(i);
+            if (fluid.isSameFluid(tankStack)) {
+                FluidStack toExtract = new FluidStack(tankStack.getFluid(), fluid.amount);
+                FluidStack simulation = capability.drain(toExtract, IFluidHandler.FluidAction.SIMULATE);
+                if (simulation.getAmount() >= fluid.amount) {
                     return true;
                 }
             }
@@ -98,77 +110,161 @@ public class FluidIngredient implements Predicate<FluidStack> {
         return false;
     }
 
-    public boolean testPartial(FluidStack fluidStack) {
-        if (fluidStack == null) return false;
-        for (FluidStack stack : stacks) {
-            if (stack.getFluid().isSame(fluidStack.getFluid())) {
+    public boolean test(FluidStack stack) {
+        if (stack == null) {
+            return false;
+        }
+        return fluid.isValidFluidAndAmount(stack);
+    }
+
+    public boolean drain(FluidStack stack, boolean simulate) {
+        if (test(stack)) {
+            if (simulate) {
+                return true;
+            } else {
+                stack.shrink(fluid.amount);
                 return true;
             }
         }
         return false;
     }
 
-    public JsonElement serialize() {
-        JsonArray arr = new JsonArray();
-        if (stacks.length == 1) {
-            JsonObject fluid = new JsonObject();
-            if (isTag) {
-                fluid.addProperty("tag", ForgeRegistries.FLUIDS.tags().getTag(tag).contains(stacks[0].getFluid()));
-                fluid.addProperty("amount", stacks[0].getAmount());
-            } else {
-                fluid.addProperty("fluid", ForgeRegistries.FLUIDS.getKey(stacks[0].getFluid()).toString());
-                fluid.addProperty("amount", stacks[0].getAmount());
-            }
-            return fluid;
-        }
-        for (FluidStack stack : stacks) {
-            JsonObject fluid = new JsonObject();
-            if (isTag) {
-                fluid.addProperty("tag", ForgeRegistries.FLUIDS.tags().getTag(tag).contains(stack.getFluid()));
-                fluid.addProperty("amount", stack.getAmount());
-            } else {
-                fluid.addProperty("fluid", ForgeRegistries.FLUIDS.getKey(stack.getFluid()).toString());
-                fluid.addProperty("amount", stack.getAmount());
-            }
-            arr.add(fluid);
-        }
-        return arr;
+    public ProxyFluid getProxy() {
+        return fluid;
     }
 
-    public static FluidIngredient deserialize(JsonElement jsonElement) {
-        List<FluidStack> stacks = new ArrayList<>();
-        if (jsonElement.isJsonArray()) {
-            for (JsonElement element : jsonElement.getAsJsonArray()) {
-                if (element instanceof JsonObject data) {
-                    if (data.has("fluid")) {
-                        ResourceLocation fluid = new ResourceLocation(JsonUtils.getStringOr("fluid", data, ""));
-                        int amount = JsonUtils.getIntOr("amount", data, 0);
-                        stacks.add(fromResourceId(fluid, amount));
+    @Override
+    public boolean isSimple() {
+        return false;
+    }
+
+    @Override
+    public IIngredientSerializer<? extends Ingredient> getSerializer() {
+        return Serializer.INSTANCE;
+    }
+
+    @Override
+    public JsonElement toJson() {
+        return getProxy().toJson();
+    }
+
+    public static class ProxyFluid {
+
+        private Either<TagKey<Fluid>, List<ResourceLocation>> fluid;
+        private int amount;
+
+        private ProxyFluid(Either<TagKey<Fluid>, List<ResourceLocation>> fluids, int amount) {
+            this.fluid = fluids;
+            this.amount = amount;
+        }
+
+        public static ProxyFluid of(Either<TagKey<Fluid>, List<ResourceLocation>> either, int amount) {
+            return new ProxyFluid(either, amount);
+        }
+
+        public static ProxyFluid of(ResourceLocation resource, int amount) {
+            return ProxyFluid.of(TagKey.create(Registry.FLUID_REGISTRY, resource), amount);
+        }
+
+        public static ProxyFluid of(TagKey<Fluid> tag, int amount) {
+            return new ProxyFluid(Either.left(tag), amount);
+        }
+
+        public static ProxyFluid of(@Nonnull FluidStack stack) {
+            ResourceLocation location = Registry.FLUID.getKey(stack.getFluid());
+            return ProxyFluid.of(TagKey.create(Registry.FLUID_REGISTRY, location), stack.getAmount());
+        }
+
+        public List<FluidStack> asFluidStacks() {
+            return fluid.map(
+                    t -> StreamSupport.stream(Registry.FLUID.getOrCreateTag(t).spliterator(), false).map(Holder::value),
+                    r -> r.stream().map(ForgeRegistries.FLUIDS::getValue)
+            ).map(fluid1 -> new FluidStack(fluid1, this.amount)).collect(Collectors.toList());
+        }
+
+        public boolean isExactFluid(FluidStack fluidStack) {
+            return isSameFluid(fluidStack) && fluidStack.getAmount() == this.amount;
+        }
+
+        public boolean isValidFluidAndAmount(FluidStack fluidStack) {
+            return isSameFluid(fluidStack) && fluidStack.getAmount() >= this.amount;
+        }
+
+        public boolean isSameFluid(FluidStack fluidStack) {
+            if (fluidStack == null) return false;
+            return fluid.map(t -> fluidStack.getFluid().is(t), r -> r.contains(Registry.FLUID.getKey(fluidStack.getFluid())));
+        }
+
+        public int getAmount() {
+            return amount;
+        }
+
+        public JsonElement toJson() {
+            JsonObject jsonObject = new JsonObject();
+            ResourceLocation name = this.fluid.orThrow().location();
+            jsonObject.addProperty("tag", name.toString());
+            jsonObject.addProperty("amount", this.amount);
+            return jsonObject;
+        }
+
+        public static ProxyFluid parse(JsonObject json) {
+            JsonObject jsonObject = json.getAsJsonObject();
+            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
+            int amount = GsonHelper.getAsInt(jsonObject, "amount");
+            return ProxyFluid.of(resourceLocation, amount);
+        }
+
+
+        public static ProxyFluid parse(FriendlyByteBuf buffer) {
+            int numMatching = buffer.readVarInt();
+            List<ResourceLocation> matching = new ArrayList<>(numMatching);
+            for (int i = 0; i < numMatching; ++i) {
+                matching.add(buffer.readResourceLocation());
+            }
+            int amount = buffer.readInt();
+            return ProxyFluid.of(Either.right(matching), amount);
+        }
+
+
+        public void write(FriendlyByteBuf buffer) {
+            List<ResourceLocation> matching = new ArrayList<>();
+            if (fluid.left().isPresent()) {
+                HolderSet.Named<?> tags = Registry.FLUID.getOrCreateTag(fluid.left().get());
+                for (Holder<?> tag : tags) {
+                    if (tag.unwrapKey().isPresent()) {
+                        matching.add(tag.unwrapKey().get().location());
                     }
                 }
             }
-        } else {
-            JsonObject data = jsonElement.getAsJsonObject();
-            if (data.has("fluid")) {
-                ResourceLocation fluid = new ResourceLocation(JsonUtils.getStringOr("fluid", data, ""));
-                int amount = JsonUtils.getIntOr("amount", data, 0);
-                stacks.add(fromResourceId(fluid, amount));
+            if (fluid.right().isPresent()) {
+                matching.addAll(fluid.right().get());
             }
+            buffer.writeVarInt(matching.size());
+            for (ResourceLocation rl : matching) buffer.writeResourceLocation(rl);
+            buffer.writeInt(this.amount);
         }
-        return FluidIngredient.of(stacks);
+
+
     }
 
-    public void toNetwork(FriendlyByteBuf pBuffer) {
-        pBuffer.writeCollection(Arrays.asList(this.stacks), FriendlyByteBuf::writeFluidStack);
-    }
+    public static class Serializer implements IIngredientSerializer<FluidIngredient> {
 
-    public static FluidIngredient fromNetwork(FriendlyByteBuf pBuffer) {
-        var size = pBuffer.readVarInt();
-        FluidStack[] array = new FluidStack[size];
-        for (int i = 0; i < array.length; i++) {
-            array[i] = pBuffer.readFluidStack();
+        public static final FluidIngredient.Serializer INSTANCE = new FluidIngredient.Serializer();
+
+        @Override
+        public FluidIngredient parse(FriendlyByteBuf buffer) {
+            return FluidIngredient.of(buffer);
         }
-        return FluidIngredient.of(array);
+
+        @Override
+        public FluidIngredient parse(JsonObject json) {
+            return FluidIngredient.of(json);
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer, FluidIngredient ingredient) {
+            ingredient.getProxy().write(buffer);
+        }
     }
 
 }

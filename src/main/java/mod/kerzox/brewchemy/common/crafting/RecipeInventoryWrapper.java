@@ -13,19 +13,25 @@ public class RecipeInventoryWrapper extends RecipeWrapper {
     // we can't make this look nicer i don't think so meh
 
     protected IFluidHandler fluidInventory;
+    private boolean sideAgnostic;
 
     public RecipeInventoryWrapper(IItemHandlerModifiable inv) {
         super(inv);
     }
 
-    public RecipeInventoryWrapper(IFluidHandler fluid, IItemHandlerModifiable item) {
+    public RecipeInventoryWrapper(IFluidHandler fluid, IItemHandlerModifiable item, boolean sideAgnostic) {
         super(item);
         this.fluidInventory = fluid;
+        this.sideAgnostic = sideAgnostic;
     }
 
     public RecipeInventoryWrapper(IFluidHandler inv) {
         super(new ItemStackHandler());
         this.fluidInventory = inv;
+    }
+
+    public boolean sideAgnostic() {
+        return sideAgnostic;
     }
 
     public boolean canStorageFluid() {

@@ -3,28 +3,66 @@ package mod.kerzox.brewchemy.common.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
 import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
-import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
+import mod.kerzox.brewchemy.common.crafting.ingredient.OldFluidIngredient;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.Objects;
+import java.util.Date;
 
 public class SomeJsonUtil {
+
+    public static String getStringOr(String pKey, JsonObject pJson, String pDefaultValue) {
+        JsonElement jsonelement = pJson.get(pKey);
+        if (jsonelement != null) {
+            return jsonelement.isJsonNull() ? pDefaultValue : jsonelement.getAsString();
+        } else {
+            return pDefaultValue;
+        }
+    }
+
+    public static int getIntOr(String pKey, JsonObject pJson, int pDefaultValue) {
+        JsonElement jsonelement = pJson.get(pKey);
+        if (jsonelement != null) {
+            return jsonelement.isJsonNull() ? pDefaultValue : jsonelement.getAsInt();
+        } else {
+            return pDefaultValue;
+        }
+    }
+
+    public static long getLongOr(String pKey, JsonObject pJson, long pDefaultValue) {
+        JsonElement jsonelement = pJson.get(pKey);
+        if (jsonelement != null) {
+            return jsonelement.isJsonNull() ? pDefaultValue : jsonelement.getAsLong();
+        } else {
+            return pDefaultValue;
+        }
+    }
+
+    public static boolean getBooleanOr(String pKey, JsonObject pJson, boolean pDefaultValue) {
+        JsonElement jsonelement = pJson.get(pKey);
+        if (jsonelement != null) {
+            return jsonelement.isJsonNull() ? pDefaultValue : jsonelement.getAsBoolean();
+        } else {
+            return pDefaultValue;
+        }
+    }
+
+    public static Date getDateOr(String pKey, JsonObject pJson) {
+        JsonElement jsonelement = pJson.get(pKey);
+        return jsonelement != null ? new Date(Long.parseLong(jsonelement.getAsString())) : new Date();
+    }
 
     public static ItemStack deserializeItemStack(JsonObject json) {
         ItemStack resultStack;
         if (json.get("result").isJsonObject()) {
             resultStack = ShapedRecipe.itemStackFromJson(json.get("result").getAsJsonObject());
         } else {
-            String s1 = JsonUtils.getStringOr("result", json, "");
+            String s1 = SomeJsonUtil.getStringOr("result", json, "");
             ResourceLocation resourcelocation = new ResourceLocation(s1);
             resultStack = new ItemStack(ForgeRegistries.ITEMS.getValue(resourcelocation));
         }
@@ -92,27 +130,27 @@ public class SomeJsonUtil {
         FluidStack resultStack = FluidStack.EMPTY;
         if (json.has("result")) {
             JsonObject result = json.getAsJsonObject("result");
-            ResourceLocation fluid = new ResourceLocation(JsonUtils.getStringOr("fluid", result, ""));
-            int amount = JsonUtils.getIntOr("amount", result, 0);
+            ResourceLocation fluid = new ResourceLocation(SomeJsonUtil.getStringOr("fluid", result, ""));
+            int amount = SomeJsonUtil.getIntOr("amount", result, 0);
             resultStack = new FluidStack(ForgeRegistries.FLUIDS.getValue(fluid), amount);
         }
         return resultStack;
     }
 
-    public static FluidIngredient[] deserializeFluidIngredients(JsonObject json) {
-        FluidIngredient[] ingredients = null;
+    public static OldFluidIngredient[] deserializeFluidIngredients(JsonObject json) {
+        OldFluidIngredient[] ingredients = null;
         if (json.has("ingredients")) {
             JsonObject fluid = json.get("ingredients").getAsJsonObject().getAsJsonObject("fluid_ingredient");
             if (fluid.has("fluid")) {
                 if (fluid.get("fluid").isJsonArray()) {
                     JsonArray arr = fluid.getAsJsonArray();
-                    ingredients = new FluidIngredient[arr.size()];
+                    ingredients = new OldFluidIngredient[arr.size()];
                     for (int i = 0; i < arr.size(); i++) {
-                        ingredients[i] = FluidIngredient.deserialize(arr.get(i));
+                        ingredients[i] = OldFluidIngredient.deserialize(arr.get(i));
                     }
                 } else {
-                    ingredients = new FluidIngredient[1];
-                    ingredients[0] = FluidIngredient.deserialize(fluid);
+                    ingredients = new OldFluidIngredient[1];
+                    ingredients[0] = OldFluidIngredient.deserialize(fluid);
                 }
             }
         }
@@ -121,13 +159,13 @@ public class SomeJsonUtil {
             if (fluid.has("fluid")) {
                 if (fluid.get("fluid").isJsonArray()) {
                     JsonArray arr = fluid.getAsJsonArray();
-                    ingredients = new FluidIngredient[arr.size()];
+                    ingredients = new OldFluidIngredient[arr.size()];
                     for (int i = 0; i < arr.size(); i++) {
-                        ingredients[i] = FluidIngredient.deserialize(arr.get(i));
+                        ingredients[i] = OldFluidIngredient.deserialize(arr.get(i));
                     }
                 } else {
-                    ingredients = new FluidIngredient[1];
-                    ingredients[0] = FluidIngredient.deserialize(fluid);
+                    ingredients = new OldFluidIngredient[1];
+                    ingredients[0] = OldFluidIngredient.deserialize(fluid);
                 }
             }
         }

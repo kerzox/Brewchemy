@@ -60,7 +60,7 @@ import java.util.stream.Stream;
 
 public class BoilKettleBlock extends BrewchemyEntityBlock<BoilKettleBlockEntity> {
 
-    private static final BooleanProperty LID = BooleanProperty.create("lid");
+    public static final BooleanProperty LID = BooleanProperty.create("lid");
 
     public BoilKettleBlock(RegistryObject<BlockEntityType<BoilKettleBlockEntity>> type, Properties properties) {
         super(type, properties);

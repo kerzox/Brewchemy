@@ -1,23 +1,29 @@
 package mod.kerzox.brewchemy;
 
 import com.mojang.logging.LogUtils;
-import mod.kerzox.brewchemy.client.ClientStartupEvents;
-import mod.kerzox.brewchemy.client.ClientEvents;
-import mod.kerzox.brewchemy.client.gui.screen.FermentationBarrelScreen;
-import mod.kerzox.brewchemy.client.gui.screen.MillstoneScreen;
+import mod.kerzox.brewchemy.client.ClientSetup;
 import mod.kerzox.brewchemy.client.render.*;
 import mod.kerzox.brewchemy.common.capabilities.BrewchemyCapabilities;
+import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.misc.CauldronRecipes;
 import mod.kerzox.brewchemy.common.network.PacketHandler;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
-import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.crafting.*;
+import net.minecraftforge.common.crafting.conditions.*;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.NewRegistryEvent;
+import net.minecraftforge.registries.RegisterEvent;
 import org.slf4j.Logger;
 
 
@@ -37,12 +43,12 @@ public class Brewchemy
         PacketHandler.register();
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonLoad);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientLoad);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onEntityRenderRegister);
-//        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerParticleProvider);
         FMLJavaModLoadingContext.get().getModEventBus().register(new BrewchemyCapabilities());
-        MinecraftForge.EVENT_BUS.register(new ClientEvents());
+
         MinecraftForge.EVENT_BUS.register(this);
+
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> modEventBus.addListener(ClientSetup::init));
     }
 
 //    private void registerParticleProvider(RegisterParticleProvidersEvent event) {
@@ -51,13 +57,6 @@ public class Brewchemy
 
     private void commonLoad(final FMLCommonSetupEvent event) {
         event.enqueueWork(CauldronRecipes::register);
-    }
-
-    private void clientLoad(final FMLClientSetupEvent event) {
-        ClientStartupEvents.init();
-        MenuScreens.register(BrewchemyRegistry.Menus.MILLSTONE_GUI.get(), MillstoneScreen::new);
-       // MenuScreens.register(BrewchemyRegistry.Menus.GERMINATION_CHAMBER_GUI.get(), GerminationScreen::new);
-        MenuScreens.register(BrewchemyRegistry.Menus.FERMENTATION_BARREL_MENU.get(), FermentationBarrelScreen::new);
     }
 
     private void onEntityRenderRegister(EntityRenderersEvent.RegisterRenderers e) {

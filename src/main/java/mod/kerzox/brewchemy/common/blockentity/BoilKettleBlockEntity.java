@@ -2,11 +2,13 @@ package mod.kerzox.brewchemy.common.blockentity;
 
 import mod.kerzox.brewchemy.common.block.BoilKettleBlock;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
+import mod.kerzox.brewchemy.common.capabilities.fluid.FluidStorageTank;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SidedMultifluidTank;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
 import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
-import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
+import mod.kerzox.brewchemy.common.crafting.ingredient.OldFluidIngredient;
+import mod.kerzox.brewchemy.common.crafting.ingredient.SizeSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.BrewingRecipe;
 import mod.kerzox.brewchemy.common.item.PintGlassItem;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
@@ -20,11 +22,12 @@ import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.OreFeature;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.Capability;
@@ -36,18 +39,38 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static mod.kerzox.brewchemy.registry.BrewchemyRegistry.BlockEntities.BREWING_TOP_POT;
 
 public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServerTickable {
 
-    private final ItemStackInventory.InputHandler inventory = new ItemStackInventory.InputHandler(1);
-    private final SidedMultifluidTank sidedFluidTank = new SidedMultifluidTank(1, PintGlassItem.KEG_VOLUME, 1, PintGlassItem.KEG_VOLUME);
-    private final LazyOptional<SidedMultifluidTank> handler = LazyOptional.of(() -> sidedFluidTank);
+    private final ItemStackInventory.InputHandler inventory = new ItemStackInventory.InputHandler(5) {
+
+        @Override
+        protected void onContentsChanged(int slot) {
+            if (getLevel() != null && workingRecipe != null) {
+                workingRecipe = workingRecipe.matches(recipeInventoryWrapper, level) ? workingRecipe : null;
+            }
+            syncBlockEntity();
+        }
+
+    };
+
+    private final SidedMultifluidTank sidedFluidTank = new SidedMultifluidTank(1, PintGlassItem.KEG_VOLUME, 1, PintGlassItem.KEG_VOLUME) {
+
+        @Override
+        protected void onContentsChanged(IFluidHandler handlerAffected) {
+            if (getLevel() != null && workingRecipe != null) {
+                workingRecipe = workingRecipe.matches(recipeInventoryWrapper, level) ? workingRecipe : null;
+            }
+            syncBlockEntity();
+        }
+
+    };
+
+    private final RecipeInventoryWrapper recipeInventoryWrapper = new RecipeInventoryWrapper(sidedFluidTank, inventory, true);
     private final LazyOptional<ItemStackHandler> itemHandler = LazyOptional.of(() -> inventory);
     private boolean running = false;
     private int duration;
@@ -55,6 +78,8 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
     private int currentRecipeHeat;
     private int tick;
     private boolean stateChanged = false;
+
+    private BrewingRecipe workingRecipe;
 
     public BoilKettleBlockEntity(BlockPos pWorldPosition, BlockState pBlockState) {
         super(BrewchemyRegistry.BlockEntities.BREWING_POT.get(), pWorldPosition, pBlockState);
@@ -64,6 +89,9 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
         if (level.getBlockState(this.getBlockPos().below()).getBlock() instanceof BaseFireBlock) {
             return level.getBlockState(this.getBlockPos().below()).getBlock() instanceof SoulFireBlock ? BrewingRecipe.SUPERHEATED : BrewingRecipe.FIRE;
         }
+        else if (level.getBlockState(this.getBlockPos().below()).getBlock() instanceof CampfireBlock) {
+            return BrewingRecipe.FIRE;
+        }
         return BrewingRecipe.NO_HEAT;
     }
 
@@ -71,19 +99,27 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
     public void onServer() {
         tick++;
         calculateHeat();
-        double x = getBlockPos().above().getX(), y = getBlockPos().above().getY(), z = getBlockPos().above().getZ();
-        List<Entity> entities = level.getEntitiesOfClass(Entity.class, new AABB(x, y, z, x + 1, y +.5, z + 1), EntitySelector.ENTITY_STILL_ALIVE);
-        for (Entity entity : entities) {
-            if (entity instanceof ItemEntity itemEntity) {
-                ItemStack stack = itemEntity.getItem().copy();
-                if (this.inventory.insertItem(0, stack, true).isEmpty()) {
-                    this.inventory.insertItem(0, stack, false);
-                    itemEntity.discard();
+        // when lid is open allow items to be inputted
+        if (!level.getBlockState(getBlockPos()).getValue(BoilKettleBlock.LID)) {
+            double x = getBlockPos().above().getX(), y = getBlockPos().above().getY(), z = getBlockPos().above().getZ();
+            List<Entity> entities = level.getEntitiesOfClass(Entity.class, new AABB(x + .1, y - 1, z + .1, x + .85, y + .5, z + .85), EntitySelector.ENTITY_STILL_ALIVE);
+            for (Entity entity : entities) {
+                if (entity instanceof ItemEntity itemEntity) {
+                    ItemStack stack = itemEntity.getItem().copy();
+                    for (int i = 0; i < this.inventory.getSlots(); i++) {
+                        if (this.inventory.insertItem(i, stack, true).isEmpty()) {
+                            itemEntity.discard();
+                            this.inventory.insertItem(i, stack, false);
+                            break;
+                        }
+                    }
                 }
             }
         }
-        Optional<BrewingRecipe> recipe = this.findValidRecipe(new RecipeInventoryWrapper(sidedFluidTank, inventory));
-        recipe.ifPresent(this::doRecipe);
+        if (workingRecipe != null) doRecipe(workingRecipe);
+        else {
+            this.findValidRecipe(recipeInventoryWrapper).ifPresent(this::doRecipe);
+        }
    }
 
     private void calculateHeat() {
@@ -108,33 +144,38 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
     }
 
     public void doRecipe(BrewingRecipe recipe) {
-        FluidStack result = recipe.assembleFluid(new RecipeInventoryWrapper(sidedFluidTank, inventory));
+        FluidStack result = recipe.assembleFluid(null);
         if (result.isEmpty()) return;
         if (!hasHeatForRecipe(recipe)) return;
         if (!running) {
+            workingRecipe = recipe;
             duration = recipe.getDuration();
             running = true;
         }
         if (duration <= 0) {
-            if (this.sidedFluidTank.getOutputHandler().getStorageTank(0).isFull()) return;
-            for (CountSpecificIngredient cIngredient : recipe.getCIngredients()) {
-                for (ItemStack item : cIngredient.getItems()) {
-                    if (inventory.getStackInSlot(0).is(item.getItem())) {
-                        inventory.getStackInSlot(0).shrink(item.getCount());
-                        break;
+            // just make sure
+            if (!workingRecipe.matches(recipeInventoryWrapper, level)) {
+                running = false;
+                workingRecipe = null;
+                return;
+            }
+
+            if (!this.sidedFluidTank.getOutputHandler().getStorageTank(0).isEmpty()) {
+                if (!this.sidedFluidTank.getOutputHandler().getStorageTank(0).getFluid().isFluidEqual(result)) return;
+            }
+
+            for (SizeSpecificIngredient ingredient : recipe.getSizedIngredients()) {
+                for (int i = 0; i < this.inventory.getSlots(); i++) {
+                    if (ingredient.test(this.inventory.getStackInSlot(i))) {
+                        this.inventory.getStackInSlot(i).shrink(ingredient.getSize());
                     }
                 }
             }
-            for (FluidIngredient fluidIngredient : recipe.getFluidIngredients()) {
-                for (FluidStack fluid : fluidIngredient.getStacks()) {
-                    if (sidedFluidTank.getInputHandler().getFluidInTank(0).getFluid().isSame(fluid.getFluid())) {
-                        sidedFluidTank.getInputHandler().getFluidInTank(0).shrink(fluid.getAmount());
-                        break;
-                    }
-                }
-            }
+
+            recipe.getFluidIngredient().drain(sidedFluidTank.getInputHandler().getFluidInTank(0), false);
             sidedFluidTank.getOutputHandler().forceFill(result, IFluidHandler.FluidAction.EXECUTE);
             running = false;
+            if (workingRecipe != null) workingRecipe = workingRecipe.matches(recipeInventoryWrapper, level) ? workingRecipe : null;
         }
         duration--;
         syncBlockEntity();
@@ -143,7 +184,15 @@ public class BoilKettleBlockEntity extends BrewchemyBlockEntity implements IServ
     @Override
     public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
         if (!pLevel.isClientSide) {
-            if (getBlockState().getBlock() instanceof BoilKettleBlock kettle) {
+            if (pPlayer.isShiftKeyDown()) {
+                for (int i = 0; i < this.inventory.getSlots(); i++) {
+                    if (!this.inventory.getStackInSlot(i).isEmpty()) {
+                        BlockPos relative = pPos.relative(pPlayer.getDirection().getOpposite(), 2);
+                        level.addFreshEntity(new ItemEntity(level, relative.getX(), relative.getY(), relative.getZ(), this.inventory.forceExtractItem(i, 64, false)));
+                    }
+                }
+            }
+            else if (getBlockState().getBlock() instanceof BoilKettleBlock kettle) {
                 BlockPos pos = getBlockPos();
                 if (!kettle.isOpened(getBlockState())) {
                     level.setBlockAndUpdate(getBlockPos(), kettle.openLid(getBlockState()));

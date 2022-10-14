@@ -5,8 +5,11 @@ import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.data.tags.FluidTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -16,6 +19,23 @@ public class GenerateTags {
 
     public static Blocks Blocks (DataGenerator pGenerator, @Nullable ExistingFileHelper existingFileHelper) {
         return new Blocks(pGenerator, Brewchemy.MODID, existingFileHelper);
+    }
+
+    public static Fluids Fluids (DataGenerator pGenerator, @Nullable ExistingFileHelper existingFileHelper) {
+        return new Fluids(pGenerator, Brewchemy.MODID, existingFileHelper);
+    }
+
+    public static class Fluids extends FluidTagsProvider {
+
+        private Fluids(DataGenerator pGenerator, String modId, @Nullable ExistingFileHelper existingFileHelper) {
+            super(pGenerator, modId, existingFileHelper);
+        }
+
+        @Override
+        protected void addTags() {
+            this.tag(FluidTags.create(new ResourceLocation(Brewchemy.MODID, "beer_fluid"))).add(BrewchemyRegistry.Fluids.BEER.getFluid().get());
+            this.tag(FluidTags.create(new ResourceLocation(Brewchemy.MODID, "wort_fluid"))).add(BrewchemyRegistry.Fluids.WORT.getFluid().get());
+        }
     }
 
     public static class Blocks extends BlockTagsProvider {

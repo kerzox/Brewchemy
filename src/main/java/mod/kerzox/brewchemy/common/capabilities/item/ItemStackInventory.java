@@ -137,6 +137,8 @@ public class ItemStackInventory extends CombinedInvWrapper implements IStrictSid
             return this.getStackInSlot(slot).getCount() == this.getSlotLimit(0);
         }
 
+
+
     }
 
     public static class OutputHandler extends ItemStackHandler {

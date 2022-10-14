@@ -1,11 +1,13 @@
 package mod.kerzox.brewchemy.common.crafting.recipes;
 
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
+import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.common.crafting.AbstractRecipe;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
 import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
+import mod.kerzox.brewchemy.common.crafting.ingredient.OldFluidIngredient;
+import mod.kerzox.brewchemy.common.crafting.ingredient.SizeSpecificIngredient;
 import mod.kerzox.brewchemy.common.util.SomeJsonUtil;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.NonNullList;
@@ -17,62 +19,33 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Objects;
 import java.util.function.Consumer;
+
+import static mod.kerzox.brewchemy.registry.BrewchemyRegistry.Recipes.FERMENTATION_RECIPE_SERIALIZER;
 
 public class FermentationRecipe extends AbstractRecipe {
 
-    private final NonNullList<CountSpecificIngredient> ingredients = NonNullList.create();
+    private final NonNullList<SizeSpecificIngredient> ingredients = NonNullList.create();
     private final NonNullList<FluidIngredient> fluidIngredients = NonNullList.create();
     private final FluidStack result;
 
-    public FermentationRecipe(RecipeType<?> type, ResourceLocation id, String group, FluidStack result, CountSpecificIngredient[] ingredient) {
-        super(type, id, group, 0);
+    public FermentationRecipe(RecipeType<?> type, ResourceLocation id, String group, FluidStack result, FluidIngredient fluidIngredient, SizeSpecificIngredient ingredients) {
+        super(type, id, group, 0, FERMENTATION_RECIPE_SERIALIZER.get());
         this.result = result;
-        this.ingredients.addAll(Arrays.asList(ingredient));
-        this.fluidIngredients.addAll(Collections.singleton(FluidIngredient.of(result)));
+
+        // fermentation will only take 1 ingredient and 1 fluid ingredient
+        this.ingredients.add(ingredients);
+        this.fluidIngredients.add(fluidIngredient);
     }
 
-    @Override
-    public boolean matches(RecipeInventoryWrapper inv, Level pLevel) {
-        boolean fluid = false;
-        for (FluidIngredient fluidIngredient : fluidIngredients) {
-            if (fluidIngredient.testPartial(inv.getFluidInventory().getFluidInTank(0))) {
-                fluid = true;
-            }
-        }
-        return fluid && hasCatalyst(inv.getItem(0), inv.getFluidInventory().getFluidInTank(0));
-    }
-
-    public boolean hasCatalyst(ItemStack cat, FluidStack stack) {
-        return getCatalystIngredient().test(cat);
-    }
-
-    public FluidIngredient getFermentationFluid() {
-        return this.fluidIngredients.get(0);
-    }
-
-    public CountSpecificIngredient getCatalystIngredient() {
-        return this.ingredients.get(0);
-    }
-
-    public NonNullList<FluidIngredient> getFluidIngredients() {
-        return this.fluidIngredients;
-    }
-
-    @Override
-    public NonNullList<Ingredient> getIngredients() {
-        return NonNullList.create();
-    }
-
-    public NonNullList<CountSpecificIngredient> getCountSpecificIngredients() {
-        return this.ingredients;
+    public FluidStack getResultFluid() {
+        return result;
     }
 
     public FluidStack assembleFluid(RecipeInventoryWrapper wrapper) {
@@ -80,71 +53,82 @@ public class FermentationRecipe extends AbstractRecipe {
     }
 
     @Override
+    public boolean matches(RecipeInventoryWrapper pContainer, Level pLevel) {
+        if (!pContainer.canStorageFluid()) return false;
+        return getFluidIngredient().test(pContainer.getFluidInventory().getFluidInTank(0)) && hasCatalyst(pContainer.getItem(0));
+    }
+
+    public boolean hasCatalyst(ItemStack cat) {
+        return getCatalystIngredient().test(cat);
+    }
+
+    public FluidIngredient getFluidIngredient() {
+        return fluidIngredients.get(0);
+    }
+
+    public SizeSpecificIngredient getCatalystIngredient() {
+        return this.ingredients.get(0);
+    }
+
+    @Override
     public ItemStack assemble(RecipeInventoryWrapper pContainer) {
-        return ItemStack.EMPTY;
+        return FluidUtil.getFilledBucket(result.copy());
     }
-
-    public FluidStack getResultFluid() {
-        return this.result;
-    }
-
 
     @Override
     public ItemStack getResultItem() {
-        return ItemStack.EMPTY;
+        return FluidUtil.getFilledBucket(result);
     }
 
     public static class Serializer implements RecipeSerializer<FermentationRecipe> {
 
         @Override
-        public FermentationRecipe fromJson(ResourceLocation pRecipeId, JsonObject json) {
-            String group = JsonUtils.getStringOr("group", json, "");
-            CountSpecificIngredient[] ingredient = SomeJsonUtil.deserializeCountSpecificIngredients(json);
-            FluidStack resultStack = SomeJsonUtil.deserializeFluidStack(json);
-            return new FermentationRecipe(BrewchemyRegistry.Recipes.FERMENTATION_RECIPE.get(), pRecipeId, group, resultStack, ingredient);
+        public FermentationRecipe fromJson(ResourceLocation pRecipeId, JsonObject pSerializedRecipe) {
+            String group = SomeJsonUtil.getStringOr("group", pSerializedRecipe, "");
+            JsonObject ingredients = pSerializedRecipe.getAsJsonObject("ingredients");
+            SizeSpecificIngredient ingredient = SizeSpecificIngredient.Serializer.INSTANCE.parse(ingredients.getAsJsonObject("ingredient"));
+            FluidIngredient fluidIngredient = FluidIngredient.of(ingredients.getAsJsonObject("fluid_ingredient"));
+            FluidStack result = SomeJsonUtil.deserializeFluidStack(pSerializedRecipe);
+            return new FermentationRecipe(BrewchemyRegistry.Recipes.FERMENTATION_RECIPE.get(), pRecipeId, group, result, fluidIngredient, ingredient);
         }
-
 
         @Override
         public @Nullable FermentationRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
             String group = pBuffer.readUtf();
-            int ingredientCount = pBuffer.readVarInt();
-            CountSpecificIngredient[] ingredients = new CountSpecificIngredient[ingredientCount];
-            for (int i = 0; i < ingredients.length; i++) {
-                ingredients[i] = CountSpecificIngredient.Serializer.INSTANCE.parse(pBuffer);
-            }
-            FluidStack resultStack = pBuffer.readFluidStack();
-            return new FermentationRecipe(BrewchemyRegistry.Recipes.FERMENTATION_RECIPE.get(), pRecipeId, group, resultStack, ingredients);
+            SizeSpecificIngredient ingredient = (SizeSpecificIngredient) Ingredient.fromNetwork(pBuffer);
+            FluidIngredient fluidIngredient = (FluidIngredient) Ingredient.fromNetwork(pBuffer);
+            FluidStack result = pBuffer.readFluidStack();
+            return new FermentationRecipe(BrewchemyRegistry.Recipes.FERMENTATION_RECIPE.get(), pRecipeId, group, result, fluidIngredient, ingredient);
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf pBuffer, FermentationRecipe pRecipe) {
             pBuffer.writeUtf(pRecipe.getGroup());
-            pBuffer.writeVarInt(pRecipe.getIngredients().size());
-            for (CountSpecificIngredient ingredient : pRecipe.getCountSpecificIngredients()) {
-                ingredient.toNetwork(pBuffer);
-            }
+            pRecipe.getCatalystIngredient().toNetwork(pBuffer);
+            pRecipe.getFluidIngredient().toNetwork(pBuffer);
             pBuffer.writeFluidStack(pRecipe.getResultFluid());
         }
     }
 
     public static class DatagenBuilder {
         private final ResourceLocation name;
-        private final CountSpecificIngredient ingredient;
+        private final SizeSpecificIngredient ingredient;
+        private final FluidIngredient fluidIngredient;
         private final FluidStack result;
         private String group;
         private final RecipeSerializer<?> supplier;
 
-        public DatagenBuilder(ResourceLocation name, CountSpecificIngredient ingredient, FluidStack result, RecipeSerializer<?> supplier) {
+        public DatagenBuilder(ResourceLocation name, String group, SizeSpecificIngredient ingredient, FluidIngredient fluidIngredient, FluidStack result, RecipeSerializer<?> supplier) {
             this.name = name;
             this.ingredient = ingredient;
+            this.fluidIngredient = fluidIngredient;
             this.result = result;
             this.group = group;
             this.supplier = supplier;
         }
 
-        public static DatagenBuilder addRecipe(ResourceLocation name, CountSpecificIngredient ingredient, FluidStack result) {
-            return new DatagenBuilder(name, ingredient, result, BrewchemyRegistry.Recipes.FERMENTATION_RECIPE_SERIALIZER.get());
+        public static DatagenBuilder addRecipe(ResourceLocation name, SizeSpecificIngredient ingredient, FluidIngredient fluidIngredient, FluidStack result) {
+            return new DatagenBuilder(name, Brewchemy.MODID, ingredient, fluidIngredient, result, FERMENTATION_RECIPE_SERIALIZER.get());
         }
 
         public void build(Consumer<FinishedRecipe> consumer) {
@@ -152,26 +136,29 @@ public class FermentationRecipe extends AbstractRecipe {
                     this.name,
                     this.group == null ? "" : this.group,
                     this.ingredient,
+                    this.fluidIngredient,
                     this.result,
                     this.supplier));
         }
 
         public static class Factory implements FinishedRecipe {
             private final ResourceLocation name;
-            private final CountSpecificIngredient ingredient;
+            private final SizeSpecificIngredient ingredient;
+            private final FluidIngredient fluidIngredient;
             private final FluidStack result;
             private String group;
             private final RecipeSerializer<?> supplier;
 
-            public Factory(ResourceLocation name, String group, CountSpecificIngredient ingredient, FluidStack result, RecipeSerializer<?> supplier) {
+            public Factory(ResourceLocation name, String group, SizeSpecificIngredient ingredient, FluidIngredient fluidIngredient, FluidStack result, RecipeSerializer<?> supplier) {
                 this.name = name;
                 this.group = group;
                 this.ingredient = ingredient;
+                this.fluidIngredient = fluidIngredient;
                 this.result = result;
                 this.supplier = supplier;
             }
 
-            private JsonObject serializeFluidStacks(FluidStack stack) {
+            private JsonObject serializeFluidStack(FluidStack stack) {
                 JsonObject json = new JsonObject();
                 json.addProperty("fluid", ForgeRegistries.FLUIDS.getKey(stack.getFluid()).toString());
                 if (stack.getAmount() != 0) {
@@ -181,12 +168,13 @@ public class FermentationRecipe extends AbstractRecipe {
             }
 
             @Override
-            public void serializeRecipeData(JsonObject json) {
-                if (!this.group.isEmpty()) {
-                    json.addProperty("group", this.group);
-                }
-                json.add("item_ingredient", this.ingredient.toJson());
-                json.add("result", serializeFluidStacks(this.result));
+            public void serializeRecipeData(JsonObject pJson) {
+                pJson.addProperty("group", group);
+                JsonObject ingredient = new JsonObject();
+                ingredient.add("ingredient", this.ingredient.toJson());
+                ingredient.add("fluid_ingredient", this.fluidIngredient.toJson());
+                pJson.add("ingredients", ingredient);
+                pJson.add("result", serializeFluidStack(result));
             }
 
             @Override

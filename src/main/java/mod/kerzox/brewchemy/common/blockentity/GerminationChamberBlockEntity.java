@@ -1,35 +1,16 @@
 package mod.kerzox.brewchemy.common.blockentity;
 
-import mod.kerzox.brewchemy.Brewchemy;
-import mod.kerzox.brewchemy.client.gui.menu.GerminationChamberMenu;
 import mod.kerzox.brewchemy.common.blockentity.base.BrewchemyBlockEntity;
-import mod.kerzox.brewchemy.common.capabilities.item.ItemStackInventory;
-import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
-import mod.kerzox.brewchemy.common.crafting.recipes.GerminationRecipe;
 import mod.kerzox.brewchemy.common.util.IServerTickable;
-import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
 
 public class GerminationChamberBlockEntity extends BrewchemyBlockEntity implements IServerTickable, MenuProvider {
     public GerminationChamberBlockEntity(BlockEntityType<?> pType, BlockPos pWorldPosition, BlockState pBlockState) {

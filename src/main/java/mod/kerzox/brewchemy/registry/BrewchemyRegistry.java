@@ -1,6 +1,6 @@
 package mod.kerzox.brewchemy.registry;
 
-import com.mojang.serialization.Codec;
+import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.gui.menu.FermentationBarrelMenu;
 import mod.kerzox.brewchemy.client.gui.menu.GerminationChamberMenu;
 import mod.kerzox.brewchemy.client.gui.menu.MillstoneMenu;
@@ -12,6 +12,10 @@ import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.*;
 import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseStorageBlockEntity;
+import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
+import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
+import mod.kerzox.brewchemy.common.crafting.ingredient.OldFluidIngredient;
+import mod.kerzox.brewchemy.common.crafting.ingredient.SizeSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.*;
 import mod.kerzox.brewchemy.common.effects.IntoxicatedEffect;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluidType;
@@ -38,14 +42,15 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Material;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import org.jline.terminal.Size;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +95,9 @@ public class BrewchemyRegistry {
         Menus.init();
         BrewchemyLootRegistry.init(bus);
 //        Particles.init();
+
+        CraftingHelper.register(new ResourceLocation(Brewchemy.MODID, "size_specific_ingredient"), SizeSpecificIngredient.Serializer.INSTANCE);
+        CraftingHelper.register(new ResourceLocation(Brewchemy.MODID, "fluid_ingredient"), FluidIngredient.Serializer.INSTANCE);
     }
 
     public static final CreativeModeTab BREWCHEMY_TAB = new CreativeModeTab("brewchemy") {
@@ -149,8 +157,6 @@ public class BrewchemyRegistry {
 
         public static final RegistryObject<RecipeType<MillstoneRecipe>> MILLSTONE_RECIPE = RECIPE_TYPES.register("millstone", () -> RecipeType.simple(new ResourceLocation(MODID, "millstone")));
         public static final RegistryObject<MillstoneRecipe.Serializer> MILLSTONE_RECIPE_SERIALIZER = RECIPES.register("millstone_recipe_serializer", MillstoneRecipe.Serializer::new);
-        public static final RegistryObject<RecipeType<GerminationRecipe>> GERMINATION_RECIPE = RECIPE_TYPES.register("germination", () -> RecipeType.simple(new ResourceLocation(MODID, "germination")));
-        public static final RegistryObject<GerminationRecipe.Serializer> GERMINATION_RECIPE_SERIALIZER = RECIPES.register("germination_recipe_serializer", GerminationRecipe.Serializer::new);
         public static final RegistryObject<RecipeType<FermentJarRecipe>> FERMENTS_JAR_RECIPE = RECIPE_TYPES.register("fermentsjar", () -> RecipeType.simple(new ResourceLocation(MODID, "fermentsjar")));
         public static final RegistryObject<FermentJarRecipe.Serializer> FERMENTS_JAR_RECIPE_SERIALIZER = RECIPES.register("fermentsjar_serializer", FermentJarRecipe.Serializer::new);
         public static final RegistryObject<RecipeType<FermentationRecipe>> FERMENTATION_RECIPE = RECIPE_TYPES.register("fermentation", () -> RecipeType.simple(new ResourceLocation(MODID, "fermentation")));

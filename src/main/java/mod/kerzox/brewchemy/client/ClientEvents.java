@@ -25,6 +25,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import java.util.function.Consumer;
+
 import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.*;
 
 public class ClientEvents {

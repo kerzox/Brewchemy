@@ -1,9 +1,10 @@
 package mod.kerzox.brewchemy.common.crafting.recipes;
 
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
+import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.common.crafting.AbstractRecipe;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
+import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.util.SomeJsonUtil;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
@@ -21,8 +22,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -31,26 +30,20 @@ public class FermentJarRecipe extends AbstractRecipe {
     private final NonNullList<FluidIngredient> ingredients = NonNullList.create();
     private final ItemStack result;
 
-    public FermentJarRecipe(RecipeType<?> type, ResourceLocation id, String group, ItemStack result, FluidIngredient[] ingredients, int duration) {
-        super(type, id, group, duration);
+    public FermentJarRecipe(RecipeType<?> type, ResourceLocation id, String group, ItemStack result, FluidIngredient ingredients, int duration) {
+        super(type, id, group, duration, BrewchemyRegistry.Recipes.FERMENTS_JAR_RECIPE_SERIALIZER.get());
         this.result = result;
-        this.ingredients.addAll(Arrays.asList(ingredients));
+        this.ingredients.add(ingredients);
     }
 
     @Override
     public boolean matches(RecipeInventoryWrapper inv, Level pLevel) {
         if (!inv.canStorageFluid()) return false;
-
-        for (FluidIngredient ingredient : ingredients) {
-            if (ingredient.test(new FluidStack(inv.getFluidInventory().getFluidInTank(0), ingredient.getAmountFromIngredient(inv.getFluidInventory().getFluidInTank(0))))) {
-                return true;
-            }
-        }
-        return false;
+        return getFluidIngredient().test(inv.getFluidInventory().getFluidInTank(0));
     }
 
-    public NonNullList<FluidIngredient> getFluidIngredients() {
-        return this.ingredients;
+    public FluidIngredient getFluidIngredient() {
+        return this.ingredients.get(0);
     }
 
     @Override
@@ -72,34 +65,27 @@ public class FermentJarRecipe extends AbstractRecipe {
 
         @Override
         public FermentJarRecipe fromJson(ResourceLocation pRecipeId, JsonObject json) {
-            String group = JsonUtils.getStringOr("group", json, "");
-            FluidIngredient[] ingredients = SomeJsonUtil.deserializeFluidIngredients(json);
+            String group = SomeJsonUtil.getStringOr("group", json, "");
+            FluidIngredient ingredient = FluidIngredient.of(json.getAsJsonObject("fluid_ingredient"));
             ItemStack resultStack = SomeJsonUtil.deserializeItemStack(json);
-            int duration = JsonUtils.getIntOr("duration", json, 0);
-            return new FermentJarRecipe(BrewchemyRegistry.Recipes.FERMENTS_JAR_RECIPE.get(), pRecipeId, group, resultStack, ingredients, duration);
+            int duration = SomeJsonUtil.getIntOr("duration", json, 0);
+            return new FermentJarRecipe(BrewchemyRegistry.Recipes.FERMENTS_JAR_RECIPE.get(), pRecipeId, group, resultStack, ingredient, duration);
         }
 
 
         @Override
         public @Nullable FermentJarRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
             String group = pBuffer.readUtf();
-            int ingredientCount = pBuffer.readVarInt();
-            FluidIngredient[] ingredients = new FluidIngredient[ingredientCount];
-            for (int i = 0; i < ingredients.length; i++) {
-                ingredients[i] = FluidIngredient.fromNetwork(pBuffer);
-            }
+            FluidIngredient ingredient = (FluidIngredient) Ingredient.fromNetwork(pBuffer);
             ItemStack resultStack = pBuffer.readItem();
             int duration = pBuffer.readVarInt();
-            return new FermentJarRecipe(BrewchemyRegistry.Recipes.FERMENTS_JAR_RECIPE.get(), pRecipeId, group, resultStack, ingredients, duration);
+            return new FermentJarRecipe(BrewchemyRegistry.Recipes.FERMENTS_JAR_RECIPE.get(), pRecipeId, group, resultStack, ingredient, duration);
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf pBuffer, FermentJarRecipe pRecipe) {
             pBuffer.writeUtf(pRecipe.getGroup());
-            pBuffer.writeVarInt(pRecipe.getIngredients().size());
-            for (FluidIngredient ingredient : pRecipe.getFluidIngredients()) {
-                ingredient.toNetwork(pBuffer);
-            }
+            pRecipe.getFluidIngredient().toNetwork(pBuffer);
             pBuffer.writeItem(pRecipe.getResultItem());
             pBuffer.writeVarInt(pRecipe.getDuration());
         }
@@ -117,7 +103,7 @@ public class FermentJarRecipe extends AbstractRecipe {
             this.name = name;
             this.result = result;
             this.ingredient = ingredient;
-            this.group = group;
+            this.group = Brewchemy.MODID;
             this.duration = duration;
             this.supplier = supplier;
         }
@@ -164,11 +150,9 @@ public class FermentJarRecipe extends AbstractRecipe {
 
             @Override
             public void serializeRecipeData(JsonObject json) {
-                if (!this.group.isEmpty()) {
-                    json.addProperty("group", this.group);
-                }
+                json.addProperty("group", this.group);
                 json.addProperty("duration", this.duration);
-                json.add("fluid_ingredient", this.ingredient.serialize());
+                json.add("fluid_ingredient", this.ingredient.toJson());
                 json.add("result", serializeItemStacks(this.result));
             }
 

@@ -1,35 +1,45 @@
 package mod.kerzox.brewchemy.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+
 import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.baked.PintGlassBakedModel;
 import mod.kerzox.brewchemy.client.baked.RopeTiedFenceBakedModel;
-import mod.kerzox.brewchemy.client.overlay.WarehouseOverlay;
-import mod.kerzox.brewchemy.client.render.MillstoneCrankBlockEntityRenderer;
+import mod.kerzox.brewchemy.client.gui.screen.FermentationBarrelScreen;
+import mod.kerzox.brewchemy.client.gui.screen.MillstoneScreen;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.block.BlockModelShaper;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.client.event.ModelEvent.BakingCompleted;
-import net.minecraftforge.client.event.ModelEvent.RegisterGeometryLoaders;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.DynamicFluidContainerModel;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import static mod.kerzox.brewchemy.client.overlay.WarehouseOverlay.WAREHOUSE_STOCK;
 import static mod.kerzox.brewchemy.client.render.MillstoneCrankBlockEntityRenderer.CRANK_MODEL;
 
 @Mod.EventBusSubscriber(modid = Brewchemy.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class ClientStartupEvents {
+public class ClientSetup {
 
-    public static void init() {
+    public static void init(FMLClientSetupEvent event) {
+
+        event.enqueueWork(() -> {
+            MenuScreens.register(BrewchemyRegistry.Menus.MILLSTONE_GUI.get(), MillstoneScreen::new);
+            // MenuScreens.register(BrewchemyRegistry.Menus.GERMINATION_CHAMBER_GUI.get(), GerminationScreen::new);
+            MenuScreens.register(BrewchemyRegistry.Menus.FERMENTATION_BARREL_MENU.get(), FermentationBarrelScreen::new);
+        });
+
+        MinecraftForge.EVENT_BUS.register(new ClientEvents());
+
     }
 
     @SubscribeEvent
@@ -56,7 +66,7 @@ public class ClientStartupEvents {
     }
 
     @SubscribeEvent
-    public static void onModelBakeEvent(BakingCompleted event) {
+    public static void onModelBakeEvent(ModelEvent.BakingCompleted event) {
         System.out.println("Model bake");
         for (BlockState blockState : BrewchemyRegistry.Blocks.ROPE_FENCE_BLOCK.get().getStateDefinition().getPossibleStates()) {
             ModelResourceLocation variantMRL = BlockModelShaper.stateToModelLocation(blockState);
@@ -83,6 +93,4 @@ public class ClientStartupEvents {
         }
 
     }
-
-
 }

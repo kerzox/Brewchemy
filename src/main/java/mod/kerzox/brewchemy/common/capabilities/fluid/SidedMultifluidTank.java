@@ -22,6 +22,8 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
 
     public SidedMultifluidTank(int inputTanks, int inputCapacities, int outputTanks, int outputCapacities) {
         super(new InputWrapper(inputTanks, inputCapacities), new OutputWrapper(outputTanks, outputCapacities));
+        this.getInputHandler().setMain(this);
+        this.getOutputHandler().setMain(this);
         input.addAll(Arrays.asList(Direction.values()));
         output.add(Direction.NORTH);
     }
@@ -86,17 +88,34 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
         onLoad();
     }
 
+    protected void onContentsChanged(IFluidHandler handlerAffected) {
+
+    }
+
     protected void onLoad() {
 
     }
 
+//    public MultitankFluid getAsBasic() {
+//        MultitankFluid tank = new MultitankFluid(this.getTanks(), this.ge);
+//        tank.deserializeNBT(this.getInputHandler().serializeNBT());
+//        tank.deserializeNBT(this.getOutputHandler().serializeNBT());
+//        return tank;
+//    }
+
     public static class InputWrapper extends MultitankFluid {
 
         private LazyOptional<InputWrapper> handler = LazyOptional.of(() -> this);
+        private SidedMultifluidTank main;
 
         public InputWrapper(int tanks, int tankCapacities) {
             super(tanks, tankCapacities);
         }
+
+        public void setMain(SidedMultifluidTank main) {
+            this.main = main;
+        }
+
 
         @Override
         public @NotNull FluidStack drain(FluidStack resource, FluidAction action) {
@@ -111,14 +130,23 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
             return handler.cast();
         }
 
+        @Override
+        protected void onContentsChanged() {
+            this.main.onContentsChanged(this);
+        }
     }
 
     public static class OutputWrapper extends MultitankFluid {
 
         private LazyOptional<OutputWrapper> handler = LazyOptional.of(() -> this);
+        private SidedMultifluidTank main;
 
         public OutputWrapper(int tanks, int tankCapacities) {
             super(tanks, tankCapacities);
+        }
+
+        public void setMain(SidedMultifluidTank main) {
+            this.main = main;
         }
 
         @Override
@@ -132,6 +160,11 @@ public class SidedMultifluidTank extends CombinedFluidInventory implements IStri
 
         public <T> LazyOptional<T> getHandler() {
             return handler.cast();
+        }
+
+        @Override
+        protected void onContentsChanged() {
+            this.main.onContentsChanged(this);
         }
 
     }

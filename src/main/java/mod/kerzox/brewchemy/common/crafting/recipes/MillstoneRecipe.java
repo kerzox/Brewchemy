@@ -1,7 +1,7 @@
 package mod.kerzox.brewchemy.common.crafting.recipes;
 
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
+import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.common.crafting.AbstractRecipe;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventoryWrapper;
 import mod.kerzox.brewchemy.common.util.SomeJsonUtil;
@@ -31,7 +31,7 @@ public class MillstoneRecipe extends AbstractRecipe {
     private final ItemStack result;
 
     public MillstoneRecipe(RecipeType<?> type, ResourceLocation id, String group, ItemStack result, Ingredient[] ingredients, int duration) {
-        super(type, id, group, duration);
+        super(type, id, group, duration, BrewchemyRegistry.Recipes.MILLSTONE_RECIPE_SERIALIZER.get());
         this.result = result;
         this.ingredients.addAll(Arrays.asList(ingredients));
         this.ingredients.forEach(i -> matching.put(i, false));
@@ -68,10 +68,10 @@ public class MillstoneRecipe extends AbstractRecipe {
 
         @Override
         public MillstoneRecipe fromJson(ResourceLocation pRecipeId, JsonObject json) {
-            String group = JsonUtils.getStringOr("group", json, "");
+            String group = SomeJsonUtil.getStringOr("group", json, "");
             Ingredient[] ingredients = SomeJsonUtil.deserializeIngredients(json);
             ItemStack resultStack = SomeJsonUtil.deserializeItemStack(json);
-            int duration = JsonUtils.getIntOr("duration", json, 0);
+            int duration = SomeJsonUtil.getIntOr("duration", json, 0);
             return new MillstoneRecipe(BrewchemyRegistry.Recipes.MILLSTONE_RECIPE.get(), pRecipeId, group, resultStack, ingredients, duration);
         }
 
@@ -113,7 +113,7 @@ public class MillstoneRecipe extends AbstractRecipe {
             this.name = name;
             this.result = result;
             this.ingredient = ingredient;
-            this.group = group;
+            this.group = Brewchemy.MODID;
             this.duration = duration;
             this.supplier = supplier;
         }

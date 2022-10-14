@@ -62,10 +62,16 @@ public class BrewingRecipeCategory extends AbstractRecipeCategory<BrewingRecipe>
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, BrewingRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.INPUT, 13, 16).addIngredients(recipe.getCIngredients().get(0));
+
+        if (recipe.getSizedIngredients().size() > 1) {
+
+        } else {
+            builder.addSlot(RecipeIngredientRole.INPUT, 13, 16).addIngredients(recipe.getSizedIngredients().get(0));
+        }
+
         builder.addSlot(RecipeIngredientRole.INPUT, 46, 0)
                 .setFluidRenderer(10000, false, 24, 49)
-                .addIngredients(ForgeTypes.FLUID_STACK, List.of(recipe.getFluidIngredients().get(0).getStacks()));
+                .addIngredients(ForgeTypes.FLUID_STACK, recipe.getFluidIngredient().getFluidStacks());
         builder.addSlot(RecipeIngredientRole.OUTPUT, 87, 0)
                 .setFluidRenderer(10000, false, 24, 49)
                 .addIngredient(ForgeTypes.FLUID_STACK, new FluidStack(recipe.getResultFluid().getFluid(), recipe.getResultFluid().getAmount()));
