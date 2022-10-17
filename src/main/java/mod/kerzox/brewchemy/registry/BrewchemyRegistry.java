@@ -12,9 +12,7 @@ import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.*;
 import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseStorageBlockEntity;
-import mod.kerzox.brewchemy.common.crafting.ingredient.CountSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
-import mod.kerzox.brewchemy.common.crafting.ingredient.OldFluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.SizeSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipes.*;
 import mod.kerzox.brewchemy.common.effects.IntoxicatedEffect;
@@ -50,7 +48,6 @@ import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import org.jline.terminal.Size;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -201,7 +198,7 @@ public class BrewchemyRegistry {
         public static final makeBlock<FluidBarrelBlock<WoodenBarrelBlockEntity>> WOODEN_BARREL_BLOCK = makeBlock.build("wooden_barrel_block", p -> new FluidBarrelBlock<>(WOODEN_BARREL.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(1.0F), true);
         public static final makeBlock<BoilKettleBlock> BOIL_KETTLE_BLOCK = makeBlock.build("boil_kettle_block", p -> new BoilKettleBlock(BREWING_POT.getType(), p), BlockBehaviour.Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(3F), true);
         public static final makeBlock<BoilKettleBlock.BoilKettleTop> BOIL_KETTLE_TOP_BLOCK = makeBlock.build("boil_kettle_top_block", BoilKettleBlock.BoilKettleTop::new, BlockBehaviour.Properties.of(Material.METAL).noCollission().noLootTable().requiresCorrectToolForDrops().strength(3F), false);
-        public static final makeBlock<WarehouseBlock> WAREHOUSE_BLOCK = makeBlock.buildCustomSuppliedItem("warehouse_block",  p -> new WarehouseBlock(WAREHOUSE.getType(), p), BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F), () -> new WarehouseBlock.Item(new Item.Properties().tab(BREWCHEMY_TAB)));
+        public static final makeBlock<WarehouseBlock> WAREHOUSE_BLOCK = makeBlock.buildCustomSuppliedItem("warehouse_block", p -> new WarehouseBlock(WAREHOUSE.getType(), p), BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F), () -> new WarehouseBlock.Item(new Item.Properties().tab(BREWCHEMY_TAB)));
         public static final makeBlock<WarehouseBlock.WarehouseStorageBlock> WAREHOUSE_STORAGE_BLOCK = makeBlock.build("warehouse_storage_block", WarehouseBlock.WarehouseStorageBlock::new, BlockBehaviour.Properties.of(Material.GLASS).strength(-1.0F, 3600000.0F).noLootTable(), false);
         public static final makeBlock<GrapeFlowerBlock.GrapeTrunkBlock> GRAPE_TRUNK_BLOCK = makeBlock.build("grape_trunk_block", GrapeFlowerBlock.GrapeTrunkBlock::new, BlockBehaviour.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.WOOD), true);
         public static final makeBlock<GrapeFlowerBlock> GRAPE_FLOWER_BLOCK = makeBlock.build("grape_flower_block", GrapeFlowerBlock::new, BlockBehaviour.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.CROP), false);
@@ -254,13 +251,14 @@ public class BrewchemyRegistry {
         public static final makeBlockEntity<FermentsJarBlockEntity> FERMENTS_JAR = makeBlockEntity.build("ferments_jar_be", FermentsJarBlockEntity::new, FERMENTS_JAR_BLOCK);
         public static final makeBlockEntity<BoilKettleBlockEntity> BREWING_POT = makeBlockEntity.build("brewing_pot_be", BoilKettleBlockEntity::new, BOIL_KETTLE_BLOCK);
         public static final makeBlockEntity<BoilKettleBlockEntity.TopBlockEntity> BREWING_TOP_POT = makeBlockEntity.build("brewing_pot_top_be", BoilKettleBlockEntity.TopBlockEntity::new, BOIL_KETTLE_TOP_BLOCK);
-       // public static final makeBlockEntity<SupportStickEntityBlock> SUPPORT_STICK = makeBlockEntity.build("support_stick_be", SupportStickEntityBlock::new, SUPPORT_STICK_BLOCK);
+        // public static final makeBlockEntity<SupportStickEntityBlock> SUPPORT_STICK = makeBlockEntity.build("support_stick_be", SupportStickEntityBlock::new, SUPPORT_STICK_BLOCK);
         public static final makeBlockEntity<RopeBlockEntity> ROPE = makeBlockEntity.build("rope_be", RopeBlockEntity::new, ROPE_BLOCK);
         public static final makeBlockEntity<RopeTiedFenceBlockEntity> ROPE_FENCE = makeBlockEntity.build("rope_fence_be", RopeTiedFenceBlockEntity::new, ROPE_FENCE_BLOCK);
         //public static final makeBlockEntity<GerminationChamberBlockEntity> GERMINATION_CHAMBER = makeBlockEntity.build("germination_chamber_be", GerminationChamberBlockEntity::new, GERMINATION_CHAMBER_BLOCK);
         public static final makeBlockEntity<WoodenBarrelBlockEntity> WOODEN_BARREL = makeBlockEntity.build("wooden_barrel_be", WoodenBarrelBlockEntity::new, WOODEN_BARREL_BLOCK);
         public static final makeBlockEntity<WarehouseBlockEntity> WAREHOUSE = makeBlockEntity.build("warehouse_be", WarehouseBlockEntity::new, WAREHOUSE_BLOCK);
         public static final makeBlockEntity<WarehouseStorageBlockEntity> WAREHOUSE_STORAGE = makeBlockEntity.build("warehouse_storage_be", WarehouseStorageBlockEntity::new, WAREHOUSE_STORAGE_BLOCK);
+
         public static class makeBlockEntity<T extends BlockEntity> implements Supplier<BlockEntityType<T>> {
 
             private final RegistryObject<BlockEntityType<T>> type;
@@ -341,18 +339,18 @@ public class BrewchemyRegistry {
             }
 
             private RegistryObject<FlowingFluid> makeFlowing(String name) {
-                this.flowingFluid = FLUIDS.register(name+"_flowing", () -> new ForgeFlowingFluid.Flowing(this.properties));
+                this.flowingFluid = FLUIDS.register(name + "_flowing", () -> new ForgeFlowingFluid.Flowing(this.properties));
                 return flowingFluid;
             }
 
             private RegistryObject<BrewchemyLiquidBlock> makeBlock(String name) {
-                this.block = BLOCKS.register(name+"_block",
+                this.block = BLOCKS.register(name + "_block",
                         () -> new BrewchemyLiquidBlock(this.flowingFluid, BlockBehaviour.Properties.of(Material.WATER).noCollission().strength(100.0F).noLootTable()));
                 return block;
             }
 
             private RegistryObject<Item> makeBucket(String name) {
-                this.bucket = ITEMS.register(name+"_bucket",
+                this.bucket = ITEMS.register(name + "_bucket",
                         () -> new BucketItem(this.fluid, new Item.Properties()
                                 .craftRemainder(net.minecraft.world.item.Items.BUCKET)
                                 .stacksTo(1)
@@ -389,7 +387,7 @@ public class BrewchemyRegistry {
                 return block;
             }
 
-            public RegistryObject<T> getType () {
+            public RegistryObject<T> getType() {
                 return fluidType;
             }
         }

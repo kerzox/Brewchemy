@@ -3,6 +3,7 @@ package mod.kerzox.brewchemy.client;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Vector3f;
 import mod.kerzox.brewchemy.Brewchemy;
+import mod.kerzox.brewchemy.client.util.RenderingUtil;
 import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.warehouse.WarehouseStorageBlockEntity;
 import mod.kerzox.brewchemy.common.effects.IntoxicatedEffect;
@@ -17,14 +18,20 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.AirBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.*;
@@ -70,14 +77,19 @@ public class ClientEvents {
                         for (int x = relative.getX(); x < relative.getX() + 5; x++) {
                             for (int y = relative.getY(); y < relative.getY() + 5; y++) {
                                 for (int z = relative.getZ(); z < relative.getZ() + 5; z++) {
-                                    BlockPos relativePos = new BlockPos(x, y, z);
-                                    if (player.getDirection() == Direction.SOUTH) {
-                                        relativePos = relativePos.offset(-4, 0, 0);
-                                    } else if (player.getDirection() == Direction.NORTH) {
-                                        relativePos = relativePos.offset(0, 0, -4);
-                                    } else if (player.getDirection() == Direction.WEST) {
-                                        relativePos = relativePos.offset(-4, 0, -4);
+                                    BlockPos relativePos = new BlockPos(x - relative.getX(), y - relative.getY(), z - relative.getZ());
+                                    if (facing == Direction.EAST) {
+                                        relativePos = relativePos.offset(1, 0, 0);
+                                    } else if (facing == Direction.SOUTH) {
+                                        relativePos = relativePos.rotate(Rotation.CLOCKWISE_90).offset(0, 0, 1);
+                                    } else if (facing == Direction.WEST) {
+                                        relativePos = relativePos.rotate(Rotation.CLOCKWISE_180).offset(-1, 0, 0);
+                                    } else if (facing == Direction.NORTH) {
+                                        relativePos = relativePos.rotate(Rotation.COUNTERCLOCKWISE_90).offset(0, 0, -1);;
                                     }
+
+                                    relativePos = relativePos.offset(relative.getX(), relative.getY(), relative.getZ());
+
                                     if (!(level.getBlockState(relativePos).getBlock() instanceof AirBlock)) {
                                         red = 1f;
                                         green = 0f;
@@ -108,6 +120,7 @@ public class ClientEvents {
                                 relative.getY() + 5,
                                 relative.getZ() + 5, red, green, blue, 1.0F);
                         poseStack.popPose();
+
 
                     } else if (level.getBlockEntity(block.getBlockPos()) instanceof WarehouseBlockEntity warehouse) {
                         Direction facing = warehouse.getBlockState().getValue(HorizontalDirectionalBlock.FACING).getOpposite();

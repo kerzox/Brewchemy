@@ -20,6 +20,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.capabilities.Capability;
@@ -104,15 +105,17 @@ public class WarehouseBlockEntity extends BrewchemyBlockEntity implements IServe
         for (int x = position1.getX(); x < position2.getX(); x++) {
             for (int y = position1.getY(); y < position2.getY(); y++) {
                 for (int z = position1.getZ(); z < position2.getZ(); z++) {
-                    BlockPos relativePos = getBlockPos().relative(facing).offset(x, y, z);
-                    if (facing == Direction.SOUTH) {
-                        relativePos = relativePos.offset(-position2.getX() + 1, 0, 0);
-                    } else if (facing == Direction.NORTH) {
-                        relativePos = relativePos.offset(0, 0, -position2.getZ() + 1);
+                    BlockPos relativePos = new BlockPos(x, y, z);
+                    if (facing == Direction.EAST) {
+                        relativePos = relativePos.offset(1, 0, 0);
+                    } else if (facing == Direction.SOUTH) {
+                        relativePos = relativePos.rotate(Rotation.CLOCKWISE_90).offset(0, 0, 1);
                     } else if (facing == Direction.WEST) {
-                        relativePos = relativePos.offset(-position2.getX() + 1, 0, -position2.getZ() + 1);
+                        relativePos = relativePos.rotate(Rotation.CLOCKWISE_180).offset(-1, 0, 0);
+                    } else if (facing == Direction.NORTH) {
+                        relativePos = relativePos.rotate(Rotation.COUNTERCLOCKWISE_90).offset(0, 0, -1);;
                     }
-                    positions.add(relativePos);
+                    positions.add(getBlockPos().offset(relativePos));
                 }
             }
         }
