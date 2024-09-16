@@ -35,6 +35,11 @@ public abstract class BrewchemyCropBlock extends CropBlock {
     }
 
     @Override
+    public void growCrops(Level p_52264_, BlockPos p_52265_, BlockState p_52266_) {
+        super.growCrops(p_52264_, p_52265_, p_52266_);
+    }
+
+    @Override
     public int getMaxAge() {
         return this.maxAge;
     }
@@ -77,7 +82,7 @@ public abstract class BrewchemyCropBlock extends CropBlock {
     }
 
     public void ageCrop(ServerLevel pLevel, BlockPos pPos, RandomSource pRandom, BlockState pState, int age) {
-
+        pLevel.setBlock(pPos, pState.setValue(getAgeProperty(), age), 2);
     }
 
     public boolean isHarvestable(BlockState pState) {

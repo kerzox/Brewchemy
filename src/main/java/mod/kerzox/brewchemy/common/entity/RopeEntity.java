@@ -1,14 +1,14 @@
 package mod.kerzox.brewchemy.common.entity;
 
-import mod.kerzox.brewchemy.client.render.entity.RopeEntityRenderer;
-import mod.kerzox.brewchemy.common.block.RopeTiedPostBlock;
 import mod.kerzox.brewchemy.common.blockentity.RopeTiedPost;
 import mod.kerzox.brewchemy.common.item.RopeItem;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -26,9 +26,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class RopeEntity extends Entity {
 
@@ -45,6 +43,13 @@ public class RopeEntity extends Entity {
     private static final EntityDataAccessor<BlockPos> DATA_SECOND_POSITION = SynchedEntityData.defineId(RopeEntity.class, EntityDataSerializers.BLOCK_POS);
     private static final EntityDataAccessor<Boolean> CAN_SUPPORT = SynchedEntityData.defineId(RopeEntity.class, EntityDataSerializers.BOOLEAN);
 
+    private boolean isVertical = false;
+    private boolean currentlySupported = false;
+
+    private RopeEntity supportingRope = null;
+
+    HashSet<BlockPos> cropPositions = new HashSet<>();
+
     public RopeEntity(EntityType<?> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
     }
@@ -53,6 +58,11 @@ public class RopeEntity extends Entity {
         super(BrewchemyRegistry.Entities.ROPE_ENTITY.get(), p_19871_);
         setPos(x + 0.5f, y + (6 / 16f), z + 0.5f);
 
+    }
+
+    public boolean supportedFromTheTop(RopeEntity supportingRope) {
+        //checks if the supporting rope is the same height as this ropes end point
+        return supportingRope.getPositions()[0].getY() == Math.max(this.getPositions()[0].getY(), this.getPositions()[1].getY());
     }
 
     @Override
@@ -101,6 +111,7 @@ public class RopeEntity extends Entity {
         } else if (direction.getAxis() == Direction.Axis.X) {
              bb = new AABB(minX + size, pos[0].getY() + size, centerZ + size, maxX + 1 - size, pos[0].getY() + 1 - size, centerZ + 1 - size);
         } else {
+            this.isVertical = true;
              bb = new AABB(centerX + size, minY + size, centerZ + size, centerX + 1 - size, maxY + 1 - size, centerZ + 1 - size);
         }
 
@@ -124,7 +135,13 @@ public class RopeEntity extends Entity {
 
     @Override
     public void remove(RemovalReason p_146834_) {
-        notifyIntersectedRopes(NotifyReason.REMOVAL, false);
+
+        // notify the entire rope network
+        for (RopeEntity rope : traverseIntersectingRopes(this)) {
+            if (rope == this) continue;
+            rope.currentlySupported = false;
+            rope.intersectedRopeUpdate(null, this, false, NotifyReason.REMOVAL);
+        }
         super.remove(p_146834_);
     }
 
@@ -142,14 +159,39 @@ public class RopeEntity extends Entity {
             findIntersectingRopes(null, null);
         }
 
+        if (notify) {
+            // this gives us every rope we are directly and indirectly connected to
+        }
+
         if (!level().isClientSide) {
             // check if we are not a structural rope
-            if (!canSupport()) {
+            if (!isStructural()) {
+                this.currentlySupported = false;
+                // if we are connected directly to a structural rope and are currently supported
+                if (this.supportingRope != null) {
+
+                    // exit asap
+                    if (reason == NotifyReason.REMOVAL && entityResponsible == this.supportingRope) {
+                        // reason for notification is removal the entity responsible is our supporting rope
+                        this.supportingRope = null;
+                    }
+                }
+
                 // search through all intersecting ropes find first structural rope
                 for (List<RopeEntity> entities : getIntersections().values()) {
                     for (RopeEntity ropeEntity : entities) {
-                        if (ropeEntity.canSupport()) {
-                            // we are valid to survive
+                        if (ropeEntity.isStructural() && supportedFromTheTop(ropeEntity)) {
+                            // this rope is connected to a structural rope
+                            this.currentlySupported = true;
+                            this.supportingRope = ropeEntity;
+                            return;
+                        }
+                    }
+                    // we didn't find a structural, but maybe we can find a supported rope we can leech from
+                    for (RopeEntity ropeEntity : entities) {
+                        if (ropeEntity.isCurrentlySupported() && supportedFromTheTop(ropeEntity)) {
+                            // we did so mark as supported
+                            this.currentlySupported = true;
                             return;
                         }
                     }
@@ -158,8 +200,10 @@ public class RopeEntity extends Entity {
                 return;
             }
 
-            // get here we are not valid anymore
+//            // get here we are not valid anymore
             drop();
+
+
         }
 
 
@@ -178,6 +222,34 @@ public class RopeEntity extends Entity {
     public void drop() {
         kill();
         spawnAtLocation(BrewchemyRegistry.Items.ROPE_ITEM.get());
+        for (BlockPos position : cropPositions) {
+            level().destroyBlock(position, true);
+        }
+    }
+
+    public HashSet<RopeEntity> traverseIntersectingRopes(RopeEntity startingNode) {
+        Queue<RopeEntity> queue = new LinkedList<>();
+        HashSet<RopeEntity> visited = new HashSet<>();
+
+        queue.add(startingNode);
+        visited.add(startingNode);
+
+        while (!queue.isEmpty()) {
+
+            RopeEntity current = queue.poll();
+
+
+            for (List<RopeEntity> value : current.getIntersections().values()) {
+                for (RopeEntity next : value) {
+                    if (!visited.contains(next)) {
+                        queue.add(next);
+                        visited.add(next);
+                    }
+                }
+            }
+
+        }
+        return visited;
     }
 
     @Override
@@ -196,10 +268,14 @@ public class RopeEntity extends Entity {
             if (hand == InteractionHand.MAIN_HAND) {
 
                 player.sendSystemMessage(Component.literal("Position clicked on rope: "+position.toShortString()));
-                player.sendSystemMessage(Component.literal("Is structural: "+(canSupport() ? "Yes" : "No")));
+                player.sendSystemMessage(Component.literal("Is structural: "+(isStructural() ? "Yes" : "No")));
 
                 for (AABB aabb : getIntersections().keySet()) {
                     player.sendSystemMessage(Component.literal("IP: " + aabb + " : " + getIntersections().get(aabb).size()));
+                }
+
+                for (RopeEntity rope : traverseIntersectingRopes(this)) {
+                    player.sendSystemMessage(Component.literal(rope.blockPosition().toShortString()));
                 }
 
                 ItemStack stack = player.getMainHandItem();
@@ -284,6 +360,13 @@ public class RopeEntity extends Entity {
 
     }
 
+    public boolean isCurrentlySupported() {
+        return currentlySupported;
+    }
+
+    public boolean isVertical() {
+        return isVertical;
+    }
 
     @Override
     public void tick() {
@@ -292,7 +375,9 @@ public class RopeEntity extends Entity {
         if (boundingBox == getBoundingBox()) {
             boundingBox = null;
             findIntersectingRopes(null, null);
+            notifyIntersectedRopes(NotifyReason.INTERSECT, false);
         }
+
     }
 
     @Override
@@ -309,6 +394,8 @@ public class RopeEntity extends Entity {
 
         List<RopeEntity> entities = level().getEntitiesOfClass(RopeEntity.class, boundingBox != null ? boundingBox : getBoundingBox());
 
+        HashMap<AABB, List<RopeEntity>> copy = new HashMap<>(getIntersections());
+
         for (RopeEntity ropeEntity : entities) {
             if (ropeEntity == this || ignore == ropeEntity) { continue;}
             //TODO add this as a cached value in the entity
@@ -317,17 +404,17 @@ public class RopeEntity extends Entity {
             if (intersections.containsKey(intersection)) {
                 if (!intersections.get(intersection).contains(ropeEntity)) {
                     intersections.get(intersection).add(ropeEntity);
-                    notifyIntersectedRopes(NotifyReason.INTERSECT, false);
                 }
             } else {
                 intersections.put(intersection, new ArrayList<>());
                 intersections.get(intersection).add(ropeEntity);
-                notifyIntersectedRopes(NotifyReason.INTERSECT, false);
             }
-
-
-
         }
+
+        if (!copy.equals(getIntersections())) {
+//            notifyIntersectedRopes(NotifyReason.INTERSECT, false);
+        }
+
     }
 
     public HashMap<AABB, List<RopeEntity>> getIntersections() {
@@ -380,6 +467,10 @@ public class RopeEntity extends Entity {
 
     }
 
+    public HashSet<BlockPos> getCropPositions() {
+        return cropPositions;
+    }
+
     public void setCanSupport(boolean value) {
         this.getEntityData().set(CAN_SUPPORT, value);
     }
@@ -388,7 +479,7 @@ public class RopeEntity extends Entity {
         return this.getEntityData().get(UPDATE);
     }
 
-    public boolean canSupport() {
+    public boolean isStructural() {
         return this.getEntityData().get(CAN_SUPPORT);
     }
 
@@ -411,6 +502,11 @@ public class RopeEntity extends Entity {
         setSecondPosition(NbtUtils.readBlockPos(tag.getCompound("pos2")));
         setUpdate(tag.getBoolean("update"));
         setCanSupport(tag.getBoolean("can_support"));
+        ListTag list = tag.getList("crop_positions", Tag.TAG_COMPOUND);
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag tag2 = list.getCompound(i);
+            cropPositions.add(NbtUtils.readBlockPos(tag2));
+        }
     }
 
     @Override
@@ -418,6 +514,14 @@ public class RopeEntity extends Entity {
         tag.put("pos1", NbtUtils.writeBlockPos(getPositions()[0]));
         tag.put("pos2", NbtUtils.writeBlockPos(getPositions()[1]));
         tag.putBoolean("update", getUpdateState());
-        tag.putBoolean("can_support", canSupport());
+        tag.putBoolean("can_support", isStructural());
+
+        ListTag tag1 = new ListTag();
+        for (BlockPos cropPosition : cropPositions) {
+            tag1.add(NbtUtils.writeBlockPos(cropPosition));
+        }
+
+        tag.put("crop_positions", tag1);
+
     }
 }

@@ -42,16 +42,9 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
     }
 
     @Override
-    public void render(RopeEntity entity,
-                       float p_114486_,
-                       float partialTicks,
-                       PoseStack poseStack,
-                       MultiBufferSource bufferSource,
-                       int combinedLight) {
-
+    public void render(RopeEntity entity, float p_114486_, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight) {
         super.render(entity, p_114486_, partialTicks, poseStack, bufferSource, combinedLight);
 
-        int tint = 0xFFbc8c17;
         int packedLight = LightTexture.pack(Minecraft.getInstance().level.getBrightness(LightLayer.BLOCK, entity.getOnPos()), Minecraft.getInstance().level.getBrightness(LightLayer.SKY, entity.getOnPos()));
         BakedModel model = context.getBlockRenderDispatcher().getBlockModel(BrewchemyRegistry.Blocks.ROPE_TIED_POST_BLOCK.get().defaultBlockState());
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(new ResourceLocation(Brewchemy.MODID, "block/rope_block"));
@@ -98,7 +91,7 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
             int min = Math.min(positions[0].getY(), positions[1].getY());
             int max = Math.max(positions[0].getY(), positions[1].getY());
 
-            wp.translate(-1, 14/16f, 0);
+            wp.translate(-1, 14 / 16f, 0);
             wp.rotateZ(90);
 
             for (int i = min; i < max; i++) {
@@ -110,25 +103,9 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
 
         wp.pop();
 
-/*        for (RopeEntity ropeEntity : entity.level().getEntitiesOfClass(RopeEntity.class, entity.getBoundingBox())) {
-            if (ropeEntity != entity) {
-                //TODO add this as a cached value in the entity
-                AABB intersection = entity.getBoundingBox().intersect(ropeEntity.getBoundingBox());
-
-
-            }
-        }*/
-
         for (AABB intersection : entity.getIntersections().keySet()) {
             for (RopeEntity ropeEntity : entity.getIntersections().get(intersection)) {
-                LevelRenderer.renderLineBox(wp.asStack(),
-                        Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.LINES),
-                        intersection.minX - entity.position().x,
-                        intersection.minY - entity.position().y,
-                        intersection.minZ - entity.position().z,
-                        intersection.maxX - entity.position().x,
-                        intersection.maxY - entity.position().y,
-                        intersection.maxZ - entity.position().z, direction.getAxis() == Direction.Axis.Z ? 1f : 0, direction.getAxis() == Direction.Axis.X ? 1f : 0, direction.getAxis() == Direction.Axis.Y ? 1f : 0, 1.0F);
+                LevelRenderer.renderLineBox(wp.asStack(), Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.LINES), intersection.minX - entity.position().x, intersection.minY - entity.position().y, intersection.minZ - entity.position().z, intersection.maxX - entity.position().x, intersection.maxY - entity.position().y, intersection.maxZ - entity.position().z, direction.getAxis() == Direction.Axis.Z ? 1f : 0, direction.getAxis() == Direction.Axis.X ? 1f : 0, direction.getAxis() == Direction.Axis.Y ? 1f : 0, 1.0F);
             }
         }
 
@@ -136,58 +113,16 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
     }
 
     private static void drawRope(PoseStack poseStack, MultiBufferSource bufferSource, WrappedPose wp, TextureAtlasSprite sprite, int packedLight) {
-        wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack,
-                bufferSource.getBuffer(RenderType.solid()),
-                sprite,
-                Direction.NORTH,
-                packedLight,
-                0, 7 / 16f, 7 / 16f, 1, 9 / 16f, 1,
-                0xFFffffff));
+        wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack, bufferSource.getBuffer(RenderType.solid()), sprite, Direction.NORTH, packedLight, 0, 7 / 16f, 7 / 16f, 1, 9 / 16f, 1, 0xFFffffff));
 
-        wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack,
-                bufferSource.getBuffer(RenderType.solid()),
-                sprite,
-                Direction.SOUTH,
-                packedLight,
-                0, 7 / 16f, 1, 1, 9 / 16f, 9 / 16f,
-                0xFFffffff));
+        wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack, bufferSource.getBuffer(RenderType.solid()), sprite, Direction.SOUTH, packedLight, 0, 7 / 16f, 1, 1, 9 / 16f, 9 / 16f, 0xFFffffff));
 
-        wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack,
-                bufferSource.getBuffer(RenderType.solid()),
-                sprite,
-                Direction.UP,
-                packedLight,
-                0, 0, 9 / 16f, 1, 7 / 16f, 7 / 16f,
-                0xFFffffff));
-
-        // add a check incase we want to cull face
-
-        wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack,
-                bufferSource.getBuffer(RenderType.solid()),
-                sprite,
-                Direction.UP,
-                packedLight,
-                0, 0, 0, 0, 0, 0,
-                0xFFffffff));
-
-        wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack,
-                bufferSource.getBuffer(RenderType.solid()),
-                sprite,
-                Direction.UP,
-                packedLight,
-                0, 0, 0, 0, 0, 0,
-                0xFFffffff));
+        wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack, bufferSource.getBuffer(RenderType.solid()), sprite, Direction.UP, packedLight, 0, 0, 9 / 16f, 1, 7 / 16f, 7 / 16f, 0xFFffffff));
 
         wp.push();
         wp.rotateX(180);
 
-        wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack,
-                bufferSource.getBuffer(RenderType.solid()),
-                sprite,
-                Direction.UP,
-                packedLight,
-                0, 0, 9 / 16f, 1, 7 / 16f, 7 / 16f,
-                0xFFffffff));
+        wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack, bufferSource.getBuffer(RenderType.solid()), sprite, Direction.UP, packedLight, 0, 0, 9 / 16f, 1, 7 / 16f, 7 / 16f, 0xFFffffff));
 
         wp.pop();
     }

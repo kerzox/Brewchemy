@@ -2,6 +2,7 @@ package mod.kerzox.brewchemy.registry;
 
 import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.common.block.BarleyCropBlock;
+import mod.kerzox.brewchemy.common.block.HopsCropBlock;
 import mod.kerzox.brewchemy.common.block.RopeTiedPostBlock;
 import mod.kerzox.brewchemy.common.blockentity.RopeTiedPost;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
@@ -98,6 +99,10 @@ public class BrewchemyRegistry {
                 true,
                 "rope_item", () -> new RopeItem(new Item.Properties()));
 
+        public static final RegistryObject<Item> HOPS_ITEM = register(
+                true,
+                "hops_item", () -> new BarleyItem(new Item.Properties()));
+
         public static void init() {
 
         }
@@ -127,6 +132,17 @@ public class BrewchemyRegistry {
                         .instabreak()
                         .sound(SoundType.CROP)
                         .pushReaction(PushReaction.DESTROY)), () -> new BarleyItem.Seed(new Item.Properties()));
+
+        public static final makeBlock<HopsCropBlock> HOPS_CROP_BLOCK
+                = makeBlock.build("hops_crop_block",
+                HopsCropBlock::new,
+                (BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.PLANT)
+                        .noCollission()
+                        .randomTicks()
+                        .instabreak()
+                        .sound(SoundType.CROP)
+                        .pushReaction(PushReaction.DESTROY)), true);
 
         public static final makeBlock<RopeTiedPostBlock> ROPE_TIED_POST_BLOCK
                 = makeBlock.build("rope_tied_post_block",
