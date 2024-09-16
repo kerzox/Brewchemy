@@ -1,32 +1,38 @@
 package mod.kerzox.brewchemy.datagen;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mod.kerzox.brewchemy.Brewchemy;
-import mod.kerzox.brewchemy.common.block.base.BrewchemyCropBlock;
+import mod.kerzox.brewchemy.common.block.BrewchemyCropBlock;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.generators.BlockModelBuilder;
-import net.minecraftforge.client.model.generators.BlockModelProvider;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.IGeneratedBlockState;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 public class GenerateBlockModels extends BlockStateProvider {
-    
-    public GenerateBlockModels(DataGenerator gen, ExistingFileHelper exFileHelper) {
+
+    public GenerateBlockModels(PackOutput gen, ExistingFileHelper exFileHelper) {
         super(gen, Brewchemy.MODID, exFileHelper);
     }
 
     @Override
     protected void registerStatesAndModels() {
-        for (BrewchemyRegistry.Blocks.makeBlock<?> block : BrewchemyRegistry.Blocks.makeBlock.ENTRIES) {
-            if (block.get() instanceof BrewchemyCropBlock crop) {
-                CropModelBuilder blockstate = new CropModelBuilder(block.getName(), crop.getMaxAge() + 1);
+
+        for (RegistryObject<Block> registryObject : BrewchemyRegistry.Blocks.ALL_BLOCKS.values()) {
+
+            Block block = registryObject.get();
+
+            if (block instanceof BrewchemyCropBlock crop) {
+
+                String name = BuiltInRegistries.BLOCK.getKey(crop).getPath();
+
+                CropModelBuilder blockstate = new CropModelBuilder(name, crop.getMaxAge() + 1);
                 for (var i = 0; i < crop.getMaxAge() + 1; i++) {
-                    String textureName = "block/"+block.getName()+"_stage"+i;
+                    String textureName = "block/"+name+"_stage_"+i;
                     ResourceLocation cropModel = modLoc(textureName);
                     models().getBuilder(modLoc(textureName).getPath())
                             .parent(models().getExistingFile(modLoc("brewchemycrops")))
@@ -36,6 +42,8 @@ public class GenerateBlockModels extends BlockStateProvider {
                 }
             }
         }
+
+
     }
 
     public static class CropModelBuilder implements IGeneratedBlockState {
@@ -55,9 +63,29 @@ public class GenerateBlockModels extends BlockStateProvider {
 
             for (var i = 0; i < age; i++) {
                 JsonObject model = new JsonObject();
-                model.addProperty("model", Brewchemy.MODID + ":block/" + modelName+"_stage"+i);
+                model.addProperty("model", Brewchemy.MODID + ":block/" + modelName+"_stage_"+i);
                 variants.add("age="+i, model);
             }
+            root.add("variants", variants);
+            return root;
+        }
+    }
+
+    public static class SimpleModelBuilder implements IGeneratedBlockState {
+
+        private String modelName;
+
+        public SimpleModelBuilder(String model) {
+            this.modelName = model;
+        }
+
+        @Override
+        public JsonObject toJson() {
+            JsonObject root = new JsonObject();
+            JsonObject model = new JsonObject();
+            model.addProperty("model", Brewchemy.MODID + ":block/" + modelName);
+            JsonObject variants = new JsonObject();
+            variants.add("", model);
             root.add("variants", variants);
             return root;
         }

@@ -1,4 +1,4 @@
 package mod.kerzox.brewchemy.datagen;
 
-public class GenerateLootTables {
+public class GenerateBlockTags {
 }

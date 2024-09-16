@@ -1,25 +1,31 @@
 package mod.kerzox.brewchemy.common.block;
 
-import mod.kerzox.brewchemy.common.block.base.BrewchemyCropBlock;
-
+import mod.kerzox.brewchemy.common.util.BrewchemyUtils;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public class BarleyCropBlock extends BrewchemyCropBlock {
 
-    public BarleyCropBlock(Properties properties) {
-        super(properties);
+    public static final IntegerProperty growthStages = IntegerProperty.create("age", 0, 5);
+
+    public BarleyCropBlock(Properties p_52247_) {
+        super(p_52247_);
+        this.maxAge = 5;
+        this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(this.getAgeProperty(), 0));
     }
 
     @Override
     public void harvest(Level level, BlockPos pos, BlockState state, Player pPlayer) {
-        ItemStack seedDrop = new ItemStack(BrewchemyRegistry.Blocks.BARLEY_CROP_BLOCK.get(), level.random.nextInt(0, 2));
-        ItemStack itemDrop = new ItemStack(BrewchemyRegistry.Items.BARLEY_ITEM.get() , 1);
+        ItemStack seedDrop = new ItemStack(BrewchemyUtils.getItemUnsafe("barley_crop_block"), level.random.nextInt(0, 2));
+        ItemStack itemDrop = new ItemStack(BrewchemyUtils.getItemUnsafe("barley_item"), 1);
         level.setBlockAndUpdate(pos, this.defaultBlockState());
 
         ItemEntity item = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), itemDrop);
@@ -30,4 +36,13 @@ public class BarleyCropBlock extends BrewchemyCropBlock {
         }
     }
 
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_52286_) {
+        p_52286_.add(growthStages);
+    }
+
+    @Override
+    protected IntegerProperty getAgeProperty() {
+        return growthStages;
+    }
 }

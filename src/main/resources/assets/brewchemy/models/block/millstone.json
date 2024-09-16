@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/orientable_with_bottom",
-  "textures": {
-    "bottom": "brewchemy:block/millstone_bottom",
-    "front": "brewchemy:block/millstone_side",
-    "side": "brewchemy:block/millstone_side",
-    "top": "brewchemy:block/millstone_top"
-  }
-}

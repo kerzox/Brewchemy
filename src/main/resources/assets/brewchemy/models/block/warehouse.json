@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/orientable_with_bottom",
-  "textures": {
-    "bottom": "brewchemy:block/warehouse_side",
-    "front": "brewchemy:block/warehouse_side",
-    "side": "brewchemy:block/warehouse_side",
-    "top": "brewchemy:block/warehouse_top"
-  }
-}

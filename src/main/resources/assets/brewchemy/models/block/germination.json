@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/orientable_with_bottom",
-  "textures": {
-    "bottom": "brewchemy:block/germination_bottom",
-    "front": "brewchemy:block/germination_side",
-    "side": "brewchemy:block/germination_side",
-    "top": "brewchemy:block/germination_top"
-  }
-}
