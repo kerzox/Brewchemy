@@ -2,7 +2,7 @@ package mod.kerzox.brewchemy.datagen;
 
 import com.google.gson.JsonObject;
 import mod.kerzox.brewchemy.Brewchemy;
-import mod.kerzox.brewchemy.common.block.BrewchemyCropBlock;
+import mod.kerzox.brewchemy.common.block.base.BrewchemyCropBlock;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;

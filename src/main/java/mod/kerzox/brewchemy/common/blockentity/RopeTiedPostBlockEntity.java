@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.common.blockentity;
 
+import mod.kerzox.brewchemy.common.blockentity.base.SyncedBlockEntity;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -9,19 +10,18 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 
-public class RopeTiedPost extends SyncedBlockEntity {
+public class RopeTiedPostBlockEntity extends SyncedBlockEntity {
 
     public static final ModelProperty<BlockState> MIMIC = new ModelProperty<>();
     // mimic state
     private BlockState mimicState = Blocks.OAK_FENCE.defaultBlockState();
 
-    public RopeTiedPost(BlockPos pos, BlockState state) {
-        super(BrewchemyRegistry.BlockEntities.ROPE_TIED_POST.get(), pos, state);
+    public RopeTiedPostBlockEntity(BlockPos pos, BlockState state) {
+        super(BrewchemyRegistry.BlockEntities.ROPE_TIED_POST_BLOCK_ENTITY.get(), pos, state);
     }
 
     public void setFenceToMimic(BlockState newState) {

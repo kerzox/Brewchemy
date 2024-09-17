@@ -1,7 +1,7 @@
 package mod.kerzox.brewchemy.client.render.baked;
 
 import mod.kerzox.brewchemy.common.block.RopeTiedPostBlock;
-import mod.kerzox.brewchemy.common.blockentity.RopeTiedPost;
+import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -45,7 +45,7 @@ public class RopeTiedPostBakedModel implements IDynamicBakedModel {
 
     private BakedModel getCamoModelFromData(ModelData data) {
         BakedModel model = this.model;
-        BlockState mimic = data.get(RopeTiedPost.MIMIC);
+        BlockState mimic = data.get(RopeTiedPostBlockEntity.MIMIC);
         if (mimic != null && !(mimic.getBlock() instanceof RopeTiedPostBlock)) {
             model = Minecraft.getInstance().getBlockRenderer().getBlockModel(mimic);
         }

@@ -1,4 +1,4 @@
-package mod.kerzox.brewchemy.common.blockentity;
+package mod.kerzox.brewchemy.common.blockentity.base;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

@@ -1,6 +1,6 @@
 package mod.kerzox.brewchemy.common.entity;
 
-import mod.kerzox.brewchemy.common.blockentity.RopeTiedPost;
+import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
 import mod.kerzox.brewchemy.common.item.RopeItem;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
@@ -352,7 +352,7 @@ public class RopeEntity extends Entity {
 
         // check if we are a structural rope
 
-       if (level.getBlockEntity(firstPos) instanceof RopeTiedPost && level.getBlockEntity(secondPos) instanceof RopeTiedPost) {
+       if (level.getBlockEntity(firstPos) instanceof RopeTiedPostBlockEntity && level.getBlockEntity(secondPos) instanceof RopeTiedPostBlockEntity) {
             // both end points are rope tied fences which means we can support other ropes
             setCanSupport(true);
         }

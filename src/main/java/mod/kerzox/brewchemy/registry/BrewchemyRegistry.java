@@ -1,10 +1,13 @@
 package mod.kerzox.brewchemy.registry;
 
-import mod.kerzox.brewchemy.Brewchemy;
+import mod.kerzox.brewchemy.client.ui.menu.MillingMenu;
 import mod.kerzox.brewchemy.common.block.BarleyCropBlock;
 import mod.kerzox.brewchemy.common.block.HopsCropBlock;
+import mod.kerzox.brewchemy.common.block.MillingBlock;
 import mod.kerzox.brewchemy.common.block.RopeTiedPostBlock;
-import mod.kerzox.brewchemy.common.blockentity.RopeTiedPost;
+import mod.kerzox.brewchemy.common.blockentity.MillingBlockEntity;
+import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
+import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
 import mod.kerzox.brewchemy.common.item.BarleyItem;
 import mod.kerzox.brewchemy.common.item.RopeItem;
@@ -14,7 +17,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.inventory.MenuType;
@@ -27,20 +29,18 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.ArrayList;
+import java.awt.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -77,7 +77,9 @@ public class BrewchemyRegistry {
 
         Blocks.init();
         Items.init();
+        Recipes.init();
         BlockEntities.init();
+        Menus.init();
         Entities.init();
     }
 
@@ -85,6 +87,29 @@ public class BrewchemyRegistry {
             .withTabsBefore(CreativeModeTabs.COMBAT)
             .title(Component.literal("Brewchemy"))
             .icon(() -> Items.BARLEY_ITEM.get().getDefaultInstance()).build());
+
+    public static class Recipes {
+
+        public static final RegistryObject<RecipeType<MillingRecipe>> MILLING_RECIPE = RECIPE_TYPES.register("milling", () -> RecipeType.simple(new ResourceLocation(MODID, "milling")));
+        public static final RegistryObject<MillingRecipe.Serializer> MILLING_RECIPE_SERIALIZER = RECIPES.register("milling_serializer", MillingRecipe.Serializer::new);
+
+        public static void init() {
+
+        }
+
+    }
+
+    public static class Menus {
+        public static final RegistryObject<MenuType<MillingMenu>> MILLING_MENU = MENUS.register("milling_menu", () -> IForgeMenuType.create((windowId, inv, data) -> {
+            BlockPos pos = data.readBlockPos();
+            Level level = inv.player.level();
+            return new MillingMenu(windowId, inv, inv.player, (MillingBlockEntity) level.getBlockEntity(pos));
+        }));
+
+        public static void init() {
+
+        }
+    }
 
     public static class Items {
 
@@ -94,6 +119,10 @@ public class BrewchemyRegistry {
         public static final RegistryObject<Item> BARLEY_ITEM = register(
                 true,
                 "barley_item", () -> new BarleyItem(new Item.Properties()));
+
+        public static final RegistryObject<Item> MILLED_BARLEY_ITEM = register(
+                true,
+                "milled_barley_item", () -> new Item(new Item.Properties()));
 
         public static final RegistryObject<Item> ROPE_ITEM = register(
                 true,
@@ -152,6 +181,15 @@ public class BrewchemyRegistry {
                         .sound(SoundType.WOOD)
                         .pushReaction(PushReaction.DESTROY)), false);
 
+        public static final makeBlock<MillingBlock> MILLING_BLOCK
+                = makeBlock.build("milling_block",
+                p -> new MillingBlock(BlockEntities.MILLING_BLOCK_ENTITY.getType(), p),
+                (BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.STONE)
+                        .sound(SoundType.STONE)
+                        .requiresCorrectToolForDrops().strength(1.5F, 3.0F)
+                        .pushReaction(PushReaction.NORMAL)), true);
+
         public static void init() {
 
         }
@@ -205,8 +243,11 @@ public class BrewchemyRegistry {
 
     public static class BlockEntities {
 
-        public static final makeBlockEntity<RopeTiedPost> ROPE_TIED_POST
-                = makeBlockEntity.build("rope_tied_post", RopeTiedPost::new, Blocks.ROPE_TIED_POST_BLOCK);
+        public static final makeBlockEntity<RopeTiedPostBlockEntity> ROPE_TIED_POST_BLOCK_ENTITY
+                = makeBlockEntity.build("rope_tied_post_block_entity", RopeTiedPostBlockEntity::new, Blocks.ROPE_TIED_POST_BLOCK);
+
+        public static final makeBlockEntity<MillingBlockEntity> MILLING_BLOCK_ENTITY
+                = makeBlockEntity.build("milling_block_entity", MillingBlockEntity::new, Blocks.MILLING_BLOCK);
 
         public static void init() {
 

@@ -2,6 +2,8 @@ package mod.kerzox.brewchemy;
 
 import com.mojang.logging.LogUtils;
 import mod.kerzox.brewchemy.client.ClientSetup;
+import mod.kerzox.brewchemy.common.event.TickUtils;
+import mod.kerzox.brewchemy.common.network.PacketHandler;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
@@ -38,10 +40,11 @@ public class Brewchemy
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         BrewchemyRegistry.init(modEventBus);
-
+        PacketHandler.register();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonLoad);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onEntityRenderRegister);
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new TickUtils());
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> modEventBus.addListener(ClientSetup::init));
         modEventBus.addListener(this::addCreative);
     }

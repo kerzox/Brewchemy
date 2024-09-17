@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.common.block;
 
+import mod.kerzox.brewchemy.common.block.base.BrewchemyCropBlock;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
 import mod.kerzox.brewchemy.common.util.BrewchemyUtils;
 import net.minecraft.core.BlockPos;

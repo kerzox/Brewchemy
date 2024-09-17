@@ -1,7 +1,7 @@
 package mod.kerzox.brewchemy.common.item;
 
 import mod.kerzox.brewchemy.common.block.RopeTiedPostBlock;
-import mod.kerzox.brewchemy.common.blockentity.RopeTiedPost;
+import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.rope.IRopeConnectable;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
@@ -14,11 +14,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.units.qual.C;
 
 public class RopeItem extends Item {
 
@@ -42,7 +40,7 @@ public class RopeItem extends Item {
 
                     BlockPos firstPos = NbtUtils.readBlockPos(getData(stack).getCompound("position"));
 
-                    if (pContext.getLevel().getBlockEntity(firstPos) instanceof RopeTiedPost rope) {
+                    if (pContext.getLevel().getBlockEntity(firstPos) instanceof RopeTiedPostBlockEntity rope) {
                         pContext.getLevel().setBlockAndUpdate(firstPos, rope.getMimicState());
                     }
 
@@ -62,7 +60,7 @@ public class RopeItem extends Item {
                 BlockPos pos = pContext.getClickedPos();
                 //
                 pContext.getLevel().setBlockAndUpdate(pContext.getClickedPos(), BrewchemyRegistry.Blocks.ROPE_TIED_POST_BLOCK.get().defaultBlockState());
-                if (pContext.getLevel().getBlockEntity(pContext.getClickedPos()) instanceof RopeTiedPost rope) {
+                if (pContext.getLevel().getBlockEntity(pContext.getClickedPos()) instanceof RopeTiedPostBlockEntity rope) {
                     rope.setFenceToMimic(oldState);
 
                     if (getData(stack).isEmpty()) {

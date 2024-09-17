@@ -1,7 +1,7 @@
 package mod.kerzox.brewchemy.common.block;
 
 
-import mod.kerzox.brewchemy.common.blockentity.RopeTiedPost;
+import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.FenceBlock;
@@ -18,6 +18,6 @@ public class RopeTiedPostBlock extends FenceBlock implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new RopeTiedPost(blockPos, blockState);
+        return new RopeTiedPostBlockEntity(blockPos, blockState);
     }
 }
