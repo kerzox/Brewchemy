@@ -111,7 +111,9 @@ public class EnergyInventory extends EnergyStorage implements IStrictInventory<E
 
     @Override
     public void invalidate() {
-
+        this.combined.invalidate();
+        this.input.invalidate();
+        this.output.invalidate();
     }
 
     @Override

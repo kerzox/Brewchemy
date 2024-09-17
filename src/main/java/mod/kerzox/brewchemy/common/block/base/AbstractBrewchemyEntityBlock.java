@@ -21,7 +21,7 @@ import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AbstractBrewchemyEntityBlock extends BrewchemyBlock implements EntityBlock {
+public abstract class AbstractBrewchemyEntityBlock extends BrewchemyDirectionalBlock implements EntityBlock {
 
 
     public AbstractBrewchemyEntityBlock(Properties p_49795_) {

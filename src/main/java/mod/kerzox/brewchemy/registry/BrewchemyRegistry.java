@@ -1,15 +1,15 @@
 package mod.kerzox.brewchemy.registry;
 
 import mod.kerzox.brewchemy.client.ui.menu.MillingMenu;
-import mod.kerzox.brewchemy.common.block.BarleyCropBlock;
-import mod.kerzox.brewchemy.common.block.HopsCropBlock;
-import mod.kerzox.brewchemy.common.block.MillingBlock;
-import mod.kerzox.brewchemy.common.block.RopeTiedPostBlock;
+import mod.kerzox.brewchemy.common.block.*;
+import mod.kerzox.brewchemy.common.blockentity.BrewingKettleBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.MillingBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
+import mod.kerzox.brewchemy.common.crafting.recipe.BrewingRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
 import mod.kerzox.brewchemy.common.item.BarleyItem;
+import mod.kerzox.brewchemy.common.item.BrewingKettleItem;
 import mod.kerzox.brewchemy.common.item.RopeItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleType;
@@ -92,6 +92,9 @@ public class BrewchemyRegistry {
 
         public static final RegistryObject<RecipeType<MillingRecipe>> MILLING_RECIPE = RECIPE_TYPES.register("milling", () -> RecipeType.simple(new ResourceLocation(MODID, "milling")));
         public static final RegistryObject<MillingRecipe.Serializer> MILLING_RECIPE_SERIALIZER = RECIPES.register("milling_serializer", MillingRecipe.Serializer::new);
+
+        public static final RegistryObject<RecipeType<BrewingRecipe>> BREWING_RECIPE = RECIPE_TYPES.register("brewing", () -> RecipeType.simple(new ResourceLocation(MODID, "brewing")));
+        public static final RegistryObject<BrewingRecipe.Serializer> BREWING_RECIPE_SERIALIZER = RECIPES.register("brewing_serializer", BrewingRecipe.Serializer::new);
 
         public static void init() {
 
@@ -190,6 +193,28 @@ public class BrewchemyRegistry {
                         .requiresCorrectToolForDrops().strength(1.5F, 3.0F)
                         .pushReaction(PushReaction.NORMAL)), true);
 
+        public static final makeBlock<BrewingKettleBlock> BREWING_KETTLE_BLOCK
+                = makeBlock.buildCustomSuppliedItem("brewing_kettle_block",
+                p -> new BrewingKettleBlock(BlockEntities.BREWING_KETTLE_BLOCK_ENTITY.getType(), p),
+                (BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.COLOR_ORANGE)
+                        .sound(SoundType.NETHERITE_BLOCK)
+                        .noOcclusion()
+                        .requiresCorrectToolForDrops().strength(1.5F, 3.0F)
+                        .pushReaction(PushReaction.DESTROY)), () -> new BrewingKettleItem(new Item.Properties()));
+
+        public static final makeBlock<BrewingKettleBlock.Top> BREWING_KETTLE_TOP_BLOCK
+                = makeBlock.build("brewing_kettle_top_block",
+                BrewingKettleBlock.Top::new,
+                (BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.COLOR_ORANGE)
+                        .sound(SoundType.NETHERITE_BLOCK)
+                        .noOcclusion()
+                        .noCollission()
+                        .requiresCorrectToolForDrops().strength(1.5F, 3.0F)
+                        .pushReaction(PushReaction.DESTROY)), false);
+
+
         public static void init() {
 
         }
@@ -248,6 +273,9 @@ public class BrewchemyRegistry {
 
         public static final makeBlockEntity<MillingBlockEntity> MILLING_BLOCK_ENTITY
                 = makeBlockEntity.build("milling_block_entity", MillingBlockEntity::new, Blocks.MILLING_BLOCK);
+
+        public static final makeBlockEntity<BrewingKettleBlockEntity> BREWING_KETTLE_BLOCK_ENTITY
+                = makeBlockEntity.build("brewing_kettle_block_entity", BrewingKettleBlockEntity::new, Blocks.BREWING_KETTLE_BLOCK);
 
         public static void init() {
 

@@ -52,8 +52,6 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
         WrappedPose wp = new WrappedPose(poseStack);
         wp.push();
 
-        VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.solid());
-
         BlockPos[] positions = entity.getPositions();
 
         BlockPos normalized = positions[1].subtract(positions[0]);
@@ -114,16 +112,11 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
 
     private static void drawRope(PoseStack poseStack, MultiBufferSource bufferSource, WrappedPose wp, TextureAtlasSprite sprite, int packedLight) {
         wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack, bufferSource.getBuffer(RenderType.solid()), sprite, Direction.NORTH, packedLight, 0, 7 / 16f, 7 / 16f, 1, 9 / 16f, 1, 0xFFffffff));
-
         wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack, bufferSource.getBuffer(RenderType.solid()), sprite, Direction.SOUTH, packedLight, 0, 7 / 16f, 1, 1, 9 / 16f, 9 / 16f, 0xFFffffff));
-
         wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack, bufferSource.getBuffer(RenderType.solid()), sprite, Direction.UP, packedLight, 0, 0, 9 / 16f, 1, 7 / 16f, 7 / 16f, 0xFFffffff));
-
         wp.push();
         wp.rotateX(180);
-
         wp.enclosedTranslate(0, 0, 0, () -> RenderingUtil.drawSpriteQuad(poseStack, bufferSource.getBuffer(RenderType.solid()), sprite, Direction.UP, packedLight, 0, 0, 9 / 16f, 1, 7 / 16f, 7 / 16f, 0xFFffffff));
-
         wp.pop();
     }
 

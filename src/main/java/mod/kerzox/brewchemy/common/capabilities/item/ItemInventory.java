@@ -135,10 +135,12 @@ public class ItemInventory extends CombinedInvWrapper implements IStrictCombined
 
     @Override
     public void invalidate() {
-
+        this.combined.invalidate();
+        this.input.invalidate();
+        this.output.invalidate();
     }
 
-    public static class InternalWrapper extends ItemStackHandler{
+    public static class InternalWrapper extends ItemStackHandler {
 
         private ItemInventory owner;
         private boolean input;

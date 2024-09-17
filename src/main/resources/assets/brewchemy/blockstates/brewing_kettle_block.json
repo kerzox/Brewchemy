@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "brewchemy:block/brewing_kettle"
+    },
+    "facing=south": {
+      "model": "brewchemy:block/brewing_kettle",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "brewchemy:block/brewing_kettle",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "brewchemy:block/brewing_kettle",
+      "y": 90
+    }
+  }
+}
