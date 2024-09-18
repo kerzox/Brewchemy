@@ -91,10 +91,10 @@ public class BrewchemyRegistry {
     public static class Recipes {
 
         public static final RegistryObject<RecipeType<MillingRecipe>> MILLING_RECIPE = RECIPE_TYPES.register("milling", () -> RecipeType.simple(new ResourceLocation(MODID, "milling")));
-        public static final RegistryObject<MillingRecipe.Serializer> MILLING_RECIPE_SERIALIZER = RECIPES.register("milling_serializer", MillingRecipe.Serializer::new);
+        public static final RegistryObject<MillingRecipe.Serializer> MILLING_RECIPE_SERIALIZER = RECIPES.register("milling", MillingRecipe.Serializer::new);
 
         public static final RegistryObject<RecipeType<BrewingRecipe>> BREWING_RECIPE = RECIPE_TYPES.register("brewing", () -> RecipeType.simple(new ResourceLocation(MODID, "brewing")));
-        public static final RegistryObject<BrewingRecipe.Serializer> BREWING_RECIPE_SERIALIZER = RECIPES.register("brewing_serializer", BrewingRecipe.Serializer::new);
+        public static final RegistryObject<BrewingRecipe.Serializer> BREWING_RECIPE_SERIALIZER = RECIPES.register("brewing", BrewingRecipe.Serializer::new);
 
         public static void init() {
 
@@ -210,7 +210,6 @@ public class BrewchemyRegistry {
                         .mapColor(MapColor.COLOR_ORANGE)
                         .sound(SoundType.NETHERITE_BLOCK)
                         .noOcclusion()
-                        .noCollission()
                         .requiresCorrectToolForDrops().strength(1.5F, 3.0F)
                         .pushReaction(PushReaction.DESTROY)), false);
 
