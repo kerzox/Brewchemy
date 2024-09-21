@@ -5,6 +5,8 @@ import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.SizeSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipe.BrewingRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
+import mod.kerzox.brewchemy.common.fluid.BrewchemyFluid;
+import mod.kerzox.brewchemy.common.fluid.alcohol.AgeableAlcoholStack;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
@@ -30,17 +32,15 @@ public class GenerateRecipes extends RecipeProvider {
                 new ItemStack(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get()),
                 SizeSpecificIngredient.of(BrewchemyRegistry.Items.BARLEY_ITEM.get(), 1), 180)
                 .build(consumer);
+        new BrewingRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "brewing_ale"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER_ALE.getFluid().get(), 500),
+                new SizeSpecificIngredient[]{ SizeSpecificIngredient.of(BrewchemyRegistry.Items.HOPS_ITEM.get(), 1) },
+                new FluidIngredient[] { FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 500)) },
+                20 * 2,
+                true,
+                100).build(consumer);
 
-        new BrewingRecipe.RecipeBuilder(new ResourceLocation(Brewchemy.MODID, "test_brewing_recipe"),
-                new ItemStack(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get()),
-                new SizeSpecificIngredient[] {SizeSpecificIngredient.of(BrewchemyRegistry.Items.BARLEY_ITEM.get(), 1)}, new FluidIngredient[] {FluidIngredient.of(new FluidStack(Fluids.WATER, 1000))}, 180)
-                .build(consumer);
-
-        new BrewingRecipe.RecipeBuilder(new ResourceLocation(Brewchemy.MODID, "test_brewing_recipe2"),
-                new ItemStack(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get()),
-                new SizeSpecificIngredient[] {SizeSpecificIngredient.of(BrewchemyRegistry.Items.BARLEY_ITEM.get(), 5), SizeSpecificIngredient.of(BrewchemyRegistry.Items.ROPE_ITEM.get(), 3), SizeSpecificIngredient.of(BrewchemyRegistry.Items.HOPS_ITEM.get(), 1)},
-                new FluidIngredient[] {FluidIngredient.of(new FluidStack(Fluids.WATER, 1000)), FluidIngredient.of(new FluidStack(Fluids.EMPTY, 1000))}, 180)
-                .build(consumer);
     }
 
 }

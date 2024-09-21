@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "brewchemy:block/culture_jar"
+    },
+    "facing=south": {
+      "model": "brewchemy:block/culture_jar",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "brewchemy:block/culture_jar",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "brewchemy:block/culture_jar",
+      "y": 90
+    }
+  }
+}

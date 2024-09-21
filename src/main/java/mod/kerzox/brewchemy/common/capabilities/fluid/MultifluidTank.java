@@ -1,5 +1,9 @@
 package mod.kerzox.brewchemy.common.capabilities.fluid;
 
+import mod.kerzox.brewchemy.common.capabilities.ICapabilitySerializer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -11,27 +15,27 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class MultifluidTank implements IFluidHandler {
+public class MultifluidTank implements IFluidHandler, ICapabilitySerializer {
 
-    private FluidTank[] fluidTanks;
+    private FluidStorage[] fluidTanks;
 
-    public MultifluidTank(FluidTank... tanks) {
-      this.fluidTanks = tanks;
+    public MultifluidTank(FluidStorage... tanks) {
+        this.fluidTanks = tanks;
     }
 
-    public MultifluidTank(Stream<FluidTank> uStream) {
-        List<FluidTank> tanks = uStream.toList();
-        this.fluidTanks = new FluidTank[tanks.size()];
+    public MultifluidTank(Stream<FluidStorage> uStream) {
+        List<FluidStorage> tanks = uStream.toList();
+        this.fluidTanks = new FluidStorage[tanks.size()];
         for (int i = 0; i < tanks.size(); i++) {
             fluidTanks[i] = tanks.get(i);
         }
     }
 
-    public static MultifluidTank of (int tanks, int capacity) {
-        return new MultifluidTank(IntStream.of(tanks).mapToObj(i->new FluidTank(capacity)));
+    public static MultifluidTank of(int tanks, int capacity) {
+        return new MultifluidTank(IntStream.range(0, tanks).mapToObj(i -> new FluidStorage(capacity)));
     }
 
-    public FluidTank[] getFluidTanks() {
+    public FluidStorage[] getFluidTanks() {
         return fluidTanks;
     }
 
@@ -92,9 +96,8 @@ public class MultifluidTank implements IFluidHandler {
                     onContentsChanged();
                     return filled;
                 }
-            }
-            else if (getFluidInTank(i).isEmpty()) {
-               fluidTanks[i].setFluid(new FluidStack(resource, Math.min(getTankCapacity(i), resource.getAmount())));
+            } else if (getFluidInTank(i).isEmpty()) {
+                fluidTanks[i].setFluid(new FluidStack(resource, Math.min(getTankCapacity(i), resource.getAmount())));
                 onContentsChanged();
                 return getFluidInTank(i).getAmount();
             }
@@ -108,8 +111,7 @@ public class MultifluidTank implements IFluidHandler {
 
     @NotNull
     @Override
-    public FluidStack drain(FluidStack resource, FluidAction action)
-    {
+    public FluidStack drain(FluidStack resource, FluidAction action) {
         if (resource.isEmpty()) return FluidStack.EMPTY;
         for (int i = 0; i < getTanks(); i++) {
             if (getFluidInTank(i).isFluidEqual(resource)) {
@@ -119,8 +121,7 @@ public class MultifluidTank implements IFluidHandler {
         return FluidStack.EMPTY;
     }
 
-    public FluidStack drain(int maxDrain, int tank, FluidAction action)
-    {
+    public FluidStack drain(int maxDrain, int tank, FluidAction action) {
         int drained = maxDrain;
         if (getFluidInTank(tank).getAmount() < drained) {
             drained = getFluidInTank(tank).getAmount();
@@ -135,8 +136,7 @@ public class MultifluidTank implements IFluidHandler {
 
     @NotNull
     @Override
-    public FluidStack drain(int maxDrain, FluidAction action)
-    {
+    public FluidStack drain(int maxDrain, FluidAction action) {
         FluidStack stack = FluidStack.EMPTY;
         for (int i = 0; i < getTanks(); i++) {
             int drained = maxDrain;
@@ -153,5 +153,36 @@ public class MultifluidTank implements IFluidHandler {
 
         }
         return stack;
+    }
+
+    @Override
+    public CompoundTag serialize() {
+        CompoundTag nbt = new CompoundTag();
+        ListTag list = new ListTag();
+        for (FluidTank tank : this.fluidTanks) {
+            CompoundTag tankTag = new CompoundTag();
+            list.add(tank.writeToNBT(tankTag));
+        }
+        nbt.put("tanks", list);
+        return nbt;
+    }
+
+    @Override
+    public void deserialize(CompoundTag tag) {
+        if (tag.contains("tanks")) {
+            ListTag list = tag.getList("tanks", Tag.TAG_COMPOUND);
+            for (int i = 0; i < list.size(); i++) {
+                this.fluidTanks[i].readFromNBT(list.getCompound(i));
+            }
+        }
+    }
+
+    public MultifluidTank copy() {
+        FluidStorage[] storage = new FluidStorage[getTanks()];
+        for (int i = 0; i < getTanks(); i++) {
+            storage[i] = new FluidStorage(getTankCapacity(i));
+            storage[i].setFluid(getFluidInTank(i).copy());
+        }
+        return new MultifluidTank(storage);
     }
 }

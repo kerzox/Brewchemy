@@ -35,7 +35,7 @@ public class MillingScreen extends DefaultScreen<MillingMenu> {
     }
 
     @Override
-    protected void addToForeground(GuiGraphics graphics, int x, int y) {
+    protected void addToForeground(GuiGraphics graphics, int x, int y, float partialTick) {
 
     }
 }

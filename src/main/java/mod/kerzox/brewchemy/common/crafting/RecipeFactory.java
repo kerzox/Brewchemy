@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,6 +80,15 @@ public abstract class RecipeFactory implements FinishedRecipe {
             json.addProperty("item", Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(stack.getItem())).toString());
             if (stack.getCount() != 0) {
                 json.addProperty("count", stack.getCount());
+            }
+            return json;
+        }
+
+        public static JsonObject serializeFluidStack(FluidStack stack) {
+            JsonObject json = new JsonObject();
+            json.addProperty("fluid", ForgeRegistries.FLUIDS.getKey(stack.getFluid()).toString());
+            if (stack.getAmount() != 0) {
+                json.addProperty("amount", stack.getAmount());
             }
             return json;
         }

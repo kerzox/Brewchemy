@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.common.blockentity.base;
 
+import mod.kerzox.brewchemy.common.capabilities.fluid.MultifluidInventory;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemInventory;
 import mod.kerzox.brewchemy.common.crafting.AbstractRecipe;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventory;
@@ -30,6 +31,9 @@ public abstract class RecipeBlockEntity<T extends AbstractRecipe<RecipeInventory
     protected int recipeDuration;
     protected int maxRecipeDuration;
 
+    protected int tick;
+    protected int pTick;
+
     public RecipeBlockEntity(BlockEntityType<?> type, RecipeType<T> recipeType, BlockPos pos, BlockState state) {
         super(type, pos, state);
         this.recipeType = recipeType;
@@ -49,6 +53,17 @@ public abstract class RecipeBlockEntity<T extends AbstractRecipe<RecipeInventory
         this.currentRecipe = Optional.empty();
         this.recipeDuration = 0;
         syncBlockEntity();
+    }
+
+    protected boolean checkRecipe() {
+        if (this.currentRecipe.isPresent()) {
+            if (findValidRecipe().isEmpty()) {
+                finishRecipe();
+                return false;
+            } else {
+                return currentRecipe.get().equals(findValidRecipe().get());
+            }
+        } else return false;
     }
 
     protected Optional<T> findValidRecipe() {
@@ -71,6 +86,8 @@ public abstract class RecipeBlockEntity<T extends AbstractRecipe<RecipeInventory
             }
             else doRecipe(currentRecipe.get());
         }
+        tick = (tick + 1) % 1_728_000;
+        pTick = tick;
     }
 
     protected void doRecipe(T workingRecipe) {
@@ -89,9 +106,11 @@ public abstract class RecipeBlockEntity<T extends AbstractRecipe<RecipeInventory
 
         if (isWorking()) {
 
-            if (getRecipeDuration() <= 0) onRecipeFinish(workingRecipe);
+            if (getRecipeDuration() <= 0) {
+                if (checkRecipe()) onRecipeFinish(workingRecipe);
+            }
 
-            if (!canProgress()) {
+            if (!canProgress(workingRecipe)) {
                 return;
             }
 
@@ -109,7 +128,7 @@ public abstract class RecipeBlockEntity<T extends AbstractRecipe<RecipeInventory
      * @return whether the recipe can progress further
      */
 
-    protected abstract boolean canProgress();
+    protected abstract boolean canProgress(T workingRecipe);
 
     public boolean isWorking() {
         return working;
@@ -123,13 +142,12 @@ public abstract class RecipeBlockEntity<T extends AbstractRecipe<RecipeInventory
         return recipeDuration;
     }
 
-/*    public static List<Integer> hasEnoughFluidSlots(FluidStack[] fResult, IFluidHandler handler) {
+    public static List<Integer> hasEnoughFluidSlots(FluidStack[] fResult, IFluidHandler handler) {
         List<Integer> slotsUsed = new ArrayList<>();
         for (FluidStack resultStack : fResult) {
             for (int index = 0; index < handler.getTanks(); index++) {
-                if (handler instanceof SidedMultifluidTank.OutputWrapper wrapper) {
-                    FluidStorageTank tank = wrapper.getStorageTank(index);
-                    int filledAmount = tank.fill(resultStack, IFluidHandler.FluidAction.SIMULATE);
+                if (handler instanceof MultifluidInventory.InternalWrapper wrapper) {;
+                    int filledAmount = wrapper.internalFill(resultStack, IFluidHandler.FluidAction.SIMULATE);
                     if (!slotsUsed.contains(index) && filledAmount == resultStack.getAmount()) {
                         slotsUsed.add(index);
                         break;
@@ -144,23 +162,21 @@ public abstract class RecipeBlockEntity<T extends AbstractRecipe<RecipeInventory
             }
         }
         return slotsUsed;
-    }*/
+    }
 
-/*
     public static void useFluidIngredients(NonNullList<FluidIngredient> fluidIngredients, IFluidHandler handler) {
         List<Integer> slotsUsed = new ArrayList<>();
         for (FluidIngredient ingredient : fluidIngredients) {
             for (int i = 0; i < handler.getTanks(); i++) {
                 FluidStack tank = handler.getFluidInTank(i);
-                if (ingredient.test(tank)) {
+                if (ingredient.testFluidWithAmount(tank)) {
                     slotsUsed.add(i);
-                    tank.shrink(ingredient.getProxy().getAmount());
+                    tank.shrink(ingredient.getAmount());
                     break;
                 }
             }
         }
     }
-*/
 
     public static void useIngredients(NonNullList<Ingredient> specificIngredients, IItemHandler handler, int amountToShrink) {
         List<Integer> slotsUsed = new ArrayList<>();
@@ -169,20 +185,28 @@ public abstract class RecipeBlockEntity<T extends AbstractRecipe<RecipeInventory
                 if (!slotsUsed.contains(i) && ingredient.test(handler.getStackInSlot(i))) {
                     slotsUsed.add(i);
                     handler.getStackInSlot(i).shrink(amountToShrink);
+                    if (handler instanceof ItemInventory.InternalWrapper inventory) {
+                        inventory.getOwner().onContentsChanged(i, true);
+                    }
                     break;
                 }
             }
         }
     }
 
-    public static void useSizeSpecificIngredients(NonNullList<SizeSpecificIngredient> specificIngredients, IItemHandler handler) {
+    public static void useSizeSpecificIngredients(NonNullList<Ingredient> specificIngredients, IItemHandler handler) {
         List<Integer> slotsUsed = new ArrayList<>();
-        for (SizeSpecificIngredient ingredient : specificIngredients) {
-            for (int i = 0; i < handler.getSlots(); i++) {
-                if (!slotsUsed.contains(i) && ingredient.test(handler.getStackInSlot(i))) {
-                    slotsUsed.add(i);
-                    handler.getStackInSlot(i).shrink(ingredient.getSize());
-                    break;
+        for (Ingredient ingredient : specificIngredients) {
+            if (ingredient instanceof SizeSpecificIngredient ingredient1) {
+                for (int i = 0; i < handler.getSlots(); i++) {
+                    if (!slotsUsed.contains(i) && ingredient.test(handler.getStackInSlot(i))) {
+                        slotsUsed.add(i);
+                        handler.getStackInSlot(i).shrink(ingredient1.getSize());
+                        if (handler instanceof ItemInventory.InternalWrapper inventory) {
+                            inventory.getOwner().onContentsChanged(i, true);
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -219,15 +243,15 @@ public abstract class RecipeBlockEntity<T extends AbstractRecipe<RecipeInventory
         return slotsUsed;
     }
 
-/*    public static void transferFluidResults(FluidStack[] result, IFluidHandler handler) {
+    public static void transferFluidResults(FluidStack[] result, IFluidHandler handler) {
         for (FluidStack resultFluidStack : result) {
-            if (handler instanceof SidedMultifluidTank.OutputWrapper wrapper) {
-                wrapper.forceFill(resultFluidStack, IFluidHandler.FluidAction.EXECUTE);
+            if (handler instanceof MultifluidInventory.InternalWrapper wrapper) {
+                wrapper.internalFill(resultFluidStack, IFluidHandler.FluidAction.EXECUTE);
                 continue;
             }
             handler.fill(resultFluidStack, IFluidHandler.FluidAction.EXECUTE);
         }
-    }*/
+    }
 
     public static void transferItemResults(ItemStack[] result, IItemHandler handler) {
         for (ItemStack resultItemStack : result) {

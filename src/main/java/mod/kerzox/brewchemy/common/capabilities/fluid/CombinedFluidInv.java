@@ -13,6 +13,12 @@ public class CombinedFluidInv implements IFluidHandler {
 
     public CombinedFluidInv(IFluidHandler... itemHandler)
     {
+
+        for (IFluidHandler handler : itemHandler) {
+
+        }
+
+
         this.fluidHandler = itemHandler;
         this.baseIndex = new int[itemHandler.length];
         int index = 0;
@@ -68,6 +74,12 @@ public class CombinedFluidInv implements IFluidHandler {
         IFluidHandler handler = getHandlerFromIndex(index);
         tank = getSlotFromIndex(tank, index);
         return handler.getFluidInTank(tank);
+    }
+
+    public @NotNull IFluidHandler getInternalHandlerFromTank(int tank) {
+        int index = getIndexForSlot(tank);
+        IFluidHandler handler = getHandlerFromIndex(index);
+        return handler;
     }
 
     @Override
@@ -127,7 +139,7 @@ public class CombinedFluidInv implements IFluidHandler {
         return ret;
     }
 
-    private void onContentsChanged() {
+    protected void onContentsChanged() {
 
     }
 

@@ -1,6 +1,7 @@
 package mod.kerzox.brewchemy.common.network;
 
 import mod.kerzox.brewchemy.Brewchemy;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -26,9 +27,24 @@ public class PacketHandler {
 
     public static void register() {
         INSTANCE.messageBuilder(SyncContainer.class, nextID())
-                .encoder((p, b) -> {})
+                .encoder(SyncContainer::toBytes)
                 .decoder(SyncContainer::new)
                 .consumerMainThread(SyncContainer::handle)
+                .add();
+        INSTANCE.messageBuilder(FluidTankClick.class, nextID())
+                .encoder(FluidTankClick::toBytes)
+                .decoder(FluidTankClick::new)
+                .consumerMainThread(FluidTankClick::handle)
+                .add();
+        INSTANCE.messageBuilder(BrewingKettleGuiClick.class, nextID())
+                .encoder(BrewingKettleGuiClick::toBytes)
+                .decoder(BrewingKettleGuiClick::new)
+                .consumerMainThread(BrewingKettleGuiClick::handle)
+                .add();
+        INSTANCE.messageBuilder(CompoundTagPacket.class, nextID())
+                .encoder(CompoundTagPacket::toBytes)
+                .decoder(CompoundTagPacket::new)
+                .consumerMainThread(CompoundTagPacket::handle)
                 .add();
     }
 

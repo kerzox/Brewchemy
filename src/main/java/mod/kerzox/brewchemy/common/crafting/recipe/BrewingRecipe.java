@@ -3,44 +3,55 @@ package mod.kerzox.brewchemy.common.crafting.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
-import mod.kerzox.brewchemy.common.crafting.AbstractRecipe;
+import mod.kerzox.brewchemy.common.crafting.AbstractFluidRecipe;
 import mod.kerzox.brewchemy.common.crafting.RecipeFactory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventory;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.SizeSpecificIngredient;
+import mod.kerzox.brewchemy.common.fluid.alcohol.AgeableAlcoholStack;
 import mod.kerzox.brewchemy.common.util.BrewchemyJsonUtil;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class BrewingRecipe extends AbstractRecipe<RecipeInventory> {
+public class BrewingRecipe extends AbstractFluidRecipe<RecipeInventory> {
 
     private final NonNullList<Ingredient> ingredients = NonNullList.create();
     private final NonNullList<FluidIngredient> fluidIngredients = NonNullList.create();
     private final Map<Ingredient, Boolean> matching = new HashMap<>();
-    private final Map<FluidIngredient, Boolean> fluid_matching = new HashMap<>();
-    private final ItemStack result;
+    private final Map<FluidIngredient, Boolean> matchingFluids = new HashMap<>();
+    private final boolean alcoholic;
+    private final int heat;
 
-    public BrewingRecipe(RecipeType<?> type, ResourceLocation id, String group, ItemStack result, SizeSpecificIngredient[] ingredients, FluidIngredient[] fluids,  int duration) {
-        super(type, id, group, duration, BrewchemyRegistry.Recipes.BREWING_RECIPE_SERIALIZER.get());
-        this.result = result;
+    public BrewingRecipe(RecipeType<?> type, ResourceLocation id, String group, FluidStack result, SizeSpecificIngredient[] ingredients, FluidIngredient[] fluids, int duration, boolean alcoholic, int heat) {
+        super(type, id, group, duration, result, BrewchemyRegistry.Recipes.BREWING_RECIPE_SERIALIZER.get());
+        this.alcoholic = alcoholic;
+        this.heat = heat;
         this.ingredients.addAll(Arrays.stream(ingredients).toList());
         this.ingredients.forEach(i -> matching.put(i, false));
         this.fluidIngredients.addAll(Arrays.stream(fluids).toList());
-        this.fluidIngredients.forEach(i -> fluid_matching.put(i, false));
+        this.fluidIngredients.forEach(i -> matchingFluids.put(i, false));
+    }
+
+    public FluidStack[] assembleAsAlcohlic(RecipeInventory inv, RegistryAccess access) {
+        if (!alcoholic) return null;
+        AgeableAlcoholStack[] ageableAlcoholStacks = new AgeableAlcoholStack[this.results.length];
+        for (int i = 0; i < this.results.length; i++) {
+            ageableAlcoholStacks[i] = new AgeableAlcoholStack(this.results[i]);
+        }
+        return ageableAlcoholStacks;
     }
 
     public NonNullList<FluidIngredient> getFluidIngredients() {
@@ -53,18 +64,37 @@ public class BrewingRecipe extends AbstractRecipe<RecipeInventory> {
     }
 
     @Override
-    public boolean matches(RecipeInventory inv, Level p_44003_) {
-        return false;
+    public boolean matches(RecipeInventory pContainer, Level pLevel) {
+        this.ingredients.forEach(i -> matching.put(i, false));
+        this.fluidIngredients.forEach(i -> matchingFluids.put(i, false));
+
+        if (!pContainer.canStorageFluid()) throw new IllegalStateException("You can't have recipe inventory for this recipe without fluid");
+
+        getFluidIngredients().forEach(((ingredient) -> {
+            for (int i = 0; i < pContainer.getFluidHandler().getTanks(); i++) {
+                if (ingredient.test(pContainer.getFluidHandler().getFluidInTank(i))) {
+                    matchingFluids.put(ingredient, true);
+                }
+            }
+        }));
+
+        ingredients.forEach(((ingredient) -> {
+            for (int i = 0; i < pContainer.getContainerSize(); i++) {
+                if (ingredient.test(pContainer.getItem(i))) {
+                    matching.put(ingredient, true);
+                }
+            }
+        }));
+
+        return !matching.containsValue(false) && !matchingFluids.containsValue(false);
     }
 
-    @Override
-    public ItemStack assemble(RecipeInventory p_44001_, RegistryAccess p_267165_) {
-        return this.result.copy();
+    public boolean isAlcoholic() {
+        return alcoholic;
     }
 
-    @Override
-    public ItemStack getResultItem(RegistryAccess p_267052_) {
-        return this.result;
+    public int getHeat() {
+        return heat;
     }
 
     public static class Serializer implements RecipeSerializer<BrewingRecipe> {
@@ -72,17 +102,21 @@ public class BrewingRecipe extends AbstractRecipe<RecipeInventory> {
         @Override
         public BrewingRecipe fromJson(ResourceLocation pRecipeId, JsonObject json) {
             String group = JsonUtils.getStringOr("group", json, "");
+            boolean al = JsonUtils.getBooleanOr("alcoholic", json, false);
+            int heat = JsonUtils.getIntOr("heat", json, 0);
             Ingredient[] ingredients = BrewchemyJsonUtil.deserializeIngredients(json);
             FluidIngredient[] fluidIngredients = BrewchemyJsonUtil.deserializeFluidIngredients(json);
-            ItemStack resultStack = BrewchemyJsonUtil.deserializeItemStack(json);
+            FluidStack resultStack = BrewchemyJsonUtil.deserializeFluidStack(json);
             int duration = JsonUtils.getIntOr("duration", json, 0);
-            return new BrewingRecipe(BrewchemyRegistry.Recipes.BREWING_RECIPE.get(), pRecipeId, group, resultStack, (SizeSpecificIngredient[]) ingredients, fluidIngredients, duration);
+            return new BrewingRecipe(BrewchemyRegistry.Recipes.BREWING_RECIPE.get(), pRecipeId, group, resultStack, (SizeSpecificIngredient[]) ingredients, fluidIngredients, duration, al, heat);
         }
 
 
         @Override
         public @Nullable BrewingRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
             String group = pBuffer.readUtf();
+            boolean al = pBuffer.readBoolean();
+            int heat = pBuffer.readInt();
             int ingredientCount = pBuffer.readVarInt();
             SizeSpecificIngredient[] ingredients = new SizeSpecificIngredient[ingredientCount];
             for (int i = 0; i < ingredients.length; i++) {
@@ -92,14 +126,16 @@ public class BrewingRecipe extends AbstractRecipe<RecipeInventory> {
             for (int i = 0; i < fluid_ingredients.length; i++) {
                 fluid_ingredients[i] = FluidIngredient.Serializer.INSTANCE.parse(pBuffer);
             }
-            ItemStack resultStack = pBuffer.readItem();
+            FluidStack resultStack = pBuffer.readFluidStack();
             int duration = pBuffer.readVarInt();
-            return new BrewingRecipe(BrewchemyRegistry.Recipes.BREWING_RECIPE.get(), pRecipeId, group, resultStack, ingredients, fluid_ingredients, duration);
+            return new BrewingRecipe(BrewchemyRegistry.Recipes.BREWING_RECIPE.get(), pRecipeId, group, resultStack, ingredients, fluid_ingredients, duration, al, heat);
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf pBuffer, BrewingRecipe pRecipe) {
             pBuffer.writeUtf(pRecipe.getGroup());
+            pBuffer.writeBoolean(pRecipe.isAlcoholic());
+            pBuffer.writeInt(pRecipe.getHeat());
             pBuffer.writeVarInt(pRecipe.getIngredients().size());
             for (Ingredient ingredient : pRecipe.getIngredients()) {
                 ingredient.toNetwork(pBuffer);
@@ -108,29 +144,34 @@ public class BrewingRecipe extends AbstractRecipe<RecipeInventory> {
             for (FluidIngredient ingredient : pRecipe.getFluidIngredients()) {
                 ingredient.toNetwork(pBuffer);
             }
-            pBuffer.writeItem(pRecipe.getResultItem(RegistryAccess.EMPTY));
+            pBuffer.writeFluidStack(pRecipe.getRecipeResults(RegistryAccess.EMPTY)[0]);
             pBuffer.writeVarInt(pRecipe.getDuration());
         }
     }
 
     public static class RecipeBuilder extends RecipeFactory {
 
-        protected ItemStack result;
-        protected SizeSpecificIngredient[] ingredient;
-        protected FluidIngredient[] fingredient;
+        protected final FluidStack result;
+        protected final SizeSpecificIngredient[] ingredient;
+        protected final FluidIngredient[] fingredient;
+        protected final boolean alcoholic;
+        protected final int heat;
 
-        public RecipeBuilder(ResourceLocation name, ItemStack result, SizeSpecificIngredient[] ingredient, FluidIngredient[] fluidIngredients, int duration) {
+        public RecipeBuilder(ResourceLocation name, FluidStack result, SizeSpecificIngredient[] ingredient, FluidIngredient[] fluidIngredients, int duration, boolean alcoholic, int heat) {
             super(name, duration, BrewchemyRegistry.Recipes.BREWING_RECIPE_SERIALIZER.get());
             this.ingredient = ingredient;
             this.fingredient = fluidIngredients;
             this.result = result;
+            this.alcoholic = alcoholic;
+            this.heat = heat;
         }
 
         @Override
         protected void writeRecipe(JsonObject json) {
 
             JsonObject ingredients = new JsonObject();
-
+            json.addProperty("alcohol", this.alcoholic);
+            json.addProperty("heat", this.heat);
             if (ingredient.length > 1) {
                 JsonArray arr = new JsonArray();
                 for (int i = 0; i < ingredient.length; i++) {
@@ -152,7 +193,7 @@ public class BrewingRecipe extends AbstractRecipe<RecipeInventory> {
             }
 
             json.add("recipe_ingredients", ingredients);
-            json.add("result", Util.serializeItemStack(result));
+            json.add("result", Util.serializeFluidStack(result));
         }
     }
 

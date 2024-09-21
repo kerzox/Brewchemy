@@ -4,12 +4,15 @@ package mod.kerzox.brewchemy.common.capabilities.fluid;
 import mod.kerzox.brewchemy.common.capabilities.CapabilityHolder;
 import mod.kerzox.brewchemy.common.capabilities.ICapabilitySerializer;
 import mod.kerzox.brewchemy.common.capabilities.IStrictInventory;
+import mod.kerzox.brewchemy.common.capabilities.item.ItemInventory;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,16 +20,32 @@ import java.util.HashSet;
 
 public class MultifluidInventory extends CombinedFluidInv implements IStrictInventory<MultifluidInventory>, CapabilityHolder<MultifluidInventory>, ICapabilitySerializer {
 
-    private HashSet<Direction> inputSides = new HashSet<>();
-    private HashSet<Direction> outputSides = new HashSet<>();
-    private MultifluidInventory.InternalWrapper inputWrapper;
-    private MultifluidInventory.InternalWrapper outputWrapper;
-    private LazyOptional<MultifluidInventory> combined = LazyOptional.of(() -> this);
-    private LazyOptional<MultifluidInventory.InternalWrapper> input;
-    private LazyOptional<MultifluidInventory.InternalWrapper> output;
+    protected HashSet<Direction> inputSides = new HashSet<>();
+    protected HashSet<Direction> outputSides = new HashSet<>();
+    protected MultifluidInventory.InternalWrapper inputWrapper;
+    protected MultifluidInventory.InternalWrapper outputWrapper;
+    protected LazyOptional<MultifluidInventory> combined = LazyOptional.of(() -> this);
+    protected LazyOptional<MultifluidInventory.InternalWrapper> input;
+    protected LazyOptional<MultifluidInventory.InternalWrapper> output;
+
+    protected MultifluidInventory(InternalWrapper... tank) {
+        super(tank[0]);
+        this.inputWrapper = tank[0];
+        this.outputWrapper = tank[1];
+        this.input = LazyOptional.of(() -> this.inputWrapper);
+        this.output = LazyOptional.of(() -> this.outputWrapper);
+    }
+
+    public MultifluidInventory(InternalWrapper input, InternalWrapper output) {
+        super(input, output);
+        this.inputWrapper = input;
+        this.outputWrapper = output;
+        this.input = LazyOptional.of(() -> this.inputWrapper);
+        this.output = LazyOptional.of(() -> this.outputWrapper);
+    }
 
     public MultifluidInventory(MultifluidTank input, MultifluidTank output) {
-        super(new InternalWrapper(input, true), new InternalWrapper(output, false));
+        this(new InternalWrapper(input, true), new InternalWrapper(output, false));
     }
 
     public static MultifluidInventory of(MultifluidTank input, MultifluidTank output) {
@@ -43,9 +62,25 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
         return ForgeCapabilities.FLUID_HANDLER;
     }
 
+    public InternalWrapper getInputWrapper() {
+        return this.inputWrapper;
+    }
+
+    public InternalWrapper getOutputWrapper() {
+        return this.outputWrapper;
+    }
+
     @Override
-    public LazyOptional<MultifluidInventory> getCapabilityHandler(Direction direction) {
-        return null;
+    public LazyOptional<MultifluidInventory> getCapabilityHandler(Direction side) {
+        // return combined
+        if (side == null) return combined.cast();
+        else if (getInputs().contains(side) && getOutputs().contains(side)) return combined.cast();
+            // return only input
+        else if (getInputs().contains(side)) return input.cast();
+            // return only output
+        else if (getOutputs().contains(side)) return output.cast();
+        // return empty
+        return LazyOptional.empty();
     }
 
     @Override
@@ -56,12 +91,17 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
     @Override
     public CompoundTag serialize() {
         CompoundTag tag = new CompoundTag();
+        tag.put("input", this.inputWrapper.serialize());
+        tag.put("output", this.outputWrapper.serialize());
+        tag.put("io", serializeInputAndOutput());
         return tag;
     }
 
     @Override
     public void deserialize(CompoundTag tag) {
-
+        this.inputWrapper.deserialize(tag.getCompound("input"));
+        this.outputWrapper.deserialize(tag.getCompound("output"));
+        deserializeInputAndOutput(tag.getCompound("io"));
     }
 
     @Override
@@ -74,36 +114,72 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
         return this.outputSides;
     }
 
-    public static class InternalWrapper extends MultifluidTank {
+    public static class InternalWrapper implements IFluidHandler, ICapabilitySerializer {
 
+        private MultifluidTank tank;
         private boolean input;
 
         public InternalWrapper(MultifluidTank tank, boolean input) {
-            super(tank.getFluidTanks());
+            this.tank = tank;
             this.input = input;
         }
 
         public int internalFill(FluidStack resource, FluidAction action) {
-            return super.fill(resource, action);
+            return tank.fill(resource, action);
         }
 
         public @NotNull FluidStack internalDrain(int maxDrain, FluidAction action) {
-            return super.drain(maxDrain, action);
+            return tank.drain(maxDrain, action);
         }
 
         @Override
         public @NotNull FluidStack drain(int maxDrain, FluidAction action) {
-            return !input ? super.drain(maxDrain, action) : FluidStack.EMPTY;
+            return !input ? tank.drain(maxDrain, action) : FluidStack.EMPTY;
         }
 
         @Override
         public @NotNull FluidStack drain(FluidStack resource, FluidAction action) {
-            return !input ? super.drain(resource, action) : FluidStack.EMPTY;
+            return !input ? tank.drain(resource, action) : FluidStack.EMPTY;
+        }
+
+        @Override
+        public int getTanks() {
+            return tank.getTanks();
+        }
+
+        @Override
+        public @NotNull FluidStack getFluidInTank(int tank) {
+            return this.tank.getFluidInTank(tank);
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+            return this.tank.getTankCapacity(tank);
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
+            return this.tank.isFluidValid(tank, stack);
         }
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
-            return input ? super.fill(resource, action) : 0;
+            return input ? tank.fill(resource, action) : 0;
+        }
+
+
+        @Override
+        public CompoundTag serialize() {
+            return tank.serialize();
+        }
+
+        @Override
+        public void deserialize(CompoundTag tag) {
+            tank.deserialize(tag);
+        }
+
+        public MultifluidTank get() {
+            return this.tank;
         }
     }
 }

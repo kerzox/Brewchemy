@@ -9,7 +9,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
+
+import static com.mojang.realmsclient.util.JsonUtils.getIntOr;
 
 public class BrewchemyJsonUtil {
 
@@ -136,6 +139,17 @@ public class BrewchemyJsonUtil {
             }
         }
         return ingredients;
+    }
+
+    public static FluidStack deserializeFluidStack(JsonObject json) {
+        FluidStack resultStack = FluidStack.EMPTY;
+        if (json.has("result")) {
+            JsonObject result = json.getAsJsonObject("result");
+            ResourceLocation fluid = new ResourceLocation(JsonUtils.getStringOr("fluid", result, ""));
+            int amount = getIntOr("amount", result, 0);
+            resultStack = new FluidStack(ForgeRegistries.FLUIDS.getValue(fluid), amount);
+        }
+        return resultStack;
     }
 
     public static ItemStack deserializeItemStack(JsonObject json) {

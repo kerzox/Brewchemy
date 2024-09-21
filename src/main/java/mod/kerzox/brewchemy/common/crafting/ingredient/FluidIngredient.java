@@ -55,6 +55,9 @@ public class FluidIngredient extends AbstractIngredient  {
         return new FluidIngredient(fluids, null, fluids.get(0).getAmount());
     }
 
+    public int getAmount() {
+        return amount;
+    }
 
     @Override
     public boolean isSimple() {
@@ -94,6 +97,11 @@ public class FluidIngredient extends AbstractIngredient  {
     public boolean testExactMatch(@Nullable FluidStack fluidStack) {
         if (fluidStack == null) return false;
         return fluidStacks.stream().allMatch(f -> f.isFluidStackIdentical(fluidStack));
+    }
+
+    public boolean test(@Nullable FluidStack pStack) {
+        if (pStack == null) return false;
+        return testFluidWithAmount(pStack);
     }
 
     @Override

@@ -32,7 +32,7 @@ public class ItemInventory extends CombinedInvWrapper implements IStrictCombined
     private LazyOptional<InternalWrapper> input;
     private LazyOptional<InternalWrapper> output;
 
-    private ItemInventory(InternalWrapper input, InternalWrapper output) {
+    public ItemInventory(InternalWrapper input, InternalWrapper output) {
         super(input, output);
         addInput(Direction.values());
         this.inputWrapper = input;
@@ -120,6 +120,10 @@ public class ItemInventory extends CombinedInvWrapper implements IStrictCombined
         return ForgeCapabilities.ITEM_HANDLER;
     }
 
+    public void onContentsChanged(int slot, boolean input) {
+
+    }
+
     @Override
     public LazyOptional<ItemInventory> getCapabilityHandler(Direction side) {
         // return combined
@@ -140,6 +144,8 @@ public class ItemInventory extends CombinedInvWrapper implements IStrictCombined
         this.output.invalidate();
     }
 
+
+
     public static class InternalWrapper extends ItemStackHandler {
 
         private ItemInventory owner;
@@ -148,6 +154,10 @@ public class ItemInventory extends CombinedInvWrapper implements IStrictCombined
         public InternalWrapper(int slots, boolean input) {
             super(slots);
             this.input = input;
+        }
+
+        public ItemInventory getOwner() {
+            return owner;
         }
 
         public void setOwner(ItemInventory owner) {
@@ -173,21 +183,52 @@ public class ItemInventory extends CombinedInvWrapper implements IStrictCombined
         }
 
         public @NotNull ItemStack internalInsertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-            return super.insertItem(slot, stack, simulate);
+
+            ItemStack ret = super.insertItem(slot, stack, simulate);
+
+            if (!ItemStack.isSameItem(ret, stack) && !simulate) {
+                owner.onContentsChanged(slot, true);
+            }
+
+            return ret;
         }
 
         public @NotNull ItemStack internalExtractItem(int slot, int amount, boolean simulate) {
-            return super.extractItem(slot, amount, simulate);
+
+            ItemStack ret = super.extractItem(slot, amount, simulate);
+
+            if (!ret.isEmpty() && !simulate) {
+                owner.onContentsChanged(slot, false);
+            }
+
+            return ret;
         }
 
         @Override
         public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-            return input ? super.insertItem(slot, stack, simulate) : stack;
+
+            if (!input) return stack;
+            ItemStack ret = super.insertItem(slot, stack, simulate);
+
+            if (!ItemStack.isSameItem(ret, stack) && !simulate) {
+                owner.onContentsChanged(slot, true);
+            }
+
+            return ret;
         }
 
         @Override
         public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-            return input ? ItemStack.EMPTY : super.extractItem(slot, amount, simulate);
+
+            if (input) return ItemStack.EMPTY;
+
+            ItemStack ret = super.extractItem(slot, amount, simulate);
+
+            if (!ret.isEmpty() && !simulate) {
+                owner.onContentsChanged(slot, false);
+            }
+
+            return ret;
         }
 
         public boolean isInput() {

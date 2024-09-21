@@ -8,6 +8,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
@@ -41,6 +43,18 @@ public abstract class CapabilityBlockEntity extends SyncedBlockEntity {
 
     public List<CapabilityHolder<?>> getCapabilityHolders() {
         return capabilities;
+    }
+
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+        handleDataPacket(net, pkt);
+        read(pkt.getTag());
+        ListTag list = pkt.getTag().getList(MACHINE_CAPABILITY_LIST_TAG, Tag.TAG_COMPOUND);
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag tag = list.getCompound(i);
+            if (capabilities.get(i) instanceof ICapabilitySerializer serializer) serializer.deserialize(tag);
+        }
     }
 
     @Override

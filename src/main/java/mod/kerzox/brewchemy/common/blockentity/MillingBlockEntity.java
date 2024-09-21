@@ -11,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
@@ -70,7 +69,7 @@ public class MillingBlockEntity extends RecipeBlockEntity<MillingRecipe> impleme
      */
 
     @Override
-    protected boolean canProgress() {
+    protected boolean canProgress(MillingRecipe workingRecipe) {
 
         if (energyHandler.hasEnough(FE_TICK)) {
             energyHandler.consumeEnergy(FE_TICK);

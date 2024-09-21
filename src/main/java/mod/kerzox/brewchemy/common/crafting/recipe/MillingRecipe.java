@@ -2,6 +2,7 @@ package mod.kerzox.brewchemy.common.crafting.recipe;
 
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
+import mod.kerzox.brewchemy.common.crafting.AbstractItemRecipe;
 import mod.kerzox.brewchemy.common.crafting.AbstractRecipe;
 import mod.kerzox.brewchemy.common.crafting.RecipeFactory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventory;
@@ -23,14 +24,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MillingRecipe extends AbstractRecipe<RecipeInventory> {
+public class MillingRecipe extends AbstractItemRecipe<RecipeInventory> {
 
     private final NonNullList<Ingredient> ingredients = NonNullList.create();
     private final Map<Ingredient, Boolean> matching = new HashMap<>();
     private final ItemStack result;
 
     public MillingRecipe(RecipeType<?> type, ResourceLocation id, String group, ItemStack result, SizeSpecificIngredient ingredient, int duration) {
-        super(type, id, group, duration, BrewchemyRegistry.Recipes.MILLING_RECIPE_SERIALIZER.get());
+        super(type, id, group, duration, result, BrewchemyRegistry.Recipes.MILLING_RECIPE_SERIALIZER.get());
         this.result = result;
         this.ingredients.addAll(Arrays.asList(ingredient));
         this.ingredients.forEach(i -> matching.put(i, false));
@@ -44,16 +45,6 @@ public class MillingRecipe extends AbstractRecipe<RecipeInventory> {
     @Override
     public boolean matches(RecipeInventory inv, Level p_44003_) {
         return ingredients.get(0).test(inv.getItem(0));
-    }
-
-    @Override
-    public ItemStack assemble(RecipeInventory p_44001_, RegistryAccess p_267165_) {
-        return this.result.copy();
-    }
-
-    @Override
-    public ItemStack getResultItem(RegistryAccess p_267052_) {
-        return this.result;
     }
 
     public static class Serializer implements RecipeSerializer<MillingRecipe> {

@@ -1,20 +1,28 @@
 package mod.kerzox.brewchemy.registry;
 
+import mod.kerzox.brewchemy.Brewchemy;
+import mod.kerzox.brewchemy.client.ui.menu.BrewingMenu;
 import mod.kerzox.brewchemy.client.ui.menu.MillingMenu;
 import mod.kerzox.brewchemy.common.block.*;
 import mod.kerzox.brewchemy.common.blockentity.BrewingKettleBlockEntity;
+import mod.kerzox.brewchemy.common.blockentity.CultureJarBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.MillingBlockEntity;
 import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
 import mod.kerzox.brewchemy.common.crafting.recipe.BrewingRecipe;
+import mod.kerzox.brewchemy.common.crafting.recipe.CultureJarRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
+import mod.kerzox.brewchemy.common.data.BrewingKettleHeating;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
+import mod.kerzox.brewchemy.common.fluid.BrewchemyFluid;
 import mod.kerzox.brewchemy.common.item.BarleyItem;
 import mod.kerzox.brewchemy.common.item.BrewingKettleItem;
 import mod.kerzox.brewchemy.common.item.RopeItem;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
@@ -29,18 +37,22 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidType;
+import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -81,6 +93,18 @@ public class BrewchemyRegistry {
         BlockEntities.init();
         Menus.init();
         Entities.init();
+        Fluids.init();
+        DataPacks.init();
+    }
+
+    public static class DataPacks {
+
+        public static final ResourceKey<Registry<BrewingKettleHeating>> KETTLE_HEATING_REGISTRY_KEY =
+                ResourceKey.createRegistryKey(new ResourceLocation(MODID, "kettle_heating"));
+
+        public static void init() {
+
+        }
     }
 
     public static final RegistryObject<CreativeModeTab> BREWCHEMY_TAG = CREATIVE_MODE_TABS.register("brewchemy_tab", () -> CreativeModeTab.builder()
@@ -96,6 +120,10 @@ public class BrewchemyRegistry {
         public static final RegistryObject<RecipeType<BrewingRecipe>> BREWING_RECIPE = RECIPE_TYPES.register("brewing", () -> RecipeType.simple(new ResourceLocation(MODID, "brewing")));
         public static final RegistryObject<BrewingRecipe.Serializer> BREWING_RECIPE_SERIALIZER = RECIPES.register("brewing", BrewingRecipe.Serializer::new);
 
+        public static final RegistryObject<RecipeType<CultureJarRecipe>> CULTURE_JAR_RECIPE = RECIPE_TYPES.register("culture", () -> RecipeType.simple(new ResourceLocation(MODID, "culture")));
+        public static final RegistryObject<CultureJarRecipe.Serializer> CULTURE_JAR_RECIPE_SERIALIZER = RECIPES.register("culture", CultureJarRecipe.Serializer::new);
+
+
         public static void init() {
 
         }
@@ -103,10 +131,17 @@ public class BrewchemyRegistry {
     }
 
     public static class Menus {
+
         public static final RegistryObject<MenuType<MillingMenu>> MILLING_MENU = MENUS.register("milling_menu", () -> IForgeMenuType.create((windowId, inv, data) -> {
             BlockPos pos = data.readBlockPos();
             Level level = inv.player.level();
             return new MillingMenu(windowId, inv, inv.player, (MillingBlockEntity) level.getBlockEntity(pos));
+        }));
+
+        public static final RegistryObject<MenuType<BrewingMenu>> BREWING_MENU = MENUS.register("brewing_menu", () -> IForgeMenuType.create((windowId, inv, data) -> {
+            BlockPos pos = data.readBlockPos();
+            Level level = inv.player.level();
+            return new BrewingMenu(windowId, inv, inv.player, (BrewingKettleBlockEntity) level.getBlockEntity(pos));
         }));
 
         public static void init() {
@@ -134,6 +169,19 @@ public class BrewchemyRegistry {
         public static final RegistryObject<Item> HOPS_ITEM = register(
                 true,
                 "hops_item", () -> new BarleyItem(new Item.Properties()));
+
+        public static final RegistryObject<Item> BREWERS_YEAST_ITEM = register(
+                true,
+                "brewers_yeast_item", () -> new Item(new Item.Properties()));
+
+        public static final RegistryObject<Item> LAGER_YEAST_ITEM = register(
+                true,
+                "lager_yeast_item", () -> new Item(new Item.Properties()));
+
+        public static final RegistryObject<Item> WILD_YEAST_ITEM = register(
+                true,
+                "wild_yeast_item", () -> new Item(new Item.Properties()));
+
 
         public static void init() {
 
@@ -213,6 +261,15 @@ public class BrewchemyRegistry {
                         .requiresCorrectToolForDrops().strength(1.5F, 3.0F)
                         .pushReaction(PushReaction.DESTROY)), false);
 
+        public static final makeBlock<CultureJarBlock> CULTURE_JAR_BLOCK
+                = makeBlock.build("culture_jar_block",
+                CultureJarBlock::new,
+                (BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.WOOD)
+                        .sound(SoundType.DECORATED_POT)
+                        .noOcclusion()
+                        .pushReaction(PushReaction.DESTROY)), true);
+
 
         public static void init() {
 
@@ -276,6 +333,10 @@ public class BrewchemyRegistry {
         public static final makeBlockEntity<BrewingKettleBlockEntity> BREWING_KETTLE_BLOCK_ENTITY
                 = makeBlockEntity.build("brewing_kettle_block_entity", BrewingKettleBlockEntity::new, Blocks.BREWING_KETTLE_BLOCK);
 
+        public static final makeBlockEntity<CultureJarBlockEntity> CULTURE_JAR_BLOCK_ENTITY
+                = makeBlockEntity.build("culture_jar_block_entity", CultureJarBlockEntity::new, Blocks.CULTURE_JAR_BLOCK);
+
+
         public static void init() {
 
         }
@@ -329,6 +390,130 @@ public class BrewchemyRegistry {
         public static void init() {
 
         }
+
+    }
+
+    public static class Fluids {
+
+        public static final HashMap<String, makeFluid<?>> ALL_FLUIDS = new HashMap<>();
+
+        public static final makeFluid<BrewchemyFluid> WORT = makeFluid.build("wort",
+                true, true, () -> BrewchemyFluid.createColoured(0xFF92791e, false));
+
+        public static final makeFluid<BrewchemyFluid> BEER_ALE = makeFluid.build("beer_ale",
+                true, true, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
+
+        public static final makeFluid<BrewchemyFluid> BEER_LAGER = makeFluid.build("beer_lager",
+                true, true, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
+
+        public static final makeFluid<BrewchemyFluid> BEER_PALE_ALE = makeFluid.build("beer_pale_ale",
+                true, true, () -> BrewchemyFluid.createColoured(0xFFf99100, false));
+
+        public static final makeFluid<BrewchemyFluid> BEER_STOUT = makeFluid.build("beer_stout",
+                true, true, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
+
+        public static void init() {
+
+        }
+
+        public static class makeFluid<T extends FluidType> implements Supplier<T> {
+
+            private RegistryObject<T> fluidType;
+            private RegistryObject<Fluid> fluid;
+            private RegistryObject<FlowingFluid> flowingFluid;
+            private RegistryObject<BrewchemyFluid.Block> block;
+            private RegistryObject<Item> bucket;
+            private ForgeFlowingFluid.Properties properties;
+
+            private final String name;
+
+            public makeFluid(RegistryObject<T> fluidType, String name, boolean placeable, boolean needsBucket) {
+                this.fluidType = fluidType;
+                this.name = name;
+                this.properties = new ForgeFlowingFluid.Properties(this.fluidType, makeSource(name), makeFlowing(name));
+                if (placeable) {
+                    this.properties.block(makeBlock(name));
+                }
+                if (needsBucket) {
+                    this.properties.bucket(makeBucket(name));
+                }
+            }
+
+            public static <T extends FluidType> makeFluid<T> build(String name, boolean placeable, boolean bucket, Supplier<T> fluid) {
+                RegistryObject<T> type = FLUID_TYPES.register(name, fluid);
+                makeFluid<T> tmakeFluid = new makeFluid<>(type, name, placeable, bucket);
+                ALL_FLUIDS.put(name, tmakeFluid);
+                return tmakeFluid;
+            }
+
+
+            private RegistryObject<Fluid> makeSource(String name) {
+                this.fluid = FLUIDS.register(name, () -> new ForgeFlowingFluid.Source(this.properties));
+                return fluid;
+            }
+
+            private RegistryObject<FlowingFluid> makeFlowing(String name) {
+                this.flowingFluid = FLUIDS.register(name + "_flowing", () -> new ForgeFlowingFluid.Flowing(this.properties));
+                return flowingFluid;
+            }
+
+            private RegistryObject<BrewchemyFluid.Block> makeBlock(String name) {
+                this.block = BLOCKS.register(name + "_block",
+                        () -> new BrewchemyFluid.Block(this.flowingFluid, BlockBehaviour.Properties.of()
+                                .mapColor(MapColor.NONE)
+                                .replaceable()
+                                .noCollission()
+                                .strength(100.0F)
+                                .pushReaction(PushReaction.DESTROY)
+                                .noLootTable()
+                                .liquid()
+                                .sound(SoundType.EMPTY)));
+                return block;
+            }
+
+            private RegistryObject<Item> makeBucket(String name) {
+                this.bucket = ITEMS.register(name + "_bucket",
+                        () -> new BucketItem(this.fluid, new Item.Properties()
+                                .craftRemainder(net.minecraft.world.item.Items.BUCKET)
+                                .stacksTo(1)));
+                Items.ALL_ITEMS.put(name, this.bucket);
+                return bucket;
+            }
+
+            @Override
+            public T get() {
+                return this.fluidType.get();
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public ForgeFlowingFluid.Properties getProperties() {
+                return properties;
+            }
+
+            public RegistryObject<FlowingFluid> getFlowingFluid() {
+                return flowingFluid;
+            }
+
+            public RegistryObject<Fluid> getFluid() {
+                return fluid;
+            }
+
+            public RegistryObject<Item> getBucket() {
+                return bucket;
+            }
+
+            public RegistryObject<BrewchemyFluid.Block> getBlock() {
+                return block;
+            }
+
+            public RegistryObject<T> getType() {
+                return fluidType;
+            }
+        }
+
 
     }
 

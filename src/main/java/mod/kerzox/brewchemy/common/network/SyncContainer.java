@@ -2,6 +2,8 @@ package mod.kerzox.brewchemy.common.network;
 
 import mod.kerzox.brewchemy.client.ui.menu.base.DefaultMenu;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
@@ -14,16 +16,26 @@ import java.util.function.Supplier;
 
 public class SyncContainer {
 
+    int state;
+
     public static void handle() {
-       PacketHandler.sendToServer(new SyncContainer());
+       PacketHandler.sendToServer(new SyncContainer(1));
     }
 
-    public SyncContainer() {
+    public static void onOpen()  {
+        PacketHandler.sendToServer(new SyncContainer(0));
+    }
 
+    public SyncContainer(int state) {
+        this.state = state;
     }
 
     public SyncContainer(FriendlyByteBuf buf) {
+       this.state = buf.readInt();
+    }
 
+    public void toBytes(FriendlyByteBuf buf) {
+        buf.writeInt(state);
     }
 
     public static boolean handle(SyncContainer packet, Supplier<NetworkEvent.Context> ctx) {
@@ -34,11 +46,14 @@ public class SyncContainer {
     }
 
     private static void handleOnServer(SyncContainer packet, Supplier<NetworkEvent.Context> ctx) {
-        Player player = ctx.get().getSender();
+        ServerPlayer player = ctx.get().getSender();
         if (player != null) {
             if (player.containerMenu instanceof DefaultMenu<?> menu) {
                 menu.getBlockEntity().syncBlockEntity();
+                menu.getBlockEntity().onMenuSync(player, packet.state);
             }
         }
     }
+
+
 }

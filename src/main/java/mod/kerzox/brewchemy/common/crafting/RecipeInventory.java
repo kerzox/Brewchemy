@@ -37,4 +37,11 @@ public class RecipeInventory extends RecipeWrapper {
         else return Optional.empty();
     }
 
+    public boolean canStorageFluid() {
+        return this.fluidInv != null;
+    }
+
+    public IFluidHandler getFluidHandler() {
+        return fluidInv;
+    }
 }

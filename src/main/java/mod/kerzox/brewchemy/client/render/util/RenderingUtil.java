@@ -1,22 +1,28 @@
 package mod.kerzox.brewchemy.client.render.util;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -350,4 +356,38 @@ public class RenderingUtil {
             builder.putBulkData(matrixEntry, bakedquad, f, f1, f2, alpha, combinedLightsIn, combinedOverlayIn, true);
         }
     }
+
+    public static void drawFluidQuad(FluidStack stack, int x, int y, float z, int width, int height, int color) {
+
+    }
+
+    public static void drawTestFluidRect(BufferBuilder consumer, float x, float y, float width, float height, float z, float u, float v, float maxU, float maxV) {
+        consumer.vertex(x, y + height, z).uv(u, maxV).endVertex();
+        consumer.vertex(x + width, y + height, z).uv(u, maxV).endVertex();
+        consumer.vertex(x + width, y, z).uv(u, maxV).endVertex();
+        consumer.vertex(x, y, z).uv(u, maxV).endVertex();
+        consumer.end();
+    }
+
+
+
+    private static void putVertex(VertexConsumer builder, PoseStack ms, float x, float y, float z, int color, float u,
+                                  float v, Direction face, int light) {
+
+        Vec3i normal = face.getNormal();
+        PoseStack.Pose peek = ms.last();
+        int a = color >> 24 & 0xff;
+        int r = color >> 16 & 0xff;
+        int g = color >> 8 & 0xff;
+        int b = color & 0xff;
+
+        builder.vertex(peek.pose(), x, y, z)
+                .color(r, g, b, a)
+                .uv(u, v)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
+                .uv2(light)
+                .normal(peek.normal(), normal.getX(), normal.getY(), normal.getZ())
+                .endVertex();
+    }
+
 }

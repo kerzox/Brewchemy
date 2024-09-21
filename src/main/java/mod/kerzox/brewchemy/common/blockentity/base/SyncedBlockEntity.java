@@ -6,6 +6,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -44,12 +45,13 @@ public class SyncedBlockEntity extends BlockEntity {
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
         handleDataPacket(net, pkt);
-        super.onDataPacket(net, pkt);
+        read(pkt.getTag());
+
     }
 
     @Override
     public void handleUpdateTag(CompoundTag tag) {
-        load(tag);
+        read(tag);
         onlyClientSideUpdate(tag);
     }
 
@@ -95,11 +97,10 @@ public class SyncedBlockEntity extends BlockEntity {
 
     }
 
-    /** addToUpdateTag
-     *  Allows you to add nbt data to the update tag such as variables.
-     * @param tag
-     */
 
+    public void onMenuSync(ServerPlayer playerInteracting, int state) {
+
+    }
 
     public void updateFromNetwork(CompoundTag tag) {
 

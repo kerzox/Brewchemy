@@ -42,8 +42,8 @@ public abstract class DefaultScreen<T extends DefaultMenu<?>> extends AbstractCo
 
     @Override
     protected void containerTick() {
-        for (Renderable renderable : this.renderables) {
-            if (renderable instanceof WidgetComponent component) component.tick();
+        for (GuiEventListener listener : this.children()) {
+            if (listener instanceof WidgetComponent component) component.tick();
         }
         menuTick();
     }
@@ -118,12 +118,12 @@ public abstract class DefaultScreen<T extends DefaultMenu<?>> extends AbstractCo
         super.renderBackground(graphics);
         super.render(graphics, pMouseX, pMouseY, partialTick);
         this.renderTooltip(graphics, pMouseX, pMouseY);
+        addToForeground(graphics, pMouseX, pMouseY, partialTick);
     }
 
     @Override
     protected void renderTooltip(GuiGraphics p_283594_, int p_282171_, int p_281909_) {
         super.renderTooltip(p_283594_, p_282171_, p_281909_);
-        addToForeground(p_283594_, p_282171_, p_281909_);
     }
 
     @Override
@@ -132,7 +132,7 @@ public abstract class DefaultScreen<T extends DefaultMenu<?>> extends AbstractCo
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
-    protected abstract void addToForeground(GuiGraphics graphics, int x, int y);
+    protected abstract void addToForeground(GuiGraphics graphics, int x, int y, float partialTick);
 
     @Override
     public T getMenu() {

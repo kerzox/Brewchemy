@@ -70,12 +70,12 @@ public class TickUtils {
     public void onWorldTick(net.minecraftforge.event.TickEvent.LevelTickEvent event) {
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.END) {
             if(event.side == LogicalSide.SERVER) {
-                serverTick = (serverTick + 1) % 1_728_000;
                 prevServerTick = serverTick;
+                serverTick = (serverTick + 1) % 1_728_000;
             }
             else if (event.side == LogicalSide.CLIENT) {
-                clientRenderTick = (clientRenderTick + 1) % 1_728_000;
                 preVclientRenderTick = clientRenderTick;
+                clientRenderTick = (clientRenderTick + 1) % 1_728_000;
             }
         }
     }
