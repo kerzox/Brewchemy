@@ -123,10 +123,7 @@ public class BrewingScreen extends DefaultScreen<BrewingMenu> {
 
         @Override
         protected void drawComponent(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-//            graphics.pose().pushPose();
-//            graphics.pose().translate(0, 0, 200);
-//            graphics.blit(getTexture(), getCorrectX(), getCorrectY(), 212, 0, 100, 68, 256, 256);
-//            graphics.pose().popPose();
+
         }
 
         @Override

@@ -22,6 +22,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -376,6 +379,16 @@ public class RopeEntity extends Entity {
             boundingBox = null;
             findIntersectingRopes(null, null);
             notifyIntersectedRopes(NotifyReason.INTERSECT, false);
+        }
+
+        if (isStructural()) {
+            Block end1 = level().getBlockState(getPositions()[0]).getBlock();
+            Block end2 = level().getBlockState(getPositions()[1]).getBlock();
+            if (end1 instanceof FenceBlock && end2 instanceof FenceBlock) {
+
+            } else {
+                kill();
+            }
         }
 
     }

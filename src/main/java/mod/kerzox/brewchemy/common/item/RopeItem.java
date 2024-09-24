@@ -53,15 +53,14 @@ public class RopeItem extends Item {
             }
 
             if (block instanceof FenceBlock fence) {
-                if (block instanceof RopeTiedPostBlock ropeTiedFenceBlock){
-                    return super.useOn(pContext);
-                }
                 BlockState oldState = pContext.getLevel().getBlockState(pContext.getClickedPos());
                 BlockPos pos = pContext.getClickedPos();
                 //
                 pContext.getLevel().setBlockAndUpdate(pContext.getClickedPos(), BrewchemyRegistry.Blocks.ROPE_TIED_POST_BLOCK.get().defaultBlockState());
                 if (pContext.getLevel().getBlockEntity(pContext.getClickedPos()) instanceof RopeTiedPostBlockEntity rope) {
-                    rope.setFenceToMimic(oldState);
+                    if (!(oldState.getBlock() instanceof RopeTiedPostBlock)) {
+                        rope.setFenceToMimic(oldState);
+                    }
 
                     if (getData(stack).isEmpty()) {
                         // tag is empty which means we want to set first position
