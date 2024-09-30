@@ -46,6 +46,11 @@ public class PacketHandler {
                 .decoder(CompoundTagPacket::new)
                 .consumerMainThread(CompoundTagPacket::handle)
                 .add();
+        INSTANCE.messageBuilder(RequestDataPacket.class, nextID())
+                .encoder(RequestDataPacket::toBytes)
+                .decoder(RequestDataPacket::new)
+                .consumerMainThread(RequestDataPacket::handle)
+                .add();
     }
 
     public static void sendToClientPlayer(Object packet, ServerPlayer player) {

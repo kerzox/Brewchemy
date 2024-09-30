@@ -218,10 +218,10 @@ public class RenderingUtil {
 
         } else if (direction == Direction.DOWN) {
             // bottom
-            addVertex(vertexConsumer, pPoseStack, packedLight, maxX, minY, minZ, sprite.getU(0), sprite.getV(16), tint);
-            addVertex(vertexConsumer, pPoseStack, packedLight, minX, minY, minZ, sprite.getU(16), sprite.getV(16), tint);
-            addVertex(vertexConsumer, pPoseStack, packedLight, minX, minY, maxZ, sprite.getU(16), sprite.getV(0), tint);
-            addVertex(vertexConsumer, pPoseStack, packedLight, maxX, minY, maxZ,sprite.getU(0), sprite.getV(0), tint);
+            addVertex(vertexConsumer, pPoseStack, packedLight, minX, maxY, minZ, sprite.getU(0), sprite.getV(16), tint);
+            addVertex(vertexConsumer, pPoseStack, packedLight, maxX, maxY, minZ, sprite.getU(16), sprite.getV(16), tint);
+            addVertex(vertexConsumer, pPoseStack, packedLight, maxX, minY, minZ, sprite.getU(16), sprite.getV(0), tint);
+            addVertex(vertexConsumer, pPoseStack, packedLight, minX, minY, minZ, sprite.getU(0), sprite.getV(0), tint);
         }
     }
 
@@ -261,10 +261,15 @@ public class RenderingUtil {
         addVertex(vertexConsumer, pPoseStack, maxX, maxY, maxZ, sprite.getU(0), sprite.getV(0), tint);
 
         // bottom
-        addVertex(vertexConsumer, pPoseStack, maxX, minY, minZ, sprite.getU(0), sprite.getV(16), tint);
-        addVertex(vertexConsumer, pPoseStack, minX, minY, minZ, sprite.getU(16), sprite.getV(16), tint);
-        addVertex(vertexConsumer, pPoseStack, minX, minY, maxZ, sprite.getU(16), sprite.getV(0), tint);
-        addVertex(vertexConsumer, pPoseStack, maxX, minY, maxZ, sprite.getU(0), sprite.getV(0), tint);
+        pPoseStack.pushPose();
+        WrappedPose pose = new WrappedPose(pPoseStack);
+        pose.translate(0, (-(1 - maxY)) + minY, 0);
+        pose.rotateX(180);
+        addVertex(vertexConsumer, pPoseStack, maxX, maxY, minZ, sprite.getU(0), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, maxY, minZ, sprite.getU(16), sprite.getV(16), tint);
+        addVertex(vertexConsumer, pPoseStack, minX, maxY, maxZ, sprite.getU(16), sprite.getV(0), tint);
+        addVertex(vertexConsumer, pPoseStack, maxX, maxY, maxZ, sprite.getU(0), sprite.getV(0), tint);
+        pPoseStack.popPose();
 
     }
 

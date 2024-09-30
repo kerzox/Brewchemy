@@ -1,8 +1,10 @@
 package mod.kerzox.brewchemy.common.network;
 
-import mod.kerzox.brewchemy.client.ui.menu.base.DefaultMenu;
+import mod.kerzox.brewchemy.common.blockentity.base.SyncedBlockEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -10,16 +12,22 @@ import java.util.function.Supplier;
 
 public class RequestDataPacket {
 
-    public static void get() {
-        PacketHandler.sendToServer(new RequestDataPacket());
+    private BlockPos positionWantingUpdate;
+
+    public static void get(BlockPos pos) {
+        PacketHandler.sendToServer(new RequestDataPacket(pos));
     }
 
-    public RequestDataPacket() {
+    public RequestDataPacket(BlockPos pos) {
+        this.positionWantingUpdate = pos;
+    }
 
+    public void toBytes(FriendlyByteBuf buf) {
+        buf.writeBlockPos(this.positionWantingUpdate);
     }
 
     public RequestDataPacket(FriendlyByteBuf buf) {
-
+        this.positionWantingUpdate = buf.readBlockPos();
     }
 
     public static boolean handle(RequestDataPacket packet, Supplier<NetworkEvent.Context> ctx) {
@@ -32,8 +40,9 @@ public class RequestDataPacket {
     private static void handleOnServer(RequestDataPacket packet, Supplier<NetworkEvent.Context> ctx) {
         Player player = ctx.get().getSender();
         if (player != null) {
-            if (player.containerMenu instanceof DefaultMenu<?> menu) {
-
+            BlockEntity be = player.level().getBlockEntity(packet.positionWantingUpdate);
+            if (be instanceof SyncedBlockEntity syncedBlockEntity) {
+                syncedBlockEntity.syncBlockEntity();
             }
         }
     }

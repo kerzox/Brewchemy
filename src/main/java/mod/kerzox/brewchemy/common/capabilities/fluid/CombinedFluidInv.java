@@ -119,6 +119,7 @@ public class CombinedFluidInv implements IFluidHandler {
         for (int i = 0; i < slotCount; i++) {
             ret = getHandlerFromSlot(i).fill(resource, action);
             if (ret != 0) {
+                onContentsChanged();
                 return ret;
             }
         }
@@ -133,6 +134,7 @@ public class CombinedFluidInv implements IFluidHandler {
         for (int i = 0; i < slotCount; i++) {
             ret = getHandlerFromSlot(i).drain(resource, action);
             if (!ret.isEmpty()) {
+                onContentsChanged();
                 return ret;
             }
         }
@@ -158,6 +160,7 @@ public class CombinedFluidInv implements IFluidHandler {
             FluidStack resource = new FluidStack(getFluidInTank(i), toDrain);
 
             ret = getHandlerFromSlot(i).drain(resource, action);
+
             if (!ret.isEmpty()) {
                 return ret;
             }

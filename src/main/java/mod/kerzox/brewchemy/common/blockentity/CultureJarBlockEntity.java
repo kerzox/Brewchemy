@@ -7,11 +7,12 @@ import mod.kerzox.brewchemy.common.crafting.RecipeInventory;
 import mod.kerzox.brewchemy.common.crafting.recipe.CultureJarRecipe;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CultureJarBlockEntity extends RecipeBlockEntity<CultureJarRecipe> {
 
-    private final SingleFluidInventory fluidHandler = SingleFluidInventory.simple(1000);
+    private final SingleFluidInventory fluidHandler = (SingleFluidInventory) SingleFluidInventory.simple(1000).addInput(Direction.values());
     private final ItemInventory itemHandler = ItemInventory.of(1, 1);
 
     public CultureJarBlockEntity(BlockPos pos, BlockState state) {

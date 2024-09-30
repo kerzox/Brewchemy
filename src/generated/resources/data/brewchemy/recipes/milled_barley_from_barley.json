@@ -1,0 +1,13 @@
+{
+  "type": "brewchemy:milling",
+  "duration": 180,
+  "group": "brewchemy",
+  "ingredient": {
+    "item": "brewchemy:barley_item",
+    "size": 1
+  },
+  "result": {
+    "count": 1,
+    "item": "brewchemy:milled_barley_item"
+  }
+}

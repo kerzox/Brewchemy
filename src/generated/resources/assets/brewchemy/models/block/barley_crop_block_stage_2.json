@@ -1,0 +1,6 @@
+{
+  "parent": "brewchemy:block/brewchemycrops",
+  "textures": {
+    "crop": "brewchemy:block/barley_crop_block_stage_2"
+  }
+}

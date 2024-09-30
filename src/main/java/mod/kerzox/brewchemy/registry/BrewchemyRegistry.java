@@ -398,19 +398,19 @@ public class BrewchemyRegistry {
         public static final HashMap<String, makeFluid<?>> ALL_FLUIDS = new HashMap<>();
 
         public static final makeFluid<BrewchemyFluid> WORT = makeFluid.build("wort",
-                true, true, () -> BrewchemyFluid.createColoured(0xFF92791e, false));
+                false, true, () -> BrewchemyFluid.createColoured(0xFF92791e, false));
 
         public static final makeFluid<BrewchemyFluid> BEER_ALE = makeFluid.build("beer_ale",
-                true, true, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
+                false, false, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
 
         public static final makeFluid<BrewchemyFluid> BEER_LAGER = makeFluid.build("beer_lager",
-                true, true, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
+                false, false, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
 
         public static final makeFluid<BrewchemyFluid> BEER_PALE_ALE = makeFluid.build("beer_pale_ale",
-                true, true, () -> BrewchemyFluid.createColoured(0xFFf99100, false));
+                false, false, () -> BrewchemyFluid.createColoured(0xFFf99100, false));
 
         public static final makeFluid<BrewchemyFluid> BEER_STOUT = makeFluid.build("beer_stout",
-                true, true, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
+                false, false, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
 
         public static void init() {
 

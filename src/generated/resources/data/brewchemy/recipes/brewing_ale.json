@@ -1,0 +1,21 @@
+{
+  "type": "brewchemy:brewing",
+  "alcohol": true,
+  "duration": 40,
+  "group": "brewchemy",
+  "heat": 100,
+  "recipe_ingredients": {
+    "fluid_ingredient": {
+      "amount": 500,
+      "fluid": "brewchemy:wort"
+    },
+    "ingredient": {
+      "item": "brewchemy:hops_item",
+      "size": 1
+    }
+  },
+  "result": {
+    "amount": 500,
+    "fluid": "brewchemy:beer_ale"
+  }
+}
