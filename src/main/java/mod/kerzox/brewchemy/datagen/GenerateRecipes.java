@@ -4,6 +4,7 @@ import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.SizeSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipe.BrewingRecipe;
+import mod.kerzox.brewchemy.common.crafting.recipe.CultureJarRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluid;
 import mod.kerzox.brewchemy.common.fluid.alcohol.AgeableAlcoholStack;
@@ -40,7 +41,20 @@ public class GenerateRecipes extends RecipeProvider {
                 20 * 2,
                 true,
                 100).build(consumer);
-
+        new CultureJarRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "brewers_yeast"),
+                new ItemStack(BrewchemyRegistry.Items.BREWERS_YEAST_ITEM.get()),
+                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 250)),
+                20 * 10,
+                0)
+                .build(consumer);
+        new CultureJarRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "lager_yeast"),
+                new ItemStack(BrewchemyRegistry.Items.LAGER_YEAST_ITEM.get()),
+                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 250)),
+                20 * 10,
+                -1)
+                .build(consumer);
     }
 
 }

@@ -5,10 +5,15 @@ import mod.kerzox.brewchemy.common.capabilities.fluid.SingleFluidInventory;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemInventory;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventory;
 import mod.kerzox.brewchemy.common.crafting.recipe.CultureJarRecipe;
+import mod.kerzox.brewchemy.common.data.BrewingKettleHeating;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public class CultureJarBlockEntity extends RecipeBlockEntity<CultureJarRecipe> {
 
@@ -27,17 +32,29 @@ public class CultureJarBlockEntity extends RecipeBlockEntity<CultureJarRecipe> {
 
     @Override
     protected boolean hasAResult(CultureJarRecipe workingRecipe) {
-        return false;
+        return !workingRecipe.assemble(getRecipeInventory(), RegistryAccess.EMPTY).isEmpty();
     }
 
     @Override
     protected void onRecipeFinish(CultureJarRecipe workingRecipe) {
+        ItemStack result = workingRecipe.assemble(getRecipeInventory(), RegistryAccess.EMPTY);
+
+        IFluidHandler temp = fluidHandler.getInputWrapper().get().copy();
+        useFluidIngredients(workingRecipe.getFluidIngredients(), temp);
+
+        if (hasEnoughItemSlots(new ItemStack[]{result}, itemHandler.getOutputHandler()).size() != 1) return;
+        transferItemResults(new ItemStack[]{result}, itemHandler.getOutputHandler());
+
+        useFluidIngredients(workingRecipe.getFluidIngredients(), fluidHandler.getInputWrapper());
+
+        finishRecipe();
 
     }
 
 
     @Override
     protected boolean canProgress(CultureJarRecipe workingRecipe) {
-        return false;
+        int maxHeatFromSource = BrewingKettleHeating.getHeat(level.getBlockState(worldPosition.below()).getBlock());
+        return workingRecipe.getHeat() < 0 ? workingRecipe.getHeat() >= maxHeatFromSource : workingRecipe.getHeat() <= maxHeatFromSource;
     }
 }

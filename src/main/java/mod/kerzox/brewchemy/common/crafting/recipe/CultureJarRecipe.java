@@ -33,13 +33,14 @@ public class CultureJarRecipe extends AbstractItemRecipe<RecipeInventory> {
     private final NonNullList<FluidIngredient> fluidIngredients = NonNullList.create();
     private final Map<Ingredient, Boolean> matching = new HashMap<>();
     private final Map<FluidIngredient, Boolean> fluid_matching = new HashMap<>();
+    private final int heat;
 
-    public CultureJarRecipe(RecipeType<?> type, ResourceLocation id, String group, ItemStack result, SizeSpecificIngredient[] ingredients, FluidIngredient[] fluids, int duration) {
+    public CultureJarRecipe(RecipeType<?> type, ResourceLocation id, String group, ItemStack result, FluidIngredient fluids, int duration, int heat) {
         super(type, id, group, duration, result, BrewchemyRegistry.Recipes.CULTURE_JAR_RECIPE_SERIALIZER.get());
-        this.ingredients.addAll(Arrays.stream(ingredients).toList());
         this.ingredients.forEach(i -> matching.put(i, false));
-        this.fluidIngredients.addAll(Arrays.stream(fluids).toList());
+        this.fluidIngredients.add(fluids);
         this.fluidIngredients.forEach(i -> fluid_matching.put(i, false));
+        this.heat = heat;
     }
 
     public NonNullList<FluidIngredient> getFluidIngredients() {
@@ -52,8 +53,24 @@ public class CultureJarRecipe extends AbstractItemRecipe<RecipeInventory> {
     }
 
     @Override
-    public boolean matches(RecipeInventory inv, Level p_44003_) {
-        return false;
+    public boolean matches(RecipeInventory inv, Level level) {
+        this.fluidIngredients.forEach(i -> fluid_matching.put(i, false));
+
+        if (!inv.canStorageFluid()) throw new IllegalStateException("You can't have recipe inventory for this recipe without fluid");
+
+        getFluidIngredients().forEach(((ingredient) -> {
+            for (int i = 0; i < inv.getFluidHandler().getTanks(); i++) {
+                if (ingredient.test(inv.getFluidHandler().getFluidInTank(i))) {
+                    fluid_matching.put(ingredient, true);
+                }
+            }
+        }));
+
+        return !fluid_matching.containsValue(false);
+    }
+
+    public int getHeat() {
+        return heat;
     }
 
     public static class Serializer implements RecipeSerializer<CultureJarRecipe> {
@@ -61,44 +78,34 @@ public class CultureJarRecipe extends AbstractItemRecipe<RecipeInventory> {
         @Override
         public CultureJarRecipe fromJson(ResourceLocation pRecipeId, JsonObject json) {
             String group = JsonUtils.getStringOr("group", json, "");
-            Ingredient[] ingredients = BrewchemyJsonUtil.deserializeIngredients(json);
-            FluidIngredient[] fluidIngredients = BrewchemyJsonUtil.deserializeFluidIngredients(json);
+            FluidIngredient fluidIngredients = BrewchemyJsonUtil.deserializeFluidIngredients(json)[0];
             ItemStack resultStack = BrewchemyJsonUtil.deserializeItemStack(json);
             int duration = JsonUtils.getIntOr("duration", json, 0);
-            return new CultureJarRecipe(BrewchemyRegistry.Recipes.CULTURE_JAR_RECIPE.get(), pRecipeId, group, resultStack, (SizeSpecificIngredient[]) ingredients, fluidIngredients, duration);
+            int heat = JsonUtils.getIntOr("heat", json, 0);
+            return new CultureJarRecipe(BrewchemyRegistry.Recipes.CULTURE_JAR_RECIPE.get(), pRecipeId, group, resultStack, fluidIngredients, duration, heat);
         }
 
 
         @Override
         public @Nullable CultureJarRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
             String group = pBuffer.readUtf();
-            int ingredientCount = pBuffer.readVarInt();
-            SizeSpecificIngredient[] ingredients = new SizeSpecificIngredient[ingredientCount];
-            for (int i = 0; i < ingredients.length; i++) {
-                ingredients[i] = (SizeSpecificIngredient) Ingredient.fromNetwork(pBuffer);
-            }
-            FluidIngredient[] fluid_ingredients = new FluidIngredient[ingredientCount];
-            for (int i = 0; i < fluid_ingredients.length; i++) {
-                fluid_ingredients[i] = FluidIngredient.Serializer.INSTANCE.parse(pBuffer);
-            }
+            FluidIngredient fluid_ingredients = FluidIngredient.Serializer.INSTANCE.parse(pBuffer);
             ItemStack resultStack = pBuffer.readItem();
             int duration = pBuffer.readVarInt();
-            return new CultureJarRecipe(BrewchemyRegistry.Recipes.CULTURE_JAR_RECIPE.get(), pRecipeId, group, resultStack, ingredients, fluid_ingredients, duration);
+            int heat = pBuffer.readVarInt();
+            return new CultureJarRecipe(BrewchemyRegistry.Recipes.CULTURE_JAR_RECIPE.get(), pRecipeId, group, resultStack, fluid_ingredients, duration, heat);
         }
 
         @Override
         public void toNetwork(FriendlyByteBuf pBuffer, CultureJarRecipe pRecipe) {
             pBuffer.writeUtf(pRecipe.getGroup());
-            pBuffer.writeVarInt(pRecipe.getIngredients().size());
-            for (Ingredient ingredient : pRecipe.getIngredients()) {
-                ingredient.toNetwork(pBuffer);
-            }
             pBuffer.writeVarInt(pRecipe.getFluidIngredients().size());
             for (FluidIngredient ingredient : pRecipe.getFluidIngredients()) {
                 ingredient.toNetwork(pBuffer);
             }
             pBuffer.writeItem(pRecipe.getResultItem(RegistryAccess.EMPTY));
             pBuffer.writeVarInt(pRecipe.getDuration());
+            pBuffer.writeVarInt(pRecipe.getHeat());
         }
     }
 
@@ -106,11 +113,13 @@ public class CultureJarRecipe extends AbstractItemRecipe<RecipeInventory> {
 
         protected ItemStack result;
         protected FluidIngredient fingredient;
+        protected int heat;
 
-        public RecipeBuilder(ResourceLocation name, ItemStack result, FluidIngredient fluidIngredient, int duration) {
+        public RecipeBuilder(ResourceLocation name, ItemStack result, FluidIngredient fluidIngredient, int duration, int heat) {
             super(name, duration, BrewchemyRegistry.Recipes.CULTURE_JAR_RECIPE_SERIALIZER.get());
             this.fingredient = fluidIngredient;
             this.result = result;
+            this.heat = heat;
         }
 
         @Override
@@ -119,6 +128,7 @@ public class CultureJarRecipe extends AbstractItemRecipe<RecipeInventory> {
             ingredients.add("fluid_ingredient", fingredient.toJson());
             json.add("recipe_ingredients", ingredients);
             json.add("result", Util.serializeItemStack(result));
+            json.addProperty("heat", this.heat);
         }
     }
 
