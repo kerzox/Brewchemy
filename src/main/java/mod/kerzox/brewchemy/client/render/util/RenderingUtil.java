@@ -302,7 +302,7 @@ public class RenderingUtil {
                 return new Vector3f[]{new Vector3f(maxX, maxY, minZ), new Vector3f(minX, maxY, minZ), new Vector3f(minX, maxY, maxZ), new Vector3f(maxX, maxY, maxZ)};
             }
             case DOWN -> {
-                return new Vector3f[]{new Vector3f(maxX, minY, minZ), new Vector3f(minX, minY, minZ), new Vector3f(minX, minY, maxZ), new Vector3f(maxX, minY, maxZ)};
+                return new Vector3f[]{new Vector3f(minX, minY, minZ), new Vector3f(maxX, minY, minZ), new Vector3f(maxX, minY, maxZ), new Vector3f(minX, minY, maxZ)};
             }
         }
         return null;

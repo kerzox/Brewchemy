@@ -1,0 +1,96 @@
+{
+  "variants": {
+    "facing=down,part=left_end": {
+      "model": "brewchemy:block/table_block_left_end",
+      "y": 90.0
+    },
+    "facing=down,part=middle": {
+      "model": "brewchemy:block/table_block_middle",
+      "y": 90.0
+    },
+    "facing=down,part=right_end": {
+      "model": "brewchemy:block/table_block_right_end",
+      "y": 90.0
+    },
+    "facing=down,part=single": {
+      "model": "brewchemy:block/table_block_single",
+      "y": 90.0
+    },
+    "facing=east,part=left_end": {
+      "model": "brewchemy:block/table_block_left_end",
+      "y": 90.0
+    },
+    "facing=east,part=middle": {
+      "model": "brewchemy:block/table_block_middle",
+      "y": 90.0
+    },
+    "facing=east,part=right_end": {
+      "model": "brewchemy:block/table_block_right_end",
+      "y": 90.0
+    },
+    "facing=east,part=single": {
+      "model": "brewchemy:block/table_block_single",
+      "y": 90.0
+    },
+    "facing=north,part=left_end": {
+      "model": "brewchemy:block/table_block_left_end"
+    },
+    "facing=north,part=middle": {
+      "model": "brewchemy:block/table_block_middle"
+    },
+    "facing=north,part=right_end": {
+      "model": "brewchemy:block/table_block_right_end"
+    },
+    "facing=north,part=single": {
+      "model": "brewchemy:block/table_block_single"
+    },
+    "facing=south,part=left_end": {
+      "model": "brewchemy:block/table_block_left_end",
+      "y": 180.0
+    },
+    "facing=south,part=middle": {
+      "model": "brewchemy:block/table_block_middle",
+      "y": 180.0
+    },
+    "facing=south,part=right_end": {
+      "model": "brewchemy:block/table_block_right_end",
+      "y": 180.0
+    },
+    "facing=south,part=single": {
+      "model": "brewchemy:block/table_block_single",
+      "y": 180.0
+    },
+    "facing=up,part=left_end": {
+      "model": "brewchemy:block/table_block_left_end",
+      "y": 90.0
+    },
+    "facing=up,part=middle": {
+      "model": "brewchemy:block/table_block_middle",
+      "y": 90.0
+    },
+    "facing=up,part=right_end": {
+      "model": "brewchemy:block/table_block_right_end",
+      "y": 90.0
+    },
+    "facing=up,part=single": {
+      "model": "brewchemy:block/table_block_single",
+      "y": 90.0
+    },
+    "facing=west,part=left_end": {
+      "model": "brewchemy:block/table_block_left_end",
+      "y": 270.0
+    },
+    "facing=west,part=middle": {
+      "model": "brewchemy:block/table_block_middle",
+      "y": 270.0
+    },
+    "facing=west,part=right_end": {
+      "model": "brewchemy:block/table_block_right_end",
+      "y": 270.0
+    },
+    "facing=west,part=single": {
+      "model": "brewchemy:block/table_block_single",
+      "y": 270.0
+    }
+  }
+}

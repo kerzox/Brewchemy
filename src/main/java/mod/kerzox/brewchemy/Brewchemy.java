@@ -4,11 +4,13 @@ import com.mojang.logging.LogUtils;
 import mod.kerzox.brewchemy.client.ClientSetup;
 import mod.kerzox.brewchemy.common.data.BrewingKettleHeating;
 import mod.kerzox.brewchemy.common.event.TickUtils;
+import mod.kerzox.brewchemy.common.item.PintItem;
 import mod.kerzox.brewchemy.common.network.PacketHandler;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -63,6 +65,9 @@ public class Brewchemy
         if (event.getTabKey() == BrewchemyRegistry.BREWCHEMY_TAG.getKey()) {
             for (RegistryObject<Item> item : BrewchemyRegistry.Items.ALL_ITEMS.values()) {
                 event.accept(item);
+            }
+            for (ItemStack stack : PintItem.makeDrinks()) {
+                 event.accept(stack);
             }
         }
     }

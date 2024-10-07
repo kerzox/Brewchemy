@@ -4,18 +4,18 @@ import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.ui.menu.BrewingMenu;
 import mod.kerzox.brewchemy.client.ui.menu.MillingMenu;
 import mod.kerzox.brewchemy.common.block.*;
-import mod.kerzox.brewchemy.common.blockentity.BrewingKettleBlockEntity;
-import mod.kerzox.brewchemy.common.blockentity.CultureJarBlockEntity;
-import mod.kerzox.brewchemy.common.blockentity.MillingBlockEntity;
-import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
+import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
+import mod.kerzox.brewchemy.common.blockentity.*;
 import mod.kerzox.brewchemy.common.crafting.recipe.BrewingRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.CultureJarRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
 import mod.kerzox.brewchemy.common.data.BrewingKettleHeating;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
+import mod.kerzox.brewchemy.common.entity.SeatEntity;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluid;
 import mod.kerzox.brewchemy.common.item.BarleyItem;
 import mod.kerzox.brewchemy.common.item.BrewingKettleItem;
+import mod.kerzox.brewchemy.common.item.PintItem;
 import mod.kerzox.brewchemy.common.item.RopeItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -27,24 +27,34 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -182,6 +192,9 @@ public class BrewchemyRegistry {
                 true,
                 "wild_yeast_item", () -> new Item(new Item.Properties()));
 
+        public static final RegistryObject<Item> PINT_ITEM = register(
+                false,
+                "pint_item", () -> new PintItem(new Item.Properties().stacksTo(1)));
 
         public static void init() {
 
@@ -270,6 +283,55 @@ public class BrewchemyRegistry {
                         .noOcclusion()
                         .pushReaction(PushReaction.DESTROY)), true);
 
+        public static final makeBlock<BrewchemyEntityBlock<PintGlassBlockEntity>> PINT_GLASS_BLOCK
+                = makeBlock.build("pint_glass_block",
+                (p) -> new BrewchemyEntityBlock<>(BlockEntities.PINT_GLASS_BLOCK_ENTITY.getType(), p) {
+                    @Override
+                    public RenderShape getRenderShape(BlockState p_60550_) {
+                        return RenderShape.ENTITYBLOCK_ANIMATED;
+                    }
+
+                    @Override
+                    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
+                        VoxelShape shape = Shapes.empty();
+                        if (level.getBlockEntity(pos) instanceof PintGlassBlockEntity pintGlassBlockEntity) {
+                            int size = pintGlassBlockEntity.getBeers().stream().filter(p->!p.isEmpty()).toList().size();
+                            if (size > 1) {
+                                shape = Shapes.join(shape, Shapes.box(0.1875, 0.1875, 0, 0.3125, 0.4375, 0.125), BooleanOp.OR);
+                                shape = Shapes.join(shape, Shapes.box(0.0625, 0, 0.125, 0.4375, 0.5625, 0.5), BooleanOp.OR);
+                                shape = Shapes.join(shape, Shapes.box(0.6875, 0.1875, 0.875, 0.8125, 0.4375, 1), BooleanOp.OR);
+                                shape = Shapes.join(shape, Shapes.box(0.5625, 0, 0.5, 0.9375, 0.5625, 0.875), BooleanOp.OR);
+                            } else {
+                                shape = Shapes.join(shape, Shapes.box(0.4375, 0.1875, 0.1875, 0.5625, 0.4375, 0.3125), BooleanOp.OR);
+                                shape = Shapes.join(shape, Shapes.box(0.3125, 0, 0.3125, 0.6875, 0.5625, 0.6875), BooleanOp.OR);
+                            }
+                        }
+                        return shape;
+                    }
+                },
+                (BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.WOOD)
+                        .sound(SoundType.DECORATED_POT)
+                        .noOcclusion()
+                        .pushReaction(PushReaction.DESTROY)), false);
+
+
+        public static final makeBlock<BenchSeatBlock> BENCH_SEAT_BLOCK
+                = makeBlock.build("bench_seat_block",
+                BenchSeatBlock::new,
+                (BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.WOOD)
+                        .sound(SoundType.WOOD)
+                        .noOcclusion()), true);
+
+        public static final makeBlock<TableBlock> TABLE_BLOCK
+                = makeBlock.build("table_block",
+                TableBlock::new,
+                (BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.WOOD)
+                        .sound(SoundType.WOOD)
+                        .noOcclusion()), true);
+
 
         public static void init() {
 
@@ -336,6 +398,8 @@ public class BrewchemyRegistry {
         public static final makeBlockEntity<CultureJarBlockEntity> CULTURE_JAR_BLOCK_ENTITY
                 = makeBlockEntity.build("culture_jar_block_entity", CultureJarBlockEntity::new, Blocks.CULTURE_JAR_BLOCK);
 
+        public static final makeBlockEntity<PintGlassBlockEntity> PINT_GLASS_BLOCK_ENTITY
+                = makeBlockEntity.build("pint_glass_block_entity", PintGlassBlockEntity::new, Blocks.PINT_GLASS_BLOCK);
 
         public static void init() {
 
@@ -387,6 +451,15 @@ public class BrewchemyRegistry {
                                 .updateInterval(20)
                                 .build("rope_entity"));
 
+        public static final RegistryObject<EntityType<SeatEntity>> SEAT_ENTITY =
+                ENTITIES.register("seat_entity",
+                        () -> EntityType.Builder.<SeatEntity>of(SeatEntity::new,
+                                        MobCategory.MISC)
+                                .sized(1,1)
+                                .clientTrackingRange(6)
+                                .updateInterval(20)
+                                .build("seat_entity"));
+
         public static void init() {
 
         }
@@ -401,16 +474,16 @@ public class BrewchemyRegistry {
                 false, true, () -> BrewchemyFluid.createColoured(0xFF92791e, false));
 
         public static final makeFluid<BrewchemyFluid> BEER_ALE = makeFluid.build("beer_ale",
-                false, false, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
+                false, false, () -> BrewchemyFluid.createColoured(0xFFf99100, false));
 
         public static final makeFluid<BrewchemyFluid> BEER_LAGER = makeFluid.build("beer_lager",
                 false, false, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
 
         public static final makeFluid<BrewchemyFluid> BEER_PALE_ALE = makeFluid.build("beer_pale_ale",
-                false, false, () -> BrewchemyFluid.createColoured(0xFFf99100, false));
+                false, false, () -> BrewchemyFluid.createColoured(0xFFffb54e, false));
 
         public static final makeFluid<BrewchemyFluid> BEER_STOUT = makeFluid.build("beer_stout",
-                false, false, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
+                false, false, () -> BrewchemyFluid.createColoured(0xFF803d00, false));
 
         public static void init() {
 

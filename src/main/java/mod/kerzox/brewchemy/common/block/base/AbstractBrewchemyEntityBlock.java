@@ -36,7 +36,6 @@ public abstract class AbstractBrewchemyEntityBlock extends BrewchemyDirectionalB
                     return InteractionResult.SUCCESS;
                 }
             }
-            return InteractionResult.SUCCESS;
         }
         if (pLevel.getBlockEntity(pPos) instanceof SyncedBlockEntity onClick && pHand == InteractionHand.MAIN_HAND) {
             if (onClick.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit)) {

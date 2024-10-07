@@ -33,7 +33,6 @@ public class CultureJarBlockEntityRenderer implements BlockEntityRenderer<Cultur
     @Override
     public void render(CultureJarBlockEntity pBlockEntity, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
 
-
         pBlockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(cap -> {
             ItemStack stack = cap.getStackInSlot(1);
             if (!stack.isEmpty()) {
