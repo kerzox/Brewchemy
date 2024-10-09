@@ -19,6 +19,10 @@ public class TickUtils {
         return minutes * 60 * secondsToTicks(1);
     }
 
+    public static int minecraftDaysToTicks(int days) {
+        return 24000 * days;
+    }
+
     public static int hoursToTicks(int hours) {
         return hours * 60 * 60 * secondsToTicks(1);
     }

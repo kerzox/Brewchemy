@@ -395,4 +395,43 @@ public class RenderingUtil {
                 .endVertex();
     }
 
+    public static void renderSolidBlockEntity(PoseStack pPoseStack, BakedModel model, BlockEntity pBlockEntity, MultiBufferSource pBufferSource, int pPackedLight) {
+        Minecraft.getInstance().getBlockRenderer().getModelRenderer()
+                .tesselateWithAO(Minecraft.getInstance().level, model,
+                        pBlockEntity.getBlockState(),
+                        pBlockEntity.getBlockPos(),
+                        pPoseStack, pBufferSource.getBuffer(RenderType.solid()),
+                        true,
+                        Minecraft.getInstance().level.getRandom(), pBlockEntity.getBlockPos().asLong(), pPackedLight, ModelData.EMPTY,
+                        RenderType.solid());
+    }
+
+    public static void renderSolidBlockEntityNoAO(PoseStack pPoseStack, BakedModel model, BlockEntity pBlockEntity, MultiBufferSource pBufferSource, int pPackedLight) {
+        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(
+                pPoseStack.last(),
+                pBufferSource.getBuffer(RenderType.solid()),
+                null,
+                model,
+                1f,
+                1f,
+                1f, pPackedLight,
+                OverlayTexture.NO_OVERLAY,
+                ModelData.EMPTY,
+                RenderType.solid()
+        );
+    }
+
+
+
+    public static void renderCutoutBlockEntity(PoseStack pPoseStack, BakedModel model, BlockEntity pBlockEntity, MultiBufferSource pBufferSource, int pPackedLight) {
+        Minecraft.getInstance().getBlockRenderer().getModelRenderer()
+                .tesselateWithAO(Minecraft.getInstance().level, model,
+                        pBlockEntity.getBlockState(),
+                        pBlockEntity.getBlockPos(),
+                        pPoseStack, pBufferSource.getBuffer(RenderType.cutout()),
+                        true,
+                        Minecraft.getInstance().level.getRandom(), pBlockEntity.getBlockPos().asLong(), pPackedLight, ModelData.EMPTY,
+                        RenderType.cutout());
+    }
+
 }

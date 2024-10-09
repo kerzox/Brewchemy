@@ -1,6 +1,7 @@
 package mod.kerzox.brewchemy.common.crafting;
 
 import com.google.gson.JsonObject;
+import com.mojang.realmsclient.util.JsonUtils;
 import mod.kerzox.brewchemy.Brewchemy;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;

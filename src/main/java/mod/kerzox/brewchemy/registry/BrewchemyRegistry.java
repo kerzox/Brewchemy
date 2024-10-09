@@ -1,6 +1,5 @@
 package mod.kerzox.brewchemy.registry;
 
-import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.ui.menu.BrewingMenu;
 import mod.kerzox.brewchemy.client.ui.menu.MillingMenu;
 import mod.kerzox.brewchemy.common.block.*;
@@ -8,15 +7,15 @@ import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.*;
 import mod.kerzox.brewchemy.common.crafting.recipe.BrewingRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.CultureJarRecipe;
+import mod.kerzox.brewchemy.common.crafting.recipe.FermentationRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
 import mod.kerzox.brewchemy.common.data.BrewingKettleHeating;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
 import mod.kerzox.brewchemy.common.entity.SeatEntity;
+import mod.kerzox.brewchemy.common.event.TickUtils;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluid;
-import mod.kerzox.brewchemy.common.item.BarleyItem;
-import mod.kerzox.brewchemy.common.item.BrewingKettleItem;
-import mod.kerzox.brewchemy.common.item.PintItem;
-import mod.kerzox.brewchemy.common.item.RopeItem;
+import mod.kerzox.brewchemy.common.fluid.alcohol.AlcoholicFluid;
+import mod.kerzox.brewchemy.common.item.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
@@ -27,7 +26,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -49,20 +47,15 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -133,6 +126,8 @@ public class BrewchemyRegistry {
         public static final RegistryObject<RecipeType<CultureJarRecipe>> CULTURE_JAR_RECIPE = RECIPE_TYPES.register("culture", () -> RecipeType.simple(new ResourceLocation(MODID, "culture")));
         public static final RegistryObject<CultureJarRecipe.Serializer> CULTURE_JAR_RECIPE_SERIALIZER = RECIPES.register("culture", CultureJarRecipe.Serializer::new);
 
+        public static final RegistryObject<RecipeType<FermentationRecipe>> FERMENTATION_RECIPE = RECIPE_TYPES.register("fermentation", () -> RecipeType.simple(new ResourceLocation(MODID, "fermentation")));
+        public static final RegistryObject<FermentationRecipe.Serializer> FERMENTATION_RECIPE_SERIALIZER = RECIPES.register("fermentation", FermentationRecipe.Serializer::new);
 
         public static void init() {
 
@@ -172,13 +167,21 @@ public class BrewchemyRegistry {
                 true,
                 "milled_barley_item", () -> new Item(new Item.Properties()));
 
+        public static final RegistryObject<Item> ROASTED_BARLEY_ITEM = register(
+                true,
+                "roasted_barley_item", () -> new Item(new Item.Properties()));
+
         public static final RegistryObject<Item> ROPE_ITEM = register(
                 true,
                 "rope_item", () -> new RopeItem(new Item.Properties()));
 
         public static final RegistryObject<Item> HOPS_ITEM = register(
                 true,
-                "hops_item", () -> new BarleyItem(new Item.Properties()));
+                "hops_item", () -> new Item(new Item.Properties()));
+
+        public static final RegistryObject<Item> BARREL_TAP = register(
+                true,
+                "barrel_tap_item", () -> new Item(new Item.Properties()));
 
         public static final RegistryObject<Item> BREWERS_YEAST_ITEM = register(
                 true,
@@ -315,6 +318,13 @@ public class BrewchemyRegistry {
                         .noOcclusion()
                         .pushReaction(PushReaction.DESTROY)), false);
 
+        public static final makeBlock<FermentationBarrelBlock> FERMENTATION_BARREL_BLOCK
+                = makeBlock.build("fermentation_barrel_block",
+                FermentationBarrelBlock::new,
+                (BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.WOOD)
+                        .sound(SoundType.WOOD)
+                        .noOcclusion()), true);
 
         public static final makeBlock<BenchSeatBlock> BENCH_SEAT_BLOCK
                 = makeBlock.build("bench_seat_block",
@@ -401,6 +411,9 @@ public class BrewchemyRegistry {
         public static final makeBlockEntity<PintGlassBlockEntity> PINT_GLASS_BLOCK_ENTITY
                 = makeBlockEntity.build("pint_glass_block_entity", PintGlassBlockEntity::new, Blocks.PINT_GLASS_BLOCK);
 
+        public static final makeBlockEntity<FermentationBarrelBlockEntity> FERMENTATION_BARREL
+                = makeBlockEntity.build("fermentation_barrel", FermentationBarrelBlockEntity::new, Blocks.FERMENTATION_BARREL_BLOCK);
+
         public static void init() {
 
         }
@@ -474,16 +487,22 @@ public class BrewchemyRegistry {
                 false, true, () -> BrewchemyFluid.createColoured(0xFF92791e, false));
 
         public static final makeFluid<BrewchemyFluid> BEER_ALE = makeFluid.build("beer_ale",
-                false, false, () -> BrewchemyFluid.createColoured(0xFFf99100, false));
+                false, true, () -> AlcoholicFluid.create(0xFFf99100,
+                        new int[] { TickUtils.secondsToTicks(25), TickUtils.secondsToTicks(25) + TickUtils.secondsToTicks(5) },
+                        TickUtils.secondsToTicks(15),
+                        TickUtils.secondsToTicks(50)));
 
         public static final makeFluid<BrewchemyFluid> BEER_LAGER = makeFluid.build("beer_lager",
-                false, false, () -> BrewchemyFluid.createColoured(0xFFd16401, false));
+                false, true, () -> AlcoholicFluid.create(0xFFd16401,
+                        new int[] { TickUtils.minecraftDaysToTicks(6), TickUtils.minecraftDaysToTicks(8) - TickUtils.minutesToTicks(1) }, TickUtils.minecraftDaysToTicks(6), TickUtils.minecraftDaysToTicks(8)));
 
         public static final makeFluid<BrewchemyFluid> BEER_PALE_ALE = makeFluid.build("beer_pale_ale",
-                false, false, () -> BrewchemyFluid.createColoured(0xFFffb54e, false));
+                false, true, () -> AlcoholicFluid.create(0xFFffb54e,
+                        new int[] { TickUtils.minecraftDaysToTicks(5), TickUtils.minecraftDaysToTicks(5) + TickUtils.minutesToTicks(1) }, TickUtils.minecraftDaysToTicks(4), TickUtils.minecraftDaysToTicks(6)));
 
         public static final makeFluid<BrewchemyFluid> BEER_STOUT = makeFluid.build("beer_stout",
-                false, false, () -> BrewchemyFluid.createColoured(0xFF803d00, false));
+                false, true, () -> AlcoholicFluid.create(0xFF803d00,
+                        new int[] { TickUtils.minecraftDaysToTicks(7), TickUtils.minecraftDaysToTicks(8) }, TickUtils.minecraftDaysToTicks(6), TickUtils.minecraftDaysToTicks(10)));
 
         public static void init() {
 

@@ -27,20 +27,24 @@ public class BrewingKettleGuiClick {
 
     private ItemStack itemStack;
     private int button;
+    private int state;
 
-    public BrewingKettleGuiClick(ItemStack itemInHand, int button) {
+    public BrewingKettleGuiClick(ItemStack itemInHand, int button, int state) {
         this.itemStack = itemInHand;
         this.button = button;
+        this.state = state;
     }
 
     public BrewingKettleGuiClick(FriendlyByteBuf buf) {
         this.itemStack = buf.readItem();
         this.button = buf.readInt();
+        this.state = buf.readInt();
     }
 
     public void toBytes(FriendlyByteBuf buf) {
         buf.writeItem(this.itemStack);
         buf.writeInt(this.button);
+        buf.writeInt(this.state);
     }
 
     public static boolean handle(BrewingKettleGuiClick packet, Supplier<NetworkEvent.Context> ctx) {
@@ -60,7 +64,33 @@ public class BrewingKettleGuiClick {
                     if (brewingMenu.getBlockEntity().getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().get() instanceof MultifluidInventory inventory) {
                         IFluidHandlerItem iFluidHandlerItem = optionalIFluidHandlerItem.get();
                         for (int i = 0; i < iFluidHandlerItem.getTanks(); i++) {
-                            FluidStack stack1 = iFluidHandlerItem.getFluidInTank(i);
+                           // FluidStack stack1 = iFluidHandlerItem.getFluidInTank(i);
+
+                            if (packet.button == 0) {
+                                // create a temp handler
+                                FluidActionResult result =
+                                        FluidUtil.tryEmptyContainer(
+                                                packet.itemStack,
+                                                inventory.getInputWrapper(),
+                                                iFluidHandlerItem.getTankCapacity(i), player, true);
+                                if (result.success) {
+                                    brewingMenu.setCarried(result.result);
+                                    return;
+                                }
+                            } else {
+                                for (int i1 = 0; i1 < inventory.getTanks(); i1++) {
+                                    IFluidHandler temp = MultifluidTank.of(1, inventory.getTankCapacity(i1));
+                                    temp.fill(inventory.getFluidInTank(i1).copy(), IFluidHandler.FluidAction.EXECUTE);
+
+                                    FluidActionResult result = FluidUtil.tryFillContainer(packet.itemStack, temp, iFluidHandlerItem.getTankCapacity(i), player, true);
+                                    if (result.success) {
+                                        brewingMenu.setCarried(result.result);
+                                        inventory.getFluidInTank(i1).shrink(inventory.getFluidInTank(i1).getAmount() - temp.getFluidInTank(0).getAmount());
+                                        return;
+                                    }
+                                }
+                            }
+
 //                            if (packet.button == 1) {
 //                                tryToFillContainer(packet, menu, stack, iFluidHandlerItem, i, player);
 //                            } else {
@@ -82,9 +112,19 @@ public class BrewingKettleGuiClick {
                 else {
                     if (packet.button == 0) {
                         brewingMenu.getBlockEntity().getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(item -> {
-                            ItemStackHandlerUtils.insertAndModifyStack(item, packet.itemStack);
+
+                            if (packet.itemStack.isEmpty()) return;
+
+                            for (int i = 0; i < item.getSlots(); i++)
+                            {
+                                ItemStack ret = item.insertItem(i, packet.itemStack, false);
+                                if (!ItemStack.matches(ret, packet.itemStack)) {
+                                    brewingMenu.setCarried(ret);
+                                    return;
+                                }
+                            }
+
                         });
-                        brewingMenu.setCarried(packet.itemStack);
                     } else if (packet.button == 1) {
 
                         ItemStack carried = packet.itemStack;
@@ -94,12 +134,13 @@ public class BrewingKettleGuiClick {
                                 ItemStack insideKettle = handler.getStackInSlot(i);
                                 if (!insideKettle.isEmpty()) {
                                     if (carried.isEmpty()) {
-                                        brewingMenu.setCarried(handler.extractItem(i, player.isShiftKeyDown() ? insideKettle.getCount() : 1, false));
+                                        int amount = packet.state == 1 ? insideKettle.getCount() : 1;
+                                        brewingMenu.setCarried(handler.extractItem(i, amount, false));
                                         return;
                                     } else if (carried.getCount() < carried.getMaxStackSize()) {
                                         int spaceLeft = carried.getMaxStackSize() - carried.getCount();
                                         int amountToExtract;
-                                        if (player.isShiftKeyDown()) {
+                                        if (packet.state == 1) {
                                             amountToExtract = Math.min(insideKettle.getCount(), spaceLeft);
                                         } else {
                                             amountToExtract = 1;

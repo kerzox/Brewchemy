@@ -1,0 +1,5 @@
+{
+  "loader": "forge:obj",
+  "flip_v": true,
+  "model": "brewchemy:models/block/obj/fermentation_barrel/fermentation_barrel.obj"
+}

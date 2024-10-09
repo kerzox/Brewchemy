@@ -1,16 +1,14 @@
 package mod.kerzox.brewchemy.common.capabilities.item;
 
 import mod.kerzox.brewchemy.common.capabilities.CapabilityHolder;
-import mod.kerzox.brewchemy.common.capabilities.ICapabilitySerializer;
+import mod.kerzox.brewchemy.common.capabilities.ICompoundSerializer;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +20,7 @@ import java.util.HashSet;
  * A Sided item stack inventory with sided input and output and a combined inventory of input/output
  */
 
-public class ItemInventory extends CombinedInvWrapper implements IStrictCombinedItemHandler<ItemInventory>, ICapabilitySerializer, CapabilityHolder<ItemInventory> {
+public class ItemInventory extends CombinedInvWrapper implements IStrictCombinedItemHandler<ItemInventory>, ICompoundSerializer, CapabilityHolder<ItemInventory> {
 
     private HashSet<Direction> inputSides = new HashSet<>();
     private HashSet<Direction> outputSides = new HashSet<>();
@@ -186,7 +184,7 @@ public class ItemInventory extends CombinedInvWrapper implements IStrictCombined
 
             ItemStack ret = super.insertItem(slot, stack, simulate);
 
-            if (!ItemStack.isSameItem(ret, stack) && !simulate) {
+            if (!ItemStack.matches(ret, stack) && !simulate) {
                 owner.onContentsChanged(slot, true);
             }
 
@@ -210,7 +208,7 @@ public class ItemInventory extends CombinedInvWrapper implements IStrictCombined
             if (!input) return stack;
             ItemStack ret = super.insertItem(slot, stack, simulate);
 
-            if (!ItemStack.isSameItem(ret, stack) && !simulate) {
+            if (!ItemStack.matches(ret, stack) && !simulate) {
                 owner.onContentsChanged(slot, true);
             }
 

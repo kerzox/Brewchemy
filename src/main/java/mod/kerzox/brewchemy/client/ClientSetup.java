@@ -5,6 +5,7 @@ import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.render.baked.PintGlassBakedModel;
 import mod.kerzox.brewchemy.client.render.baked.RopeTiedPostBakedModel;
 import mod.kerzox.brewchemy.client.render.blockentity.CultureJarBlockEntityRenderer;
+import mod.kerzox.brewchemy.client.render.blockentity.FermentationBarrelBlockEntityRenderer;
 import mod.kerzox.brewchemy.client.render.blockentity.PintGlassBlockEntityRenderer;
 import mod.kerzox.brewchemy.client.render.entity.RopeEntityRenderer;
 import mod.kerzox.brewchemy.client.render.entity.NoEntityRenderer;
@@ -39,6 +40,7 @@ public class ClientSetup {
             EntityRenderers.register(BrewchemyRegistry.Entities.SEAT_ENTITY.get(), NoEntityRenderer::new);
             BlockEntityRenderers.register(BrewchemyRegistry.BlockEntities.CULTURE_JAR_BLOCK_ENTITY.get(), CultureJarBlockEntityRenderer::new);
             BlockEntityRenderers.register(BrewchemyRegistry.BlockEntities.PINT_GLASS_BLOCK_ENTITY.get(), PintGlassBlockEntityRenderer::new);
+            BlockEntityRenderers.register(BrewchemyRegistry.BlockEntities.FERMENTATION_BARREL.get(), FermentationBarrelBlockEntityRenderer::new);
         });
 
     }
@@ -53,6 +55,9 @@ public class ClientSetup {
         for (ResourceLocation glass : PintGlassBlockEntityRenderer.PINT_GLASS) {
             event.register(glass);
         }
+        event.register(FermentationBarrelBlockEntityRenderer.SINGLE);
+        event.register(FermentationBarrelBlockEntityRenderer.MULTIBLOCK);
+        event.register(FermentationBarrelBlockEntityRenderer.TAP);
     }
 
     @SubscribeEvent

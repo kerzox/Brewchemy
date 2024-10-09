@@ -7,7 +7,7 @@
   "recipe_ingredients": {
     "fluid_ingredient": {
       "amount": 500,
-      "fluid": "brewchemy:wort"
+      "fluid": "brewchemy:beer_ale"
     },
     "ingredient": {
       "item": "brewchemy:hops_item",
@@ -16,6 +16,6 @@
   },
   "result": {
     "amount": 500,
-    "fluid": "brewchemy:beer_ale"
+    "fluid": "brewchemy:beer_pale_ale"
   }
 }

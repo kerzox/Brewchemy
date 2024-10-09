@@ -2,7 +2,7 @@ package mod.kerzox.brewchemy.common.blockentity.base;
 
 import com.google.common.collect.Lists;
 import mod.kerzox.brewchemy.common.capabilities.CapabilityHolder;
-import mod.kerzox.brewchemy.common.capabilities.ICapabilitySerializer;
+import mod.kerzox.brewchemy.common.capabilities.ICompoundSerializer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -53,7 +53,7 @@ public abstract class CapabilityBlockEntity extends SyncedBlockEntity {
         ListTag list = pkt.getTag().getList(MACHINE_CAPABILITY_LIST_TAG, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag tag = list.getCompound(i);
-            if (capabilities.get(i) instanceof ICapabilitySerializer serializer) serializer.deserialize(tag);
+            if (capabilities.get(i) instanceof ICompoundSerializer serializer) serializer.deserialize(tag);
         }
     }
 
@@ -63,7 +63,7 @@ public abstract class CapabilityBlockEntity extends SyncedBlockEntity {
         ListTag list = pTag.getList(MACHINE_CAPABILITY_LIST_TAG, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag tag = list.getCompound(i);
-            if (capabilities.get(i) instanceof ICapabilitySerializer serializer) serializer.deserialize(tag);
+            if (capabilities.get(i) instanceof ICompoundSerializer serializer) serializer.deserialize(tag);
         }
     }
 
@@ -76,7 +76,7 @@ public abstract class CapabilityBlockEntity extends SyncedBlockEntity {
     private void saveCapabilities(CompoundTag pTag) {
         ListTag list = new ListTag();
         for (CapabilityHolder<?> holder : capabilities) {
-            if (holder.getInstance() instanceof ICapabilitySerializer serializer) {
+            if (holder.getInstance() instanceof ICompoundSerializer serializer) {
                 list.add(serializer.serialize());
             }
         }

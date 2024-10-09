@@ -72,6 +72,10 @@ public class SingleFluidInventory extends MultifluidInventory {
             this.outputWrapper.deserialize(tag.getCompound("output"));
             deserializeInputAndOutput(tag.getCompound("io"));
         }
+
+        public FluidStack getFluidInTank() {
+            return getFluidInTank(0);
+        }
     }
 
 }

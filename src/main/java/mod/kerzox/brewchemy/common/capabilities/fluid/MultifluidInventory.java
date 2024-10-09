@@ -2,23 +2,20 @@ package mod.kerzox.brewchemy.common.capabilities.fluid;
 
 
 import mod.kerzox.brewchemy.common.capabilities.CapabilityHolder;
-import mod.kerzox.brewchemy.common.capabilities.ICapabilitySerializer;
+import mod.kerzox.brewchemy.common.capabilities.ICompoundSerializer;
 import mod.kerzox.brewchemy.common.capabilities.IStrictInventory;
-import mod.kerzox.brewchemy.common.capabilities.item.ItemInventory;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 
-public class MultifluidInventory extends CombinedFluidInv implements IStrictInventory<MultifluidInventory>, CapabilityHolder<MultifluidInventory>, ICapabilitySerializer {
+public class MultifluidInventory extends CombinedFluidInv implements IStrictInventory<MultifluidInventory>, CapabilityHolder<MultifluidInventory>, ICompoundSerializer {
 
     protected HashSet<Direction> inputSides = new HashSet<>();
     protected HashSet<Direction> outputSides = new HashSet<>();
@@ -114,7 +111,7 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
         return this.outputSides;
     }
 
-    public static class InternalWrapper implements IFluidHandler, ICapabilitySerializer {
+    public static class InternalWrapper implements IFluidHandler, ICompoundSerializer {
 
         private MultifluidTank tank;
         private boolean input;

@@ -5,6 +5,7 @@ import mod.kerzox.brewchemy.common.crafting.ingredient.FluidIngredient;
 import mod.kerzox.brewchemy.common.crafting.ingredient.SizeSpecificIngredient;
 import mod.kerzox.brewchemy.common.crafting.recipe.BrewingRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.CultureJarRecipe;
+import mod.kerzox.brewchemy.common.crafting.recipe.FermentationRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluid;
 import mod.kerzox.brewchemy.common.fluid.alcohol.AgeableAlcoholStack;
@@ -33,14 +34,6 @@ public class GenerateRecipes extends RecipeProvider {
                 new ItemStack(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get()),
                 SizeSpecificIngredient.of(BrewchemyRegistry.Items.BARLEY_ITEM.get(), 1), 180)
                 .build(consumer);
-        new BrewingRecipe.RecipeBuilder(
-                new ResourceLocation(Brewchemy.MODID, "brewing_ale"),
-                new FluidStack(BrewchemyRegistry.Fluids.BEER_ALE.getFluid().get(), 500),
-                new SizeSpecificIngredient[]{ SizeSpecificIngredient.of(BrewchemyRegistry.Items.HOPS_ITEM.get(), 1) },
-                new FluidIngredient[] { FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 500)) },
-                20 * 2,
-                true,
-                100).build(consumer);
         new CultureJarRecipe.RecipeBuilder(
                 new ResourceLocation(Brewchemy.MODID, "brewers_yeast"),
                 new ItemStack(BrewchemyRegistry.Items.BREWERS_YEAST_ITEM.get()),
@@ -55,6 +48,59 @@ public class GenerateRecipes extends RecipeProvider {
                 20 * 10,
                 -1)
                 .build(consumer);
+
+
+        // brewing recipes
+
+        new BrewingRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "brewing_wort"),
+                new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 250),
+                new SizeSpecificIngredient[]{ SizeSpecificIngredient.of(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get(), 1) },
+                new FluidIngredient[] { FluidIngredient.of(FluidTags.WATER, 250) },
+                20 * 6,
+                false,
+                100).build(consumer);
+        new BrewingRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "brewing_ale"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER_ALE.getFluid().get(), 500),
+                new SizeSpecificIngredient[]{ SizeSpecificIngredient.of(BrewchemyRegistry.Items.HOPS_ITEM.get(), 1) },
+                new FluidIngredient[] { FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 500)) },
+                20 * 5,
+                true,
+                100).build(consumer);
+        new BrewingRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "brewing_lager"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER_LAGER.getFluid().get(), 500),
+                new SizeSpecificIngredient[]{ SizeSpecificIngredient.of(BrewchemyRegistry.Items.HOPS_ITEM.get(), 1) },
+                new FluidIngredient[] { FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 500)) },
+                20 * 5,
+                true,
+                -100).build(consumer);
+        new BrewingRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "brewing_pale_ale"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER_PALE_ALE.getFluid().get(), 500),
+                new SizeSpecificIngredient[]{ SizeSpecificIngredient.of(BrewchemyRegistry.Items.HOPS_ITEM.get(), 1) },
+                new FluidIngredient[] { FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.BEER_ALE.getFluid().get(), 500)) },
+                20 * 5,
+                true,
+                100).build(consumer);
+        new BrewingRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "brewing_stout"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER_STOUT.getFluid().get(), 500),
+                new SizeSpecificIngredient[]{ SizeSpecificIngredient.of(BrewchemyRegistry.Items.HOPS_ITEM.get(), 1), SizeSpecificIngredient.of(BrewchemyRegistry.Items.ROASTED_BARLEY_ITEM.get(), 1) },
+                new FluidIngredient[] { FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.WORT.getFluid().get(), 500)) },
+                20 * 5,
+                true,
+                +100).build(consumer);
+
+        // fermentation
+
+        new FermentationRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "fermenting_ale"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER_ALE.getFluid().get(), 1),
+                SizeSpecificIngredient.of(BrewchemyRegistry.Items.BREWERS_YEAST_ITEM.get(), 1),
+                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.BEER_ALE.getFluid().get(), 1)),
+                1).build(consumer);
     }
 
 }

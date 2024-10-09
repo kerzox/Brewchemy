@@ -9,13 +9,19 @@
       "amount": 500,
       "fluid": "brewchemy:wort"
     },
-    "ingredient": {
-      "item": "brewchemy:hops_item",
-      "size": 1
-    }
+    "ingredients": [
+      {
+        "item": "brewchemy:hops_item",
+        "size": 1
+      },
+      {
+        "item": "brewchemy:roasted_barley_item",
+        "size": 1
+      }
+    ]
   },
   "result": {
     "amount": 500,
-    "fluid": "brewchemy:beer_ale"
+    "fluid": "brewchemy:beer_stout"
   }
 }

@@ -101,10 +101,6 @@ public class RopeEntity extends Entity {
         BlockPos normalized = pos[1].subtract(pos[0]);
         Direction direction = Direction.fromDelta(normalized.getX(), normalized.getY(), normalized.getZ());
 
-        if (direction == null) {
-            System.out.println("direction is null");
-        }
-
         double size = (7 / 16f);
 
         AABB bb = null;
@@ -149,8 +145,6 @@ public class RopeEntity extends Entity {
     }
 
     public void intersectedRopeUpdate(AABB intersectPoint, RopeEntity entityResponsible, boolean notify, NotifyReason reason) {
-
-        System.out.println("we got updated: " + position() + " : " + level().isClientSide);
 
         // entity responsible is now being removed
         if (reason == NotifyReason.REMOVAL) {

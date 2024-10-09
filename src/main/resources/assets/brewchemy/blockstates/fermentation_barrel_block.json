@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "brewchemy:block/fermentation_barrel_single"
+    },
+    "facing=south": {
+      "model": "brewchemy:block/fermentation_barrel_single",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "brewchemy:block/fermentation_barrel_single",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "brewchemy:block/fermentation_barrel_single",
+      "y": 90
+    }
+  }
+}

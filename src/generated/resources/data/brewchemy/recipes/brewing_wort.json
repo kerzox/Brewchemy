@@ -1,21 +1,21 @@
 {
   "type": "brewchemy:brewing",
-  "alcohol": true,
-  "duration": 100,
+  "alcohol": false,
+  "duration": 120,
   "group": "brewchemy",
   "heat": 100,
   "recipe_ingredients": {
     "fluid_ingredient": {
-      "amount": 500,
-      "fluid": "brewchemy:wort"
+      "amount": 250,
+      "tag": "minecraft:water"
     },
     "ingredient": {
-      "item": "brewchemy:hops_item",
+      "item": "brewchemy:milled_barley_item",
       "size": 1
     }
   },
   "result": {
-    "amount": 500,
-    "fluid": "brewchemy:beer_ale"
+    "amount": 250,
+    "fluid": "brewchemy:wort"
   }
 }

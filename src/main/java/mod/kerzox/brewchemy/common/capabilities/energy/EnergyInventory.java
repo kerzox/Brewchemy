@@ -1,12 +1,10 @@
 package mod.kerzox.brewchemy.common.capabilities.energy;
 
 import mod.kerzox.brewchemy.common.capabilities.CapabilityHolder;
-import mod.kerzox.brewchemy.common.capabilities.ICapabilitySerializer;
+import mod.kerzox.brewchemy.common.capabilities.ICompoundSerializer;
 import mod.kerzox.brewchemy.common.capabilities.IStrictInventory;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntTag;
-import net.minecraft.nbt.Tag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
@@ -20,7 +18,7 @@ import java.util.HashSet;
  * Has an internal wrapper for input but only one thing for capacity
  */
 
-public class EnergyInventory extends EnergyStorage implements IStrictInventory<EnergyInventory>, ICapabilitySerializer, CapabilityHolder<EnergyInventory> {
+public class EnergyInventory extends EnergyStorage implements IStrictInventory<EnergyInventory>, ICompoundSerializer, CapabilityHolder<EnergyInventory> {
 
     private HashSet<Direction> inputSides = new HashSet<>();
     private HashSet<Direction> outputSides = new HashSet<>();

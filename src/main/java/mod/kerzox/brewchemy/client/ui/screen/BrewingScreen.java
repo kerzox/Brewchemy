@@ -132,7 +132,7 @@ public class BrewingScreen extends DefaultScreen<BrewingMenu> {
             Player player = Minecraft.getInstance().player;
             ItemStack itemInHand = getScreen().getMenu().getCarried();
 
-            PacketHandler.sendToServer(new BrewingKettleGuiClick(itemInHand, button));
+            PacketHandler.sendToServer(new BrewingKettleGuiClick(itemInHand, button, hasShiftDown() ? 1 : 0));
 
         }
 

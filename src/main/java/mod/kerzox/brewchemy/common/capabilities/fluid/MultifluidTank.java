@@ -1,21 +1,19 @@
 package mod.kerzox.brewchemy.common.capabilities.fluid;
 
-import mod.kerzox.brewchemy.common.capabilities.ICapabilitySerializer;
+import mod.kerzox.brewchemy.common.capabilities.ICompoundSerializer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class MultifluidTank implements IFluidHandler, ICapabilitySerializer {
+public class MultifluidTank implements IFluidHandler, ICompoundSerializer {
 
     private FluidStorage[] fluidTanks;
 

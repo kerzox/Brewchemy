@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
 import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
@@ -20,6 +21,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import javax.swing.plaf.basic.ComboPopup;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,23 +38,29 @@ public class FluidIngredient extends AbstractIngredient  {
     protected List<FluidStack> fluidStacks;
     protected TagKey<Fluid> tag;
     protected int amount;
+    protected CompoundTag nbt;
 
-    public FluidIngredient(List<FluidStack> stacks, TagKey<Fluid> tag, int amount) {
+    public FluidIngredient(List<FluidStack> stacks, TagKey<Fluid> tag, int amount, CompoundTag nbt) {
         this.fluidStacks = stacks;
         this.tag = tag;
         this.amount = amount;
+        this.nbt = nbt;
+    }
+
+    public static FluidIngredient of(TagKey<Fluid> tag, int amount, CompoundTag nbt) {
+        return new FluidIngredient(new ArrayList<>(), tag, amount, nbt);
     }
 
     public static FluidIngredient of(TagKey<Fluid> tag, int amount) {
-        return new FluidIngredient(new ArrayList<>(), tag, amount);
+        return new FluidIngredient(new ArrayList<>(), tag, amount, null);
     }
 
     public static FluidIngredient of(FluidStack... fluids) {
-        return new FluidIngredient(Arrays.stream(fluids).toList(), null, fluids[0].getAmount());
+        return new FluidIngredient(Arrays.stream(fluids).toList(), null, fluids[0].getAmount(), null);
     }
 
     public static FluidIngredient of(List<FluidStack> fluids) {
-        return new FluidIngredient(fluids, null, fluids.get(0).getAmount());
+        return new FluidIngredient(fluids, null, fluids.get(0).getAmount(), null);
     }
 
     public int getAmount() {
@@ -115,6 +123,7 @@ public class FluidIngredient extends AbstractIngredient  {
         }
 
         ret.addProperty("amount", amount);
+
         return ret;
     }
 

@@ -9,8 +9,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class AgeableAlcoholStack extends FluidStack {
 
-    protected int maxAge = 1000;
-
     public AgeableAlcoholStack(Fluid fluid, int amount, int age) {
         super(fluid, amount);
         setAge(age);
@@ -21,7 +19,7 @@ public class AgeableAlcoholStack extends FluidStack {
     }
 
     public AgeableAlcoholStack(FluidStack stack) {
-        this(stack.getFluid(), stack.getAmount(), 0);
+        this(stack.getFluid(), stack.getAmount(), getAge(stack));
     }
 
     public void setAge(int age) {
@@ -29,11 +27,12 @@ public class AgeableAlcoholStack extends FluidStack {
     }
 
     public void ageAlcohol(int amount) {
-        setAge(Math.min(this.maxAge, amount));
+        setAge(getAge() + amount);
     }
 
-    public int getMaxAge() {
-        return maxAge;
+    public AlcoholicFluid getAsType() {
+        if (this.getFluid().getFluidType() instanceof AlcoholicFluid fluid) return fluid;
+        else return null;
     }
 
     public int getAge() {
@@ -43,4 +42,10 @@ public class AgeableAlcoholStack extends FluidStack {
         return 0;
     }
 
+    public static int getAge(FluidStack stack) {
+        if (stack.getTag() != null && stack.getTag().contains("age")) {
+            return stack.getTag().getInt("age");
+        }
+        return 0;
+    }
 }

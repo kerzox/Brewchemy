@@ -60,14 +60,12 @@ public class HopsCropBlock extends BrewchemyCropBlock {
         boolean valid = false;
         for (RopeEntity rope : pLevel.getEntitiesOfClass(RopeEntity.class, new AABB(pPos))) {
             if (rope.isVertical()) {
-                System.out.println("We found a valid rope to grown on");
                 valid = true;
                 rope.getCropPositions().add(pPos);
             }
         }
 
         if (!valid) {
-            System.out.println("Failed to find a valid rope");
             // destroy i guess
             pLevel.destroyBlock(pPos, true);
         }

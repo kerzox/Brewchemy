@@ -2,6 +2,7 @@ package mod.kerzox.brewchemy.client.render.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.core.Direction;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -51,6 +52,17 @@ public class WrappedPose {
         pop();
     }
 
+    public void enclosedRotateY(float y, Runnable func) {
+        push();
+        rotateY(y);
+        func.run();
+        pop();
+    }
+
+    public void enclosedRotateByDirection(Direction facing, Runnable func) {
+        enclosedRotateY(facing.getAxis() == Direction.Axis.Z ? facing.getOpposite().toYRot() : facing.toYRot(), func);
+    }
+
     public void translateNegative(float x, float y, float z) {
         translate(-x, -y, -z);
     }
@@ -85,6 +97,10 @@ public class WrappedPose {
 
     public void rotateZAroundPosition(float degrees, Vector3f position) {
         stack.rotateAround(Axis.ZP.rotationDegrees(degrees), position.x, position.y, position.z);
+    }
+
+    public void rotateByDirection(Direction facing) {
+        rotateY(facing.getAxis() == Direction.Axis.Z ? facing.getOpposite().toYRot() : facing.toYRot());
     }
 
 
