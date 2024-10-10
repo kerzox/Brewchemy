@@ -10,6 +10,7 @@ import mod.kerzox.brewchemy.common.crafting.recipe.CultureJarRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.FermentationRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
 import mod.kerzox.brewchemy.common.data.BrewingKettleHeating;
+import mod.kerzox.brewchemy.common.effects.IntoxicatedEffect;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
 import mod.kerzox.brewchemy.common.entity.SeatEntity;
 import mod.kerzox.brewchemy.common.event.TickUtils;
@@ -23,7 +24,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.inventory.MenuType;
@@ -86,18 +90,35 @@ public class BrewchemyRegistry {
         RECIPES.register(bus);
         MENUS.register(bus);
         EFFECTS.register(bus);
-        ENTITIES.register(bus);
         PARTICLE_TYPES.register(bus);
         CREATIVE_MODE_TABS.register(bus);
-
-        Blocks.init();
+        ENTITIES.register(bus);
+        // these are for all the machine and special items
         Items.init();
-        Recipes.init();
+        Effects.init();
+        Blocks.init();
         BlockEntities.init();
         Menus.init();
-        Entities.init();
         Fluids.init();
+        Tags.init();
+        Entities.init();
         DataPacks.init();
+        Recipes.init();
+
+    }
+
+    public static final RegistryObject<CreativeModeTab> BREWCHEMY_TAG = CREATIVE_MODE_TABS.register("brewchemy_tab", () -> CreativeModeTab.builder()
+            .withTabsBefore(CreativeModeTabs.COMBAT)
+            .title(Component.literal("Brewchemy"))
+            .icon(() -> Items.BARLEY_ITEM.get().getDefaultInstance()).build());
+
+    public static class Tags {
+
+        public static final TagKey<Item> BLOCKS = ItemTags.create(new ResourceLocation("forge", "blocks"));
+        public static final TagKey<Item> YEAST = ItemTags.create(new ResourceLocation("forge", "yeast"));
+
+        public static void init() {
+        }
     }
 
     public static class DataPacks {
@@ -110,10 +131,14 @@ public class BrewchemyRegistry {
         }
     }
 
-    public static final RegistryObject<CreativeModeTab> BREWCHEMY_TAG = CREATIVE_MODE_TABS.register("brewchemy_tab", () -> CreativeModeTab.builder()
-            .withTabsBefore(CreativeModeTabs.COMBAT)
-            .title(Component.literal("Brewchemy"))
-            .icon(() -> Items.BARLEY_ITEM.get().getDefaultInstance()).build());
+    public static final class Effects {
+        public static void init() {
+
+        }
+
+        public static final RegistryObject<MobEffect> INTOXICATED = EFFECTS.register("intoxicated", () -> new IntoxicatedEffect(MobEffectCategory.NEUTRAL, 0xFFEE82EE));
+
+    }
 
     public static class Recipes {
 
@@ -488,9 +513,9 @@ public class BrewchemyRegistry {
 
         public static final makeFluid<BrewchemyFluid> BEER_ALE = makeFluid.build("beer_ale",
                 false, true, () -> AlcoholicFluid.create(0xFFf99100,
-                        new int[] { TickUtils.secondsToTicks(25), TickUtils.secondsToTicks(25) + TickUtils.secondsToTicks(5) },
-                        TickUtils.secondsToTicks(15),
-                        TickUtils.secondsToTicks(50)));
+                        new int[] { TickUtils.minecraftDaysToTicks(3), TickUtils.minecraftDaysToTicks(3) + TickUtils.minutesToTicks(5) },
+                        TickUtils.minecraftDaysToTicks(2),
+                        TickUtils.minecraftDaysToTicks(4)));
 
         public static final makeFluid<BrewchemyFluid> BEER_LAGER = makeFluid.build("beer_lager",
                 false, true, () -> AlcoholicFluid.create(0xFFd16401,

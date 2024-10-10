@@ -2,13 +2,18 @@ package mod.kerzox.brewchemy;
 
 import com.mojang.logging.LogUtils;
 import mod.kerzox.brewchemy.client.ClientSetup;
+import mod.kerzox.brewchemy.common.capabilities.drunk.IntoxicationManager;
 import mod.kerzox.brewchemy.common.data.BrewingKettleHeating;
+import mod.kerzox.brewchemy.common.event.CommonEvents;
 import mod.kerzox.brewchemy.common.event.TickUtils;
 import mod.kerzox.brewchemy.common.item.PintItem;
 import mod.kerzox.brewchemy.common.network.PacketHandler;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -17,6 +22,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.*;
 import net.minecraftforge.common.crafting.conditions.*;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -46,6 +52,7 @@ public class Brewchemy
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onEntityRenderRegister);
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new TickUtils());
+        MinecraftForge.EVENT_BUS.register(new CommonEvents());
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> modEventBus.addListener(ClientSetup::init));
         modEventBus.addListener(this::addCreative);
         modEventBus.addListener(this::registerDatapackRegistries);
@@ -71,6 +78,8 @@ public class Brewchemy
             }
         }
     }
+
+
 
     @SubscribeEvent
     public void registerServerReloadListener(AddReloadListenerEvent event) {

@@ -73,7 +73,7 @@ public class FermentationRecipe extends AbstractFluidRecipe<RecipeInventory> {
 
         getFluidIngredients().forEach(((ingredient) -> {
             for (int i = 0; i < pContainer.getFluidHandler().getTanks(); i++) {
-                if (ingredient.test(pContainer.getFluidHandler().getFluidInTank(i))) {
+                if (ingredient.test(pContainer.getFluidHandler().getFluidInTank(i), true)) {
                     matchingFluids.put(ingredient, true);
                 }
             }

@@ -169,7 +169,7 @@ public abstract class RecipeBlockEntity<T extends AbstractRecipe<RecipeInventory
         for (FluidIngredient ingredient : fluidIngredients) {
             for (int i = 0; i < handler.getTanks(); i++) {
                 FluidStack tank = handler.getFluidInTank(i);
-                if (ingredient.testFluidWithAmount(tank)) {
+                if (ingredient.testFluidWithAmount(tank, true)) {
                     slotsUsed.add(i);
                     tank.shrink(ingredient.getAmount());
                     break;

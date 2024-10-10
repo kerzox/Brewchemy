@@ -45,7 +45,7 @@ public class BrewingRecipe extends AbstractFluidRecipe<RecipeInventory> {
         this.fluidIngredients.forEach(i -> matchingFluids.put(i, false));
     }
 
-    public FluidStack[] assembleAsAlcohlic(RecipeInventory inv, RegistryAccess access) {
+    public AgeableAlcoholStack[] assembleAsAlcohlic(RecipeInventory inv, RegistryAccess access) {
         if (!alcoholic) return null;
         AgeableAlcoholStack[] ageableAlcoholStacks = new AgeableAlcoholStack[this.results.length];
         for (int i = 0; i < this.results.length; i++) {
@@ -72,7 +72,7 @@ public class BrewingRecipe extends AbstractFluidRecipe<RecipeInventory> {
 
         getFluidIngredients().forEach(((ingredient) -> {
             for (int i = 0; i < pContainer.getFluidHandler().getTanks(); i++) {
-                if (ingredient.test(pContainer.getFluidHandler().getFluidInTank(i))) {
+                if (ingredient.test(pContainer.getFluidHandler().getFluidInTank(i), false)) {
                     matchingFluids.put(ingredient, true);
                 }
             }

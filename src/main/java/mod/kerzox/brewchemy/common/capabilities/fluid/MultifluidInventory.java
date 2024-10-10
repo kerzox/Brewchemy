@@ -67,6 +67,16 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
         return this.outputWrapper;
     }
 
+    public void setCapacity(int index, int tank, int amount) {
+        ((InternalWrapper) getHandlerFromIndex(index)).setCapacity(tank, amount);
+    }
+
+    public @NotNull InternalWrapper getInternalHandlerFromTank(int tank) {
+        int index = getIndexForSlot(tank);
+        IFluidHandler handler = getHandlerFromIndex(index);
+        return (InternalWrapper) handler;
+    }
+
     @Override
     public LazyOptional<MultifluidInventory> getCapabilityHandler(Direction side) {
         // return combined
@@ -177,6 +187,10 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
 
         public MultifluidTank get() {
             return this.tank;
+        }
+
+        public void setCapacity(int tank, int amount) {
+            this.tank.setCapacity(tank, amount);
         }
     }
 }

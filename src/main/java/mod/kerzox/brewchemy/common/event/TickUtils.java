@@ -1,5 +1,7 @@
 package mod.kerzox.brewchemy.common.event;
 
+import mod.kerzox.brewchemy.common.capabilities.drunk.IntoxicationManager;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 
@@ -73,6 +75,7 @@ public class TickUtils {
     @SubscribeEvent
     public void onWorldTick(net.minecraftforge.event.TickEvent.LevelTickEvent event) {
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.END) {
+
             if(event.side == LogicalSide.SERVER) {
                 prevServerTick = serverTick;
                 serverTick = (serverTick + 1) % 1_728_000;
@@ -81,6 +84,14 @@ public class TickUtils {
                 preVclientRenderTick = clientRenderTick;
                 clientRenderTick = (clientRenderTick + 1) % 1_728_000;
             }
+
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            event.player.getCapability(IntoxicationManager.INTOXICATION_CAPABILITY).ifPresent(IntoxicationManager::tick);
         }
     }
 

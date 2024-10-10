@@ -60,7 +60,7 @@ public class CultureJarRecipe extends AbstractItemRecipe<RecipeInventory> {
 
         getFluidIngredients().forEach(((ingredient) -> {
             for (int i = 0; i < inv.getFluidHandler().getTanks(); i++) {
-                if (ingredient.test(inv.getFluidHandler().getFluidInTank(i))) {
+                if (ingredient.test(inv.getFluidHandler().getFluidInTank(i), false)) {
                     fluid_matching.put(ingredient, true);
                 }
             }

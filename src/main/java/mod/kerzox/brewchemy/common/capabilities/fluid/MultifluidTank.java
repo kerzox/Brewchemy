@@ -33,6 +33,10 @@ public class MultifluidTank implements IFluidHandler, ICompoundSerializer {
         return new MultifluidTank(IntStream.range(0, tanks).mapToObj(i -> new FluidStorage(capacity)));
     }
 
+    public void setCapacity(int tank, int amount) {
+        fluidTanks[tank].setCapacity(amount);
+    }
+
     public FluidStorage[] getFluidTanks() {
         return fluidTanks;
     }
@@ -183,4 +187,6 @@ public class MultifluidTank implements IFluidHandler, ICompoundSerializer {
         }
         return new MultifluidTank(storage);
     }
+
+
 }

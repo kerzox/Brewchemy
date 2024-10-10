@@ -20,9 +20,9 @@ public class ItemStackHandlerUtils {
     public static void insertAndModifyStack(IItemHandler insertTo, ItemStack stack, int maxInsert) {
         ItemStack ret = ItemHandlerHelper.insertItem(insertTo, stack.copyWithCount(maxInsert), false);
         if (ret.isEmpty()) {
-            stack.shrink(stack.getCount());
+            stack.shrink(maxInsert);
         } else {
-            int extracted = stack.getCount() - ret.getCount();
+            int extracted = ret.getCount() - maxInsert;
             stack.shrink(extracted);
         }
     }

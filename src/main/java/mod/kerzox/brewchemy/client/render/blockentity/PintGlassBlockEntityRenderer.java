@@ -69,7 +69,7 @@ public class PintGlassBlockEntityRenderer implements BlockEntityRenderer<PintGla
                         BakedModel model = new PintGlassBakedModel.PintGlassBakedModelWithFluid(
                                 Minecraft.getInstance().getModelManager().getModel(
                                         PINT_GLASS[0]),
-                                itemFluidHandler.getFluid());
+                                itemFluidHandler);
 
                         pose.push();
 

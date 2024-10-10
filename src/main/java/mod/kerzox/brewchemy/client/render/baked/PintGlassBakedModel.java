@@ -1,8 +1,6 @@
 package mod.kerzox.brewchemy.client.render.baked;
 
 import mod.kerzox.brewchemy.client.render.util.RenderingUtil;
-import mod.kerzox.brewchemy.common.block.RopeTiedPostBlock;
-import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.fluid.FluidInventoryItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -14,7 +12,6 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.client.resources.model.MultiPartBakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -79,7 +76,7 @@ public class PintGlassBakedModel implements IDynamicBakedModel {
             @Override
             public BakedModel resolve(BakedModel pModel, ItemStack pStack, @Nullable ClientLevel pLevel, @Nullable LivingEntity pEntity, int pSeed) {
                 FluidInventoryItem cap = (FluidInventoryItem) pStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM, null).orElseThrow(() -> new IllegalArgumentException("Capability is empty"));
-                if (!cap.getFluid().isEmpty()) return new PintGlassBakedModelWithFluid(model, cap.getFluid());
+                if (!cap.getFluid().isEmpty()) return new PintGlassBakedModelWithFluid(model, cap);
                 return model;
             }
         };
@@ -87,11 +84,11 @@ public class PintGlassBakedModel implements IDynamicBakedModel {
 
     public static class PintGlassBakedModelWithFluid extends PintGlassBakedModel {
 
-        protected FluidStack fluidStack;
+        protected FluidInventoryItem handler;
 
-        public PintGlassBakedModelWithFluid(BakedModel bakedModel, FluidStack fluidStack) {
+        public PintGlassBakedModelWithFluid(BakedModel bakedModel, FluidInventoryItem fluidStack) {
             super(bakedModel);
-            this.fluidStack = fluidStack;
+            this.handler = fluidStack;
         }
 
         @Override
@@ -103,16 +100,19 @@ public class PintGlassBakedModel implements IDynamicBakedModel {
 
         private List<BakedQuad> getQuadsFromFluid() {
             List<BakedQuad> quads = new ArrayList<>();
-            if (fluidStack != null && fluidStack.getFluid() != null) {
-                IClientFluidTypeExtensions clientStuff = IClientFluidTypeExtensions.of(fluidStack.getFluid());
+            if (handler != null && !handler.getFluid().isEmpty()) {
+                IClientFluidTypeExtensions clientStuff = IClientFluidTypeExtensions.of(handler.getFluid().getFluid());
                 if (clientStuff != null) {
                     TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(clientStuff.getStillTexture());
+
+                    float percentage = 8 / 16f * ((float) handler.getFluid().getAmount() / handler.getTankCapacity(0));
+
                     quads.addAll(Objects.requireNonNull(RenderingUtil.bakedQuadList(
                             5.25f / 16f,
                             0.25f / 16f,
                             5.25f / 16f,
                             (5.25f + 5.5f) / 16f,
-                            8 / 16f,
+                            percentage,
                             (5.25f + 5.5f) / 16f,
                             sprite.getU(0), sprite.getV(16), sprite.getU(16), sprite.getV(0), sprite, clientStuff.getTintColor())));
 

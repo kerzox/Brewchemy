@@ -110,10 +110,10 @@ public class BrewingKettleBlockEntity extends RecipeBlockEntity<BrewingRecipe> i
 
     @Override
     protected void onRecipeFinish(BrewingRecipe workingRecipe) {
-        FluidStack[] result = workingRecipe.isAlcoholic() ? workingRecipe.assembleAsAlcohlic(getRecipeInventory(), RegistryAccess.EMPTY) : workingRecipe.assembleResultItems(getRecipeInventory(), RegistryAccess.EMPTY);
+        FluidStack[] result = workingRecipe.assembleResultItems(getRecipeInventory(), RegistryAccess.EMPTY);
 
         /*
-            Create a temp input handler so we can use the ingredients and check if we can output the recipe
+            Create a temp input handler we can use the ingredients and check if we can output the recipe
             After that we use the ingredients
          */
         IFluidHandler temp = fluidHandler.getInputWrapper().get().copy();

@@ -9,6 +9,7 @@ import mod.kerzox.brewchemy.common.capabilities.fluid.MultifluidInventory;
 import mod.kerzox.brewchemy.common.capabilities.fluid.MultifluidTank;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SingleFluidInventory;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemInventory;
+import mod.kerzox.brewchemy.common.capabilities.item.ItemStackHandlerUtils;
 import mod.kerzox.brewchemy.common.crafting.RecipeInventory;
 import mod.kerzox.brewchemy.common.crafting.recipe.FermentationRecipe;
 import mod.kerzox.brewchemy.common.event.TickUtils;
@@ -23,8 +24,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -34,6 +37,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -113,6 +117,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
     public void tick() {
         if (this.controller.masterBlock == this) {
             super.tick();
+
         }
     }
 
@@ -149,18 +154,35 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
     @Override
     public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
 
-        if (!pLevel.isClientSide && pHand == InteractionHand.MAIN_HAND) {
-            ItemStack held = pPlayer.getItemInHand(InteractionHand.MAIN_HAND);
-            if (held.is(BrewchemyRegistry.Items.BARREL_TAP.get()) && !controller.masterBlock.tapped) {
-                controller.masterBlock.setTapped(true);
-                held.shrink(1);
-                controller.sync();
+        if (!pLevel.isClientSide) {
+            ItemStack held = pPlayer.getItemInHand(pHand);
+            if (pHand == InteractionHand.MAIN_HAND) {
+
+                SingleFluidInventory.Simple simpleFluidInv = (SingleFluidInventory.Simple) getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().get();
+
+                pPlayer.sendSystemMessage(Component.literal("Capacity: " + simpleFluidInv.getTankCapacity(0)));
+                pPlayer.sendSystemMessage(Component.literal("Fluid Stored: " + simpleFluidInv.getFluidInTank().getAmount() + " ").append(simpleFluidInv.getFluidInTank().getDisplayName()));
+
+                if (!simpleFluidInv.getFluidInTank().isEmpty()) {
+                    pPlayer.sendSystemMessage(Component.literal("Age: " + new AgeableAlcoholStack(simpleFluidInv.getFluidInTank()).getAge()));
+                }
+
+                if (held.is(BrewchemyRegistry.Items.BARREL_TAP.get()) && !controller.masterBlock.tapped) {
+                    controller.masterBlock.setTapped(true);
+                    held.shrink(1);
+                    controller.sync();
+                }
+                else if (held.isEmpty() && pPlayer.isShiftKeyDown() && controller.masterBlock.tapped) {
+                    controller.masterBlock.setTapped(false);
+                    pPlayer.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BrewchemyRegistry.Items.BARREL_TAP.get()));
+                    controller.sync();
+                }
             }
-            else if (held.isEmpty() && pPlayer.isShiftKeyDown() && controller.masterBlock.tapped) {
-                controller.masterBlock.setTapped(false);
-                pPlayer.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BrewchemyRegistry.Items.BARREL_TAP.get()));
-                controller.sync();
+
+            if (held.is(BrewchemyRegistry.Tags.YEAST)) {
+                ItemStackHandlerUtils.insertAndModifyStack(controller.masterBlock.itemInventory.getInputHandler(), held, 1);
             }
+
         }
 
         return super.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit);
@@ -225,6 +247,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         }
 
         catalystRemaining--;
+
     }
 
     public boolean isTapped() {
@@ -279,12 +302,14 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
 
         public Controller(FermentationBarrelBlockEntity b) {
             this.masterBlock = b;
+            this.barrels.add(b);
         }
 
         public void tryFormation(FermentationBarrelBlockEntity block) {
             if (testStructure(block)) {
                 this.formed = true;
                 formingDirection = block.getBlockState().getValue(HorizontalDirectionalBlock.FACING);
+                this.masterBlock.fluidInventory.setCapacity(16000 * 8);
             } else if (this.formed) {
                 disassemble();
             }
@@ -367,8 +392,14 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
 
         public void disassemble() {
             this.formed = false;
+
+            FluidStack fluid = masterBlock.fluidInventory.getFluidInTank();
             for (FermentationBarrelBlockEntity barrel : barrels) {
                 barrel.setController(new Controller(barrel));
+                barrel.fluidInventory.setCapacity(16000);
+                FluidStack copied = new FluidStack(fluid.getFluid(), Math.min(fluid.getAmount(), 16000));
+                if (!copied.isEmpty()) fluid.shrink(barrel.fluidInventory.fill(copied, IFluidHandler.FluidAction.EXECUTE));
+                barrel.syncBlockEntity();
             }
         }
 

@@ -76,6 +76,10 @@ public class SingleFluidInventory extends MultifluidInventory {
         public FluidStack getFluidInTank() {
             return getFluidInTank(0);
         }
+
+        public void setCapacity(int amount) {
+            outputWrapper.setCapacity(0, amount);
+        }
     }
 
 }

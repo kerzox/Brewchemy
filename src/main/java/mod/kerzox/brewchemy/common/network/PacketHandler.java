@@ -46,6 +46,11 @@ public class PacketHandler {
                 .decoder(CompoundTagPacket::new)
                 .consumerMainThread(CompoundTagPacket::handle)
                 .add();
+        INSTANCE.messageBuilder(PlayerCompoundTagPacket.class, nextID())
+                .encoder(PlayerCompoundTagPacket::toBytes)
+                .decoder(PlayerCompoundTagPacket::new)
+                .consumerMainThread(PlayerCompoundTagPacket::handle)
+                .add();
         INSTANCE.messageBuilder(RequestDataPacket.class, nextID())
                 .encoder(RequestDataPacket::toBytes)
                 .decoder(RequestDataPacket::new)
