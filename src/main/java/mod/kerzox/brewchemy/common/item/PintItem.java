@@ -175,7 +175,12 @@ public class PintItem extends BlockItem {
 
     @Override
     public boolean isBarVisible(ItemStack p_150899_) {
-        return true;
+        Optional<IFluidHandlerItem> storage = p_150899_.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).resolve();
+        if (storage.get() instanceof FluidInventoryItem inventoryItem) {
+            if (inventoryItem.getFluid().isEmpty() || inventoryItem.getFluid().getAmount() == inventoryItem.getTankCapacity(0)) return false;
+            else return true;
+        }
+        return false;
     }
 
     @Override

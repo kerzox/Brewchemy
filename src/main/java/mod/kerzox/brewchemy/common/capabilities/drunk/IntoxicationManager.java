@@ -5,6 +5,7 @@ import mod.kerzox.brewchemy.common.fluid.alcohol.AgeableAlcoholStack;
 import mod.kerzox.brewchemy.common.network.PacketHandler;
 import mod.kerzox.brewchemy.common.network.PlayerCompoundTagPacket;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,7 +29,7 @@ public class IntoxicationManager implements ICapabilitySerializable<CompoundTag>
         BLACKOUT;
 
         public static State fromIntoxicationLevel(double intoxicationAmount) {
-            if (intoxicationAmount >= 40000) {
+            if (intoxicationAmount >= 30000) {
                 return State.BLACKOUT;
             }
             if (intoxicationAmount >= 25000) {
@@ -48,8 +49,11 @@ public class IntoxicationManager implements ICapabilitySerializable<CompoundTag>
     private LazyOptional<IntoxicationManager> handler = LazyOptional.of(() -> this);
     private Player player;
     private double intoxicationAmount = 0;
-
     private int tick;
+    private State intoxicationState = State.SOBER;
+
+    private int blackoutTimer = 0;
+
 
     public IntoxicationManager(Player player) {
         this.player = player;
@@ -114,15 +118,32 @@ public class IntoxicationManager implements ICapabilitySerializable<CompoundTag>
         player.removeEffect(BrewchemyRegistry.Effects.INTOXICATED.get());
         player.removeEffect(BrewchemyRegistry.Effects.WASTED.get());
         player.removeEffect(BrewchemyRegistry.Effects.BLACK_OUT.get());
-
     }
 
     public void tick() {
+        if (intoxicationAmount < 0) intoxicationAmount = 0;
         if (!player.level().isClientSide) {
-            addEffectByState(State.fromIntoxicationLevel(intoxicationAmount));
+            intoxicationState = State.fromIntoxicationLevel(intoxicationAmount);
+            addEffectByState(intoxicationState);
 
             if (TickUtils.every(tick, 3)) {
-                this.intoxicationAmount -= 25;
+                this.intoxicationAmount -= 75;
+            }
+
+            if (intoxicationState == State.BLACKOUT) {
+                if (blackoutTimer <= 0) {
+                    /*
+                        Haven't decided but teleporting the player would be pretty funny or make them faint not sure what to sit with
+                     */
+
+                    BlockPos current = player.getOnPos();
+                    player.randomTeleport(15, 15, 15, true);
+                    this.detox();
+                    intoxicationAmount = 0;
+                    intoxicationState = State.SOBER;
+
+                }
+               this.blackoutTimer--;
             }
 
         }
@@ -155,6 +176,7 @@ public class IntoxicationManager implements ICapabilitySerializable<CompoundTag>
             case BLACKOUT -> {
                 if (!player.hasEffect(BrewchemyRegistry.Effects.BLACK_OUT.get())) {
                     detox();
+                    this.blackoutTimer = TickUtils.secondsToTicks(25);
                     player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.BLACK_OUT.get(), -1, 0));
                 }
                 break;

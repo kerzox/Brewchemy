@@ -49,7 +49,9 @@ public class CommonEvents {
                     if (handler instanceof FluidInventoryItem fluidInventoryItem) {
                         if (fluidInventoryItem.getFluid().isEmpty()) return;
                         int drinkingRate = Math.min(fluidInventoryItem.getFluid().getAmount(), PintItem.DRINKING_RATE);
-                        fluidInventoryItem.drain(drinkingRate, IFluidHandler.FluidAction.EXECUTE);
+                        if (!player.isCreative()) {
+                            fluidInventoryItem.drain(drinkingRate, IFluidHandler.FluidAction.EXECUTE);
+                        }
                         if (fluidInventoryItem.getFluid().getFluid().getFluidType() instanceof AlcoholicFluid) {
                             double content = IntoxicationManager.calculateContentFromFluid(fluidInventoryItem.getTankCapacity(0), new AgeableAlcoholStack(
                                     new FluidStack(fluidInventoryItem.getFluid(), drinkingRate))

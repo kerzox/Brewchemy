@@ -9,7 +9,6 @@ import mod.kerzox.brewchemy.common.network.PacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -111,9 +110,9 @@ public class TankComponent extends TexturedWidgetComponent {
     //TODO make a horizontal version
 
     protected void drawFluid(GuiGraphics graphics, int x, int y, float width, float height) {
-        RenderSystem.setShaderColor(RenderingUtil.convertColor(color)[0],
-                RenderingUtil.convertColor(color)[1],
-                RenderingUtil.convertColor(color)[2],
+        RenderSystem.setShaderColor(RenderingUtil.covertColour(color)[0],
+                RenderingUtil.covertColour(color)[1],
+                RenderingUtil.covertColour(color)[2],
                 1f);
         float size = this.height * percentage;
         RenderSystem.setShaderTexture(0, sprite.atlasLocation());

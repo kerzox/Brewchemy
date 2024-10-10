@@ -12,6 +12,8 @@ import mod.kerzox.brewchemy.client.render.blockentity.PintGlassBlockEntityRender
 import mod.kerzox.brewchemy.client.render.entity.RopeEntityRenderer;
 import mod.kerzox.brewchemy.client.render.entity.NoEntityRenderer;
 import mod.kerzox.brewchemy.client.render.overlay.BlackoutOverlay;
+import mod.kerzox.brewchemy.client.render.overlay.WastedOverlay;
+import mod.kerzox.brewchemy.client.render.particles.FermentationStageParticle;
 import mod.kerzox.brewchemy.client.render.util.WrappedPose;
 import mod.kerzox.brewchemy.client.ui.screen.BrewingScreen;
 import mod.kerzox.brewchemy.client.ui.screen.MillingScreen;
@@ -40,10 +42,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ModelEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -80,6 +79,7 @@ public class ClientSetup {
     public static void onRegisterGuiLayers(RegisterGuiOverlaysEvent event) {
         // Register custom overlay layer
         event.registerAboveAll("blackout_overlay", new BlackoutOverlay());
+        event.registerAboveAll("wasted_overlay", new WastedOverlay());
     }
 
     @SubscribeEvent
@@ -92,6 +92,14 @@ public class ClientSetup {
         event.register(FermentationBarrelBlockEntityRenderer.TAP);
     }
 
+    @SubscribeEvent
+    public static void registerParticleProviders(RegisterParticleProvidersEvent event) {
+        // There are multiple ways to register providers, all differing in the functional type they provide in the
+        // second parameter. For example, #registerSpriteSet represents a Function<SpriteSet, ParticleProvider<?>>:
+        event.registerSpriteSet(BrewchemyRegistry.Particles.FERMENTATION_STAGE_PARTICLE.get(), FermentationStageParticle.Provider::new);
+        // Other methods include #registerSprite, which is essentially a Supplier<TextureSheetParticle>,
+        // and #registerSpecial, which maps to a Supplier<Particle>. See the source code of the event for further info.
+    }
 
     @SubscribeEvent
     public static void onModelBakeEvent(ModelEvent.ModifyBakingResult event) {

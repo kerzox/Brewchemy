@@ -20,6 +20,7 @@ import mod.kerzox.brewchemy.common.event.TickUtils;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluid;
 import mod.kerzox.brewchemy.common.fluid.alcohol.AlcoholicFluid;
 import mod.kerzox.brewchemy.common.item.*;
+import mod.kerzox.brewchemy.common.particle.FermentationParticleType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
@@ -98,6 +99,7 @@ public class BrewchemyRegistry {
         ENTITIES.register(bus);
         // these are for all the machine and special items
         Items.init();
+        Particles.init();
         Effects.init();
         Blocks.init();
         BlockEntities.init();
@@ -107,6 +109,7 @@ public class BrewchemyRegistry {
         Entities.init();
         DataPacks.init();
         Recipes.init();
+
 
     }
 
@@ -128,6 +131,17 @@ public class BrewchemyRegistry {
 
         public static final ResourceKey<Registry<BrewingKettleHeating>> KETTLE_HEATING_REGISTRY_KEY =
                 ResourceKey.createRegistryKey(new ResourceLocation(MODID, "kettle_heating"));
+
+        public static void init() {
+
+        }
+    }
+
+    public static class Particles {
+        public static final Supplier<FermentationParticleType> FERMENTATION_STAGE_PARTICLE = PARTICLE_TYPES.register(
+                "fermentation",
+                () -> new FermentationParticleType(true)
+        );
 
         public static void init() {
 

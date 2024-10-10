@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -22,7 +21,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Vector3f;
 
 import java.awt.*;
@@ -39,6 +37,17 @@ public class RenderingUtil {
         int b = Integer.valueOf(decode.substring(4, 6), 16);
         int a = Integer.parseInt(alpha, 16);
         return new Color(r, g, b, a).getRGB();
+    }
+
+    public static int rgbToHex(int r, int g, int b) {
+        return Integer.parseInt(String.format("0xFF%02X%02X%02X", r, g, b));
+    }
+
+    public static int[] interpolateColor(int[] color1, int[] color2, double factor) {
+        int r = (int) (color1[0] + factor * (color2[0] - color1[0]));
+        int g = (int) (color1[1] + factor * (color2[1] - color1[1]));
+        int b = (int) (color1[2] + factor * (color2[2] - color1[2]));
+        return new int[]{r, g, b};
     }
 
     public static void renderBlockModel(PoseStack poseStack, MultiBufferSource buffer, BlockState blockState, RenderType type, int brightness) {
@@ -59,7 +68,14 @@ public class RenderingUtil {
         }
     }
 
-    public static float[] convertColor(int color) {
+    public static int[] covertColour(String hex) {
+        int r = Integer.valueOf(hex.substring(1, 3), 16);
+        int g = Integer.valueOf(hex.substring(3, 5), 16);
+        int b = Integer.valueOf(hex.substring(5, 7), 16);
+        return new int[]{r, g, b};
+    }
+
+    public static float[] covertColour(int color) {
         float alpha = ((color >> 24) & 0xFF) / 255F;
         float red = ((color >> 16) & 0xFF) / 255F;
         float green = ((color >> 8) & 0xFF) / 255F;

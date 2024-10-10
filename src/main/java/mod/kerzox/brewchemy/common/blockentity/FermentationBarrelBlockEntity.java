@@ -16,15 +16,18 @@ import mod.kerzox.brewchemy.common.event.TickUtils;
 import mod.kerzox.brewchemy.common.fluid.alcohol.AgeableAlcoholStack;
 import mod.kerzox.brewchemy.common.fluid.alcohol.AlcoholicFluid;
 import mod.kerzox.brewchemy.common.network.RequestDataPacket;
+import mod.kerzox.brewchemy.common.particle.FermentationParticleType;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -86,6 +89,8 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
     private FermentationState state = FermentationState.NONE;
     private AgeableAlcoholStack inputFluid;
 
+    private Queue<ParticleOptions> particleSpawnQueue = new LinkedList<>();
+
     // when tapped the barrel will no longer ferment
     private boolean tapped;
 
@@ -117,7 +122,11 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
     public void tick() {
         if (this.controller.masterBlock == this) {
             super.tick();
-
+            if (!particleSpawnQueue.isEmpty()) {
+                if (level instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(particleSpawnQueue.poll(), getBlockPos().getX() + 0.5f, getBlockPos().getY() + 0.5d, getBlockPos().getZ() + 0.5f, 12,.5d, .25d, .5d, 0);
+                }
+            }
         }
     }
 
@@ -158,6 +167,8 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
             ItemStack held = pPlayer.getItemInHand(pHand);
             if (pHand == InteractionHand.MAIN_HAND) {
 
+
+
                 SingleFluidInventory.Simple simpleFluidInv = (SingleFluidInventory.Simple) getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().get();
 
                 pPlayer.sendSystemMessage(Component.literal("Capacity: " + simpleFluidInv.getTankCapacity(0)));
@@ -197,6 +208,8 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         inputFluid = new AgeableAlcoholStack(fluidInventory.getFluidInTank());
     }
 
+
+
     @Override
     protected void onRecipeFinish(FermentationRecipe workingRecipe) {
         if (tapped) return;
@@ -211,6 +224,26 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         int ticksPast = tick - fermentationStartingTick;
         int daysPast = ticksPast / TickUtils.minecraftDaysToTicks(1);
 
+        if (ticksPast % TickUtils.minecraftDaysToTicks(1) == 0) {
+
+        }
+
+        if (ticksPast % TickUtils.minecraftDaysToTicks(1) == 0) {
+
+            // get current fermentation day
+            int day = ticksPast / TickUtils.minecraftDaysToTicks(1);
+
+            int[] colours = FermentationParticleType.PARTICLE_COLOURS;
+
+
+            if (level instanceof ServerLevel serverLevel) {
+                //sendParticles(ServerPlayer pPlayer, T pType, boolean pLongDistance,
+                // double pPosX, double pPosY, double pPosZ, int pParticleCount, double pXOffset, double pYOffset, double pZOffset, double pSpeed)
+                for (int i = 0; i < 5; i++) {
+                    particleSpawnQueue.add(new FermentationParticleType.Options(day >= colours.length ? 0xFF542d18 : colours[day]));
+                }
+            }
+        }
 
         if (inputFluid.getAge() >= spoilStart) {
             if (state != FermentationState.SPOILT) {
@@ -273,7 +306,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         this.tapped = pTag.getBoolean("tapped");
         this.fermentationStartingTick = pTag.getInt("fermentation_starting_tick");
         this.catalystRemaining = pTag.getInt("catalyst_remaining");
-        this.state = FermentationState.valueOf(pTag.getString("fermentation_state").toUpperCase());
+        this.state = FermentationState.valueOf(pTag.getString("fermentation.json").toUpperCase());
         tag = pTag.getCompound("controller");
 
     }
@@ -284,7 +317,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         pTag.putBoolean("tapped", this.tapped);
         pTag.putInt("fermentation_starting_tick", fermentationStartingTick);
         pTag.putInt("catalyst_remaining", this.catalystRemaining);
-        pTag.putString("fermentation_state", state.toString().toLowerCase());
+        pTag.putString("fermentation.json", state.toString().toLowerCase());
     }
 
     @Override

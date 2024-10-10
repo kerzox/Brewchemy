@@ -11,6 +11,7 @@ pluginManagement {
                 includeGroup "curse.maven"
             }
         }
+        maven { url = 'https://maven.parchmentmc.org' } // Add this line
     }
 }
 
