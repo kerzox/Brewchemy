@@ -10,7 +10,10 @@ import mod.kerzox.brewchemy.common.crafting.recipe.CultureJarRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.FermentationRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
 import mod.kerzox.brewchemy.common.data.BrewingKettleHeating;
+import mod.kerzox.brewchemy.common.effects.BlackoutEffect;
+import mod.kerzox.brewchemy.common.effects.BuzzedEffect;
 import mod.kerzox.brewchemy.common.effects.IntoxicatedEffect;
+import mod.kerzox.brewchemy.common.effects.WastedEffect;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
 import mod.kerzox.brewchemy.common.entity.SeatEntity;
 import mod.kerzox.brewchemy.common.event.TickUtils;
@@ -136,7 +139,14 @@ public class BrewchemyRegistry {
 
         }
 
+        public static final RegistryObject<MobEffect> BUZZED = EFFECTS.register("buzzed", () -> new BuzzedEffect(MobEffectCategory.NEUTRAL, 0xFFEE82EE));
+
         public static final RegistryObject<MobEffect> INTOXICATED = EFFECTS.register("intoxicated", () -> new IntoxicatedEffect(MobEffectCategory.NEUTRAL, 0xFFEE82EE));
+
+        public static final RegistryObject<MobEffect> WASTED = EFFECTS.register("wasted", () -> new WastedEffect(MobEffectCategory.NEUTRAL, 0xFFEE82EE));
+
+        public static final RegistryObject<MobEffect> BLACK_OUT = EFFECTS.register("blackout", () -> new BlackoutEffect(MobEffectCategory.NEUTRAL, 0xFFEE82EE));
+
 
     }
 

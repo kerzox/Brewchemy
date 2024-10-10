@@ -1,11 +1,14 @@
 package mod.kerzox.brewchemy.common.capabilities.drunk;
 
+import mod.kerzox.brewchemy.common.event.TickUtils;
 import mod.kerzox.brewchemy.common.fluid.alcohol.AgeableAlcoholStack;
 import mod.kerzox.brewchemy.common.network.PacketHandler;
 import mod.kerzox.brewchemy.common.network.PlayerCompoundTagPacket;
+import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.*;
 import net.minecraftforge.common.util.LazyOptional;
@@ -17,11 +20,36 @@ import static net.minecraftforge.common.capabilities.CapabilityManager.get;
 @AutoRegisterCapability
 public class IntoxicationManager implements ICapabilitySerializable<CompoundTag> {
 
+    public enum State {
+        SOBER,
+        BUZZED,
+        INTOXICATED,
+        WASTED,
+        BLACKOUT;
+
+        public static State fromIntoxicationLevel(double intoxicationAmount) {
+            if (intoxicationAmount >= 40000) {
+                return State.BLACKOUT;
+            }
+            if (intoxicationAmount >= 25000) {
+                return State.WASTED;
+            }
+            else if (intoxicationAmount >= 15000) {
+                return State.INTOXICATED;
+            }
+            else if (intoxicationAmount >= 6000) {
+                return State.BUZZED;
+            }
+            return SOBER;
+        }
+    }
+
     public static final Capability<IntoxicationManager> INTOXICATION_CAPABILITY = get(new CapabilityToken<>(){});
     private LazyOptional<IntoxicationManager> handler = LazyOptional.of(() -> this);
     private Player player;
-
     private double intoxicationAmount = 0;
+
+    private int tick;
 
     public IntoxicationManager(Player player) {
         this.player = player;
@@ -57,9 +85,12 @@ public class IntoxicationManager implements ICapabilitySerializable<CompoundTag>
     public static void applyAlcoholToPlayer(Player player, double content) {
         player.getCapability(INTOXICATION_CAPABILITY).ifPresent(handler -> {
             handler.increaseIntoxication(content);
-            PacketHandler.sendToClientPlayer(new PlayerCompoundTagPacket(INTOXICATION_CAPABILITY.getName(), handler.serializeNBT()), (ServerPlayer) player);
+            handler.syncToClient();
         });
+    }
 
+    public void syncToClient() {
+        PacketHandler.sendToClientPlayer(new PlayerCompoundTagPacket(INTOXICATION_CAPABILITY.getName(), serializeNBT()), (ServerPlayer) player);
     }
 
     public void increaseIntoxication(double amount) {
@@ -74,13 +105,66 @@ public class IntoxicationManager implements ICapabilitySerializable<CompoundTag>
         this.intoxicationAmount = amount;
     }
 
-    public void detox() {
+    public void removeIntoxication() {
         this.intoxicationAmount = 0;
     }
 
-    public void tick() {
+    public void detox() {
+        player.removeEffect(BrewchemyRegistry.Effects.BUZZED.get());
+        player.removeEffect(BrewchemyRegistry.Effects.INTOXICATED.get());
+        player.removeEffect(BrewchemyRegistry.Effects.WASTED.get());
+        player.removeEffect(BrewchemyRegistry.Effects.BLACK_OUT.get());
 
     }
+
+    public void tick() {
+        if (!player.level().isClientSide) {
+            addEffectByState(State.fromIntoxicationLevel(intoxicationAmount));
+
+            if (TickUtils.every(tick, 3)) {
+                this.intoxicationAmount -= 25;
+            }
+
+        }
+        tick++;
+    }
+
+    private void addEffectByState(State state) {
+        switch (state) {
+            case BUZZED -> {
+                if (!player.hasEffect(BrewchemyRegistry.Effects.BUZZED.get())) {
+                    detox();
+                    player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.BUZZED.get(), -1, 0));
+                }
+                break;
+            }
+            case INTOXICATED -> {
+                if (!player.hasEffect(BrewchemyRegistry.Effects.INTOXICATED.get())) {
+                    detox();
+                    player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.INTOXICATED.get(), -1, 0));
+                }
+                break;
+            }
+            case WASTED -> {
+                if (!player.hasEffect(BrewchemyRegistry.Effects.WASTED.get())) {
+                    detox();
+                    player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.WASTED.get(), -1, 0));
+                }
+                break;
+            }
+            case BLACKOUT -> {
+                if (!player.hasEffect(BrewchemyRegistry.Effects.BLACK_OUT.get())) {
+                    detox();
+                    player.addEffect(new MobEffectInstance(BrewchemyRegistry.Effects.BLACK_OUT.get(), -1, 0));
+                }
+                break;
+            }
+            default -> {
+                detox();
+            }
+        }
+    }
+
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
