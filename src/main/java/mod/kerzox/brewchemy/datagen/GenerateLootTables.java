@@ -37,8 +37,6 @@ public class GenerateLootTables extends VanillaBlockLoot {
 
     @Override
     protected void generate() {
-
-        dropNothing(BrewchemyRegistry.Blocks.ROPE_TIED_POST_BLOCK.get());
         dropNothing(BrewchemyRegistry.Blocks.PINT_GLASS_BLOCK.get());
         //dropNothing(BrewchemyRegistry.Blocks.BREWING_KETTLE_TOP_BLOCK.get());
 

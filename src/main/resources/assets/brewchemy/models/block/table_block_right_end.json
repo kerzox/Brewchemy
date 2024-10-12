@@ -1,5 +1,6 @@
 {
 	"credit": "Made with Blockbench",
+	"ambientocclusion": false,
 	"textures": {
 		"0": "brewchemy:block/bench_top",
 		"particle": "brewchemy:block/bench_top"
@@ -14,8 +15,8 @@
 				"east": {"uv": [0, 0, 12, 2], "texture": "#0"},
 				"south": {"uv": [0, 0, 12, 2], "texture": "#0"},
 				"west": {"uv": [0, 0, 12, 2], "texture": "#0"},
-				"up": {"uv": [0, 0, 12, 12], "texture": "#0"},
-				"down": {"uv": [0, 0, 12, 12], "texture": "#0"}
+				"up": {"uv": [0, 0, 16, 15], "texture": "#0"},
+				"down": {"uv": [0, 0, 16, 15], "texture": "#0"}
 			}
 		},
 		{

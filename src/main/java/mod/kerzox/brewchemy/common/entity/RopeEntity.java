@@ -24,6 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -47,6 +48,8 @@ public class RopeEntity extends Entity {
 
     private boolean isVertical = false;
     private boolean currentlySupported = false;
+
+    private boolean isTrellis = false;
 
     private RopeEntity supportingRope = null;
 
@@ -105,12 +108,12 @@ public class RopeEntity extends Entity {
         AABB bb = null;
 
         if (direction.getAxis() == Direction.Axis.Z) {
-             bb = new AABB(centerX + size, pos[0].getY() + size, maxZ + 1 - size, centerX + 1 - size, pos[0].getY() + 1 - size, minZ + size);
+            bb = new AABB(centerX + size, pos[0].getY() + size, maxZ + 1 - size, centerX + 1 - size, pos[0].getY() + 1 - size, minZ + size);
         } else if (direction.getAxis() == Direction.Axis.X) {
-             bb = new AABB(minX + size, pos[0].getY() + size, centerZ + size, maxX + 1 - size, pos[0].getY() + 1 - size, centerZ + 1 - size);
+            bb = new AABB(minX + size, pos[0].getY() + size, centerZ + size, maxX + 1 - size, pos[0].getY() + 1 - size, centerZ + 1 - size);
         } else {
             this.isVertical = true;
-             bb = new AABB(centerX + size, minY + size, centerZ + size, centerX + 1 - size, maxY + 1 - size, centerZ + 1 - size);
+            bb = new AABB(centerX + size, minY + size, centerZ + size, centerX + 1 - size, maxY + 1 - size, centerZ + 1 - size);
         }
 
         boundingBox = bb;
@@ -133,21 +136,19 @@ public class RopeEntity extends Entity {
 
     @Override
     public void remove(RemovalReason p_146834_) {
-
+        super.remove(p_146834_);
         // notify the entire rope network
         for (RopeEntity rope : traverseIntersectingRopes(this)) {
-            if (rope == this) continue;
+            if (rope == this && rope.isRemoved()) continue;
             rope.currentlySupported = false;
-            rope.intersectedRopeUpdate(null, this, false, NotifyReason.REMOVAL);
+            rope.intersectedRopeUpdate(null, this, NotifyReason.REMOVAL);
         }
-        super.remove(p_146834_);
     }
 
-    public void intersectedRopeUpdate(AABB intersectPoint, RopeEntity entityResponsible, boolean notify, NotifyReason reason) {
+    public void intersectedRopeUpdate(AABB intersectPoint, RopeEntity entityResponsible, NotifyReason reason) {
+        if (this.isRemoved()) return;
 
-        // entity responsible is now being removed
         if (reason == NotifyReason.REMOVAL) {
-            getIntersections().clear();
             findIntersectingRopes(entityResponsible, null);
         }
 
@@ -155,9 +156,12 @@ public class RopeEntity extends Entity {
             findIntersectingRopes(null, null);
         }
 
-        if (notify) {
-            // this gives us every rope we are directly and indirectly connected to
-        }
+        int minX = Math.min(getPositions()[0].getX(), getPositions()[1].getX());
+        int maxX = Math.max(getPositions()[0].getX(), getPositions()[1].getX());
+        int minY = Math.min(getPositions()[0].getY(), getPositions()[1].getY());
+        int maxY = Math.max(getPositions()[0].getY(), getPositions()[1].getY());
+        int minZ = Math.min(getPositions()[0].getZ(), getPositions()[1].getZ());
+        int maxZ = Math.max(getPositions()[0].getZ(), getPositions()[1].getZ());
 
         if (!level().isClientSide) {
             // check if we are not a structural rope
@@ -173,6 +177,11 @@ public class RopeEntity extends Entity {
                     }
                 }
 
+                boolean vertical = minY != maxY;
+                boolean[] endpoints = new boolean[] {false, false};
+
+                boolean xAxis = minX != maxX;
+
                 // search through all intersecting ropes find first structural rope
                 for (List<RopeEntity> entities : getIntersections().values()) {
                     for (RopeEntity ropeEntity : entities) {
@@ -180,7 +189,13 @@ public class RopeEntity extends Entity {
                             // this rope is connected to a structural rope
                             this.currentlySupported = true;
                             this.supportingRope = ropeEntity;
-                            return;
+                            if (xAxis) {
+                                if (minX == ropeEntity.getBlockX()) endpoints[0] = true;
+                                if (maxX == ropeEntity.getBlockX()) endpoints[1] = true;
+                            } else {
+                                if (minZ == ropeEntity.getBlockZ()) endpoints[0] = true;
+                                if (maxZ == ropeEntity.getBlockZ()) endpoints[1] = true;
+                            }
                         }
                     }
                     // we didn't find a structural, but maybe we can find a supported rope we can leech from
@@ -188,9 +203,17 @@ public class RopeEntity extends Entity {
                         if (ropeEntity.isCurrentlySupported() && supportedFromTheTop(ropeEntity)) {
                             // we did so mark as supported
                             this.currentlySupported = true;
-                            return;
+                            if (xAxis) {
+                                if (minX == ropeEntity.getBlockX()) endpoints[0] = true;
+                                if (maxX == ropeEntity.getBlockX()) endpoints[1] = true;
+                            } else {
+                                if (minZ == ropeEntity.getBlockZ()) endpoints[0] = true;
+                                if (maxZ == ropeEntity.getBlockZ()) endpoints[1] = true;
+                            }
                         }
                     }
+
+                    if (endpoints[0] && endpoints[1]) return;
                 }
             } else {
                 return;
@@ -202,21 +225,30 @@ public class RopeEntity extends Entity {
 
         }
 
-
     }
+    /*
+                        int minX = Math.min(getPositions()[0].getX(), getPositions()[1].getX());
+                    int maxX = Math.max(getPositions()[0].getX(), getPositions()[1].getX());
+                    int minY = Math.min(getPositions()[0].getY(), getPositions()[1].getY());
+                    int maxY = Math.max(getPositions()[0].getY(), getPositions()[1].getY());
+                    int minZ = Math.min(getPositions()[0].getZ(), getPositions()[1].getZ());
+                    int maxZ = Math.max(getPositions()[0].getZ(), getPositions()[1].getZ());
+     */
 
-    public void notifyIntersectedRopes(NotifyReason reason, boolean chainNotify) {
-
-        for (AABB aabb : getIntersections().keySet()) {
+    public void notifyIntersectedRopes(NotifyReason reason) {
+        if (this.isRemoved()) return;
+        for (AABB aabb : new ArrayList<>(getIntersections().keySet())) {
             for (RopeEntity entityToUpdate : getIntersections().get(aabb)) {
-                if (!entityToUpdate.isRemoved()) entityToUpdate.intersectedRopeUpdate(aabb, this, chainNotify, reason);
+                if (entityToUpdate != null && !entityToUpdate.isRemoved() && entityToUpdate != this) entityToUpdate.intersectedRopeUpdate(aabb, this, reason);
             }
         }
 
     }
 
     public void drop() {
-        kill();
+        if (isRemoved()) return;
+        this.remove(Entity.RemovalReason.KILLED);
+        this.gameEvent(GameEvent.ENTITY_DIE);
         spawnAtLocation(BrewchemyRegistry.Items.ROPE_ITEM.get());
         for (BlockPos position : cropPositions) {
             level().destroyBlock(position, true);
@@ -233,7 +265,6 @@ public class RopeEntity extends Entity {
         while (!queue.isEmpty()) {
 
             RopeEntity current = queue.poll();
-
 
             for (List<RopeEntity> value : current.getIntersections().values()) {
                 for (RopeEntity next : value) {
@@ -256,7 +287,7 @@ public class RopeEntity extends Entity {
 
         BlockPos position = BlockPos.containing(position().subtract(new
                 Vec3(Math.abs(positionClicked.x) > 0.5f ? -positionClicked.x : 0,
-                Math.abs(positionClicked.y) > 0.5f ? -positionClicked.y: 0,
+                Math.abs(positionClicked.y) > 0.5f ? -positionClicked.y : 0,
                 Math.abs(positionClicked.z) > 0.5f ? -positionClicked.z : 0)));
 
         if (!level.isClientSide) {
@@ -348,9 +379,13 @@ public class RopeEntity extends Entity {
 
         // check if we are a structural rope
 
-       if (level.getBlockState(firstPos).getBlock() instanceof FenceBlock && level.getBlockState(secondPos).getBlock() instanceof FenceBlock) {
+        if (level.getBlockState(firstPos).getBlock() instanceof FenceBlock && level.getBlockState(secondPos).getBlock() instanceof FenceBlock) {
             // both end points are rope tied fences which means we can support other ropes
             setCanSupport(true);
+        }
+
+        if (level.getBlockState(firstPos).getBlock() instanceof FarmBlock || level.getBlockState(secondPos).getBlock() instanceof FarmBlock) {
+            this.isTrellis = true;
         }
 
 
@@ -371,18 +406,19 @@ public class RopeEntity extends Entity {
         if (boundingBox == getBoundingBox()) {
             boundingBox = null;
             findIntersectingRopes(null, null);
-            notifyIntersectedRopes(NotifyReason.INTERSECT, false);
+            notifyIntersectedRopes(NotifyReason.INTERSECT);
         }
+        if (!level().isClientSide) {
+            Block end1 = level().getBlockState(getPositions()[0]).getBlock();
+            Block end2 = level().getBlockState(getPositions()[1]).getBlock();
 
-        Block end1 = level().getBlockState(getPositions()[0]).getBlock();
-        Block end2 = level().getBlockState(getPositions()[1]).getBlock();
+            if (isStructural()) {
+                if (!(end1 instanceof FenceBlock && end2 instanceof FenceBlock)) drop();
+            }
 
-        if (isStructural()) {
-            if (!(end1 instanceof FenceBlock && end2 instanceof FenceBlock)) drop();
-        }
-
-        if (getPositions()[0].getY() != getPositions()[1].getY()) {
-            if (!(end1 instanceof FarmBlock || end2 instanceof FarmBlock)) drop();
+            if (isTrellis) {
+                if (!(end1 instanceof FarmBlock || end2 instanceof FarmBlock)) drop();
+            }
         }
 
 
@@ -399,13 +435,16 @@ public class RopeEntity extends Entity {
     }
 
     private void findIntersectingRopes(@Nullable RopeEntity ignore, @Nullable AABB boundingBox) {
-
+        if (this.isRemoved()) return;
+        getIntersections().clear();
         List<RopeEntity> entities = level().getEntitiesOfClass(RopeEntity.class, boundingBox != null ? boundingBox : getBoundingBox());
 
         HashMap<AABB, List<RopeEntity>> copy = new HashMap<>(getIntersections());
 
         for (RopeEntity ropeEntity : entities) {
-            if (ropeEntity == this || ignore == ropeEntity) { continue;}
+            if (ropeEntity == this || ignore == ropeEntity || ropeEntity.isRemoved()) {
+                continue;
+            }
             //TODO add this as a cached value in the entity
             AABB intersection = boundingBox != null ? boundingBox : getBoundingBox().intersect(ropeEntity.getBoundingBox());
 

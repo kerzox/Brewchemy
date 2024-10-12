@@ -56,7 +56,7 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
         int minY = Math.min(positions[0].getY(), positions[1].getY());
         int maxY = Math.max(positions[0].getY(), positions[1].getY());
 
-        if (minY == maxY) {
+        if (entity.isStructural()) {
             wp.push();
             wp.translate((float) (minX - entity.position().x), -6/16f, (float) (minZ - entity.position().z));
             RenderingUtil.renderModel(wp.asStack(), knot, bufferSource, packedLight);
