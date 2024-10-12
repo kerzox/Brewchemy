@@ -36,7 +36,16 @@ public class GenerateItemModels extends ItemModelProvider {
                         .fluid(bucketItem.getFluid());
 
             }
+
         });
+
+        cubeBottomTop("milling_block",
+                new ResourceLocation(Brewchemy.MODID, "block/millstone_side"),
+                new ResourceLocation(Brewchemy.MODID, "block/millstone_bottom"),
+                new ResourceLocation(Brewchemy.MODID, "block/millstone_top"));
+        withExistingParent("bench_seat_block", new ResourceLocation(Brewchemy.MODID, "bench_seat_block"));
+        withExistingParent("table_block", new ResourceLocation(Brewchemy.MODID, "table_block"));
+
     }
 
     private void addTint(ItemModelBuilder builder, int tint) {

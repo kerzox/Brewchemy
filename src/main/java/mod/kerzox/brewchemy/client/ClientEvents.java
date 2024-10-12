@@ -47,17 +47,20 @@ public class ClientEvents {
             float period = 20 * 6;
             float period2 = 20 * 4;
             float amplitude2 = amplitude * 0.2f;
+
+            long time = System.currentTimeMillis();
+
             double x = midpoint
-                    + (amplitude * -0.5) * Math.sin(2 * Math.PI * TickUtils.clientRenderTick / period)   // First, base wave
-                    + amplitude2 * Math.sin(2 * Math.PI *  TickUtils.clientRenderTick / period2);  // Second, chaotic wave
+                    + (amplitude * -0.5) * Math.sin(2 * Math.PI * (time * 0.025) / period)   // First, base wave
+                    + amplitude2 * Math.sin(2 * Math.PI *  (time * 0.025) / period2);  // Second, chaotic wave
 
             double y = midpoint
                     + amplitude * Math.sin(2 * Math.PI * TickUtils.clientRenderTick / period)   // First, base wave
                     + amplitude2 * Math.sin(2 * Math.PI *  TickUtils.clientRenderTick / period2);  // Second, chaotic wave
 
             double z = midpoint
-                    + amplitude * Math.sin(2 * Math.PI * TickUtils.clientRenderTick / period)   // First, base wave
-                    + (amplitude2 * -0.2) * Math.sin(2 * Math.PI *  TickUtils.clientRenderTick / period2);  // Second, chaotic wave
+                    + amplitude * Math.sin(2 * Math.PI * (time * 0.025) / period)   // First, base wave
+                    + (amplitude2 * -0.2) * Math.sin(2 * Math.PI *  (time * 0.025) / period2);  // Second, chaotic wave
 
             //pose.push();
 //            pose.rotateX((float) x);

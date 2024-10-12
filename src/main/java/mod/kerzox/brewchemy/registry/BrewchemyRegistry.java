@@ -111,13 +111,13 @@ public class BrewchemyRegistry {
         ENTITIES.register(bus);
         SOUND_EVENTS.register(bus);
         // these are for all the machine and special items
+        Blocks.init();
+        BlockEntities.init();
+        Fluids.init();
         Items.init();
         Particles.init();
         Effects.init();
-        Blocks.init();
-        BlockEntities.init();
         Menus.init();
-        Fluids.init();
         Tags.init();
         Entities.init();
         DataPacks.init();

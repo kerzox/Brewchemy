@@ -232,7 +232,6 @@ public class PintItem extends BlockItem {
         stacks.add(alcoholicPint(BrewchemyRegistry.Fluids.BEER_LAGER.getFluid().get(), 0));
         stacks.add(alcoholicPint(BrewchemyRegistry.Fluids.BEER_STOUT.getFluid().get(), 0));
         stacks.add(alcoholicPint(BrewchemyRegistry.Fluids.BEER_PALE_ALE.getFluid().get(), 0));
-        stacks.add(alcoholicPint(BrewchemyRegistry.Fluids.BEER_ALE.getFluid().get(), TickUtils.minecraftDaysToTicks(5)));
         stacks.add(pintOf(Fluids.EMPTY));
         return stacks;
     }
