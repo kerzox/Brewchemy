@@ -26,7 +26,7 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
     protected LazyOptional<MultifluidInventory.InternalWrapper> output;
 
     protected MultifluidInventory(InternalWrapper... tank) {
-        super(tank[0]);
+        super(tank);
         this.inputWrapper = tank[0];
         this.outputWrapper = tank[1];
         this.input = LazyOptional.of(() -> this.inputWrapper);

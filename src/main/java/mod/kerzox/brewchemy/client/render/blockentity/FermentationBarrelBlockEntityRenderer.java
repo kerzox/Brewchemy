@@ -14,11 +14,13 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.client.model.data.ModelData;
 
+import javax.naming.ldap.Control;
 import java.util.HashMap;
 
 public class FermentationBarrelBlockEntityRenderer implements BlockEntityRenderer<FermentationBarrelBlockEntity> {
@@ -44,6 +46,8 @@ public class FermentationBarrelBlockEntityRenderer implements BlockEntityRendere
         Direction facing = pBlockEntity.getBlockState().getValue(HorizontalDirectionalBlock.FACING);
 
         boolean formed = pBlockEntity.getController().isFormed();
+
+
 
         if (pBlockEntity.getController().getMasterBlock() != pBlockEntity) return;
 

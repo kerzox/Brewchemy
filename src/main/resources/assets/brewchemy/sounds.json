@@ -1,0 +1,8 @@
+{
+  "bubbling": {
+    "sounds": [
+      "brewchemy:bubbling"
+    ],
+    "subtitle": "sound_event.brewchemy.bubbling"
+  }
+}

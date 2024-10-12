@@ -52,52 +52,52 @@ public class PintItem extends BlockItem {
 
     @Override
     public InteractionResult useOn(UseOnContext pContext) {
-        ItemStack stack = pContext.getItemInHand();
-        if (!pContext.getLevel().isClientSide) {
-            if (pContext.getLevel().getBlockEntity(pContext.getClickedPos()) instanceof PintGlassBlockEntity pint) {
-                IItemHandler handler = pint.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
-                if (handler instanceof ItemInventory inventory) {
-
-                    Direction facing = pint.getBlockState().getValue(HorizontalDirectionalBlock.FACING);
-                    Direction clickedFace = pContext.getClickedFace();
-
-                    if (facing == Direction.NORTH) {
-
-                        if (clickedFace == Direction.SOUTH) {
-                            ItemStack stack1 = inventory.getStackInSlot(0).copy();
-                            if (inventory.getStackInSlot(1).isEmpty())
-                            {
-                                inventory.setStackInSlot(1, stack1);
-                                inventory.setStackInSlot(0, stack);
-                            }
-                        } else {
-                            ItemStackHandlerUtils.insertAndModifyStack(inventory.getInputHandler(), stack);
-                        }
-
-                    }
-
-                    if (facing == Direction.SOUTH) {
-
-                        if (clickedFace == Direction.SOUTH) {
-                            ItemStackHandlerUtils.insertAndModifyStack(inventory.getInputHandler(), stack);
-                        } else {
-                            ItemStack stack1 = inventory.getStackInSlot(0).copy();
-                            if (inventory.getStackInSlot(1).isEmpty())
-                            {
-                                inventory.setStackInSlot(1, stack1);
-                                inventory.setStackInSlot(0, stack);
-                            }
-
-                        }
-
-                    }
-
-                  //  ItemStackHandlerUtils.insertAndModifyStack(inventory.getInputHandler(), stack);
-                    pint.syncBlockEntity();
-                    return InteractionResult.SUCCESS;
-                }
-            }
-        }
+//        ItemStack stack = pContext.getItemInHand();
+//        if (!pContext.getLevel().isClientSide) {
+//            if (pContext.getLevel().getBlockEntity(pContext.getClickedPos()) instanceof PintGlassBlockEntity pint) {
+//                IItemHandler handler = pint.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
+//                if (handler instanceof ItemInventory inventory) {
+//
+//                    Direction facing = pint.getBlockState().getValue(HorizontalDirectionalBlock.FACING);
+//                    Direction clickedFace = pContext.getClickedFace();
+//
+//                    if (facing == Direction.NORTH) {
+//
+//                        if (clickedFace == Direction.SOUTH) {
+//                            ItemStack stack1 = inventory.getStackInSlot(0).copy();
+//                            if (inventory.getStackInSlot(1).isEmpty())
+//                            {
+//                                inventory.setStackInSlot(1, stack1);
+//                                inventory.setStackInSlot(0, stack);
+//                            }
+//                        } else {
+//                            ItemStackHandlerUtils.insertAndModifyStack(inventory.getInputHandler(), stack);
+//                        }
+//
+//                    }
+//
+//                    if (facing == Direction.SOUTH) {
+//
+//                        if (clickedFace == Direction.SOUTH) {
+//                            ItemStackHandlerUtils.insertAndModifyStack(inventory.getInputHandler(), stack);
+//                        } else {
+//                            ItemStack stack1 = inventory.getStackInSlot(0).copy();
+//                            if (inventory.getStackInSlot(1).isEmpty())
+//                            {
+//                                inventory.setStackInSlot(1, stack1);
+//                                inventory.setStackInSlot(0, stack);
+//                            }
+//
+//                        }
+//
+//                    }
+//
+//                  //  ItemStackHandlerUtils.insertAndModifyStack(inventory.getInputHandler(), stack);
+//                    pint.syncBlockEntity();
+//                    return InteractionResult.SUCCESS;
+//                }
+//            }
+//        }
         return super.useOn(pContext);
     }
 

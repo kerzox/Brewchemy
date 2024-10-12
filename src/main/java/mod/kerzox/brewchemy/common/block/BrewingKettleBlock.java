@@ -244,8 +244,5 @@ public class BrewingKettleBlock extends BrewchemyEntityBlock<BrewingKettleBlockE
         public VoxelShape getOcclusionShape(BlockState p_60578_, BlockGetter p_60579_, BlockPos p_60580_) {
             return Shapes.box(0.25, 0.25, 0.25, 0.5, 0.5, 0.5);
         }
-
-
-
     }
 }

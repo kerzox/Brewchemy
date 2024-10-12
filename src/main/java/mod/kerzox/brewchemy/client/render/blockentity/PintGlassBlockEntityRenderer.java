@@ -53,9 +53,7 @@ public class PintGlassBlockEntityRenderer implements BlockEntityRenderer<PintGla
         WrappedPose pose = new WrappedPose(pPoseStack);
         pose.push();
 
-        if (facing == Direction.SOUTH) {
-            pose.rotateY(180);
-        }
+        pose.rotateByDirection(facing);
 
         pBlockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(cap -> {
             if (cap instanceof ItemInventory inventory) {

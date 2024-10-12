@@ -20,4 +20,6 @@ public class RopeTiedPostBlock extends FenceBlock implements EntityBlock {
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return new RopeTiedPostBlockEntity(blockPos, blockState);
     }
+
+
 }

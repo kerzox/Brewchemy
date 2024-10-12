@@ -22,18 +22,22 @@ import mod.kerzox.brewchemy.common.fluid.alcohol.AlcoholicFluid;
 import mod.kerzox.brewchemy.common.item.*;
 import mod.kerzox.brewchemy.common.particle.FermentationParticleType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -41,8 +45,10 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -51,6 +57,9 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -63,7 +72,9 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -79,9 +90,10 @@ public class BrewchemyRegistry {
     private static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = DeferredRegister.create(ForgeRegistries.RECIPE_TYPES, MODID);
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, MODID);
     private static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(ForgeRegistries.MOB_EFFECTS, MODID);
-    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES,  MODID);
+    private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES,  MODID);
     private static final DeferredRegister<ParticleType<?>> PARTICLE_TYPES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, MODID);
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+    private static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+    private static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(Registries.SOUND_EVENT, MODID);
 
 
     public static void init(IEventBus bus) {
@@ -97,6 +109,7 @@ public class BrewchemyRegistry {
         PARTICLE_TYPES.register(bus);
         CREATIVE_MODE_TABS.register(bus);
         ENTITIES.register(bus);
+        SOUND_EVENTS.register(bus);
         // these are for all the machine and special items
         Items.init();
         Particles.init();
@@ -109,7 +122,7 @@ public class BrewchemyRegistry {
         Entities.init();
         DataPacks.init();
         Recipes.init();
-
+        Sounds.init();
 
     }
 
@@ -131,6 +144,18 @@ public class BrewchemyRegistry {
 
         public static final ResourceKey<Registry<BrewingKettleHeating>> KETTLE_HEATING_REGISTRY_KEY =
                 ResourceKey.createRegistryKey(new ResourceLocation(MODID, "kettle_heating"));
+
+        public static void init() {
+
+        }
+    }
+
+    public static class Sounds {
+
+        public static final Supplier<SoundEvent> FERMENTING_BUBBLES = SOUND_EVENTS.register(
+                "bubbling",
+                () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MODID, "bubbling"))
+        );
 
         public static void init() {
 
@@ -338,6 +363,19 @@ public class BrewchemyRegistry {
         public static final makeBlock<BrewchemyEntityBlock<PintGlassBlockEntity>> PINT_GLASS_BLOCK
                 = makeBlock.build("pint_glass_block",
                 (p) -> new BrewchemyEntityBlock<>(BlockEntities.PINT_GLASS_BLOCK_ENTITY.getType(), p) {
+
+                    @Override
+                    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+
+                        BlockEntity blockentity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+                        if (blockentity instanceof PintGlassBlockEntity pintGlassBlockEntity) {
+                            BlockPos pos = pintGlassBlockEntity.getBlockPos();
+                            return pintGlassBlockEntity.getBeers();
+                        }
+
+                        return new ArrayList<>();
+                    }
+
                     @Override
                     public RenderShape getRenderShape(BlockState p_60550_) {
                         return RenderShape.ENTITYBLOCK_ANIMATED;
@@ -349,11 +387,14 @@ public class BrewchemyRegistry {
                         if (level.getBlockEntity(pos) instanceof PintGlassBlockEntity pintGlassBlockEntity) {
                             int size = pintGlassBlockEntity.getBeers().stream().filter(p->!p.isEmpty()).toList().size();
                             if (size > 1) {
-                                shape = Shapes.join(shape, Shapes.box(0.1875, 0.1875, 0, 0.3125, 0.4375, 0.125), BooleanOp.OR);
-                                shape = Shapes.join(shape, Shapes.box(0.0625, 0, 0.125, 0.4375, 0.5625, 0.5), BooleanOp.OR);
-                                shape = Shapes.join(shape, Shapes.box(0.6875, 0.1875, 0.875, 0.8125, 0.4375, 1), BooleanOp.OR);
-                                shape = Shapes.join(shape, Shapes.box(0.5625, 0, 0.5, 0.9375, 0.5625, 0.875), BooleanOp.OR);
-                            } else {
+                                if (state.getValue(HorizontalDirectionalBlock.FACING).getAxis() == Direction.Axis.X) {
+                                    shape = Shapes.join(shape, Shapes.box(0.5, 0, 0.0625, 0.875, 0.5625, 0.4375), BooleanOp.OR);
+                                    shape = Shapes.join(shape, Shapes.box(0.125, 0, 0.5625, 0.5, 0.5625, 0.9375), BooleanOp.OR);
+                                } else {
+                                    shape = Shapes.join(shape, Shapes.box(0.0625, 0, 0.125, 0.4375, 0.5625, 0.5), BooleanOp.OR);
+                                    shape = Shapes.join(shape, Shapes.box(0.5625, 0, 0.5, 0.9375, 0.5625, 0.875), BooleanOp.OR);
+                                }
+                                } else {
                                 shape = Shapes.join(shape, Shapes.box(0.4375, 0.1875, 0.1875, 0.5625, 0.4375, 0.3125), BooleanOp.OR);
                                 shape = Shapes.join(shape, Shapes.box(0.3125, 0, 0.3125, 0.6875, 0.5625, 0.6875), BooleanOp.OR);
                             }
@@ -460,7 +501,7 @@ public class BrewchemyRegistry {
         public static final makeBlockEntity<PintGlassBlockEntity> PINT_GLASS_BLOCK_ENTITY
                 = makeBlockEntity.build("pint_glass_block_entity", PintGlassBlockEntity::new, Blocks.PINT_GLASS_BLOCK);
 
-        public static final makeBlockEntity<FermentationBarrelBlockEntity> FERMENTATION_BARREL
+        public static final makeBlockEntity<FermentationBarrelBlockEntity> FERMENTATION_BARREL_BLOCK_ENTITY
                 = makeBlockEntity.build("fermentation_barrel", FermentationBarrelBlockEntity::new, Blocks.FERMENTATION_BARREL_BLOCK);
 
         public static void init() {
