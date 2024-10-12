@@ -60,6 +60,10 @@ public class PintGlassBlockEntity extends CapabilityBlockEntity {
         // try to put the item stack into the inventory
         if (!itemInHand.isEmpty() && itemInHand.is(BrewchemyRegistry.Items.PINT_ITEM.get())) {
 
+            if (!ItemHandlerHelper.insertItem(itemStackHandler.getInputHandler(), itemInHand, true).isEmpty()) {
+                return super.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit);
+            }
+
             ItemStack pintAlreadyInside = itemStackHandler.getInputHandler().internalExtractItem(0, 1, false);
             itemStackHandler.getInputHandler().insertItem(0, itemInHand.copy(), false);
             itemStackHandler.getInputHandler().insertItem(1, pintAlreadyInside, false);

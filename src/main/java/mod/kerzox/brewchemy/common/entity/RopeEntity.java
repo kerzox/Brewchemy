@@ -1,6 +1,5 @@
 package mod.kerzox.brewchemy.common.entity;
 
-import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
 import mod.kerzox.brewchemy.common.item.RopeItem;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
@@ -23,8 +22,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -264,16 +263,16 @@ public class RopeEntity extends Entity {
 
             if (hand == InteractionHand.MAIN_HAND) {
 
-                player.sendSystemMessage(Component.literal("Position clicked on rope: "+position.toShortString()));
-                player.sendSystemMessage(Component.literal("Is structural: "+(isStructural() ? "Yes" : "No")));
-
-                for (AABB aabb : getIntersections().keySet()) {
-                    player.sendSystemMessage(Component.literal("IP: " + aabb + " : " + getIntersections().get(aabb).size()));
-                }
-
-                for (RopeEntity rope : traverseIntersectingRopes(this)) {
-                    player.sendSystemMessage(Component.literal(rope.blockPosition().toShortString()));
-                }
+//                player.sendSystemMessage(Component.literal("Position clicked on rope: "+position.toShortString()));
+//                player.sendSystemMessage(Component.literal("Is structural: "+(isStructural() ? "Yes" : "No")));
+//
+//                for (AABB aabb : getIntersections().keySet()) {
+//                    player.sendSystemMessage(Component.literal("IP: " + aabb + " : " + getIntersections().get(aabb).size()));
+//                }
+//
+//                for (RopeEntity rope : traverseIntersectingRopes(this)) {
+//                    player.sendSystemMessage(Component.literal(rope.blockPosition().toShortString()));
+//                }
 
                 ItemStack stack = player.getMainHandItem();
 
@@ -349,7 +348,7 @@ public class RopeEntity extends Entity {
 
         // check if we are a structural rope
 
-       if (level.getBlockEntity(firstPos) instanceof RopeTiedPostBlockEntity && level.getBlockEntity(secondPos) instanceof RopeTiedPostBlockEntity) {
+       if (level.getBlockState(firstPos).getBlock() instanceof FenceBlock && level.getBlockState(secondPos).getBlock() instanceof FenceBlock) {
             // both end points are rope tied fences which means we can support other ropes
             setCanSupport(true);
         }
@@ -375,15 +374,17 @@ public class RopeEntity extends Entity {
             notifyIntersectedRopes(NotifyReason.INTERSECT, false);
         }
 
-        if (isStructural()) {
-            Block end1 = level().getBlockState(getPositions()[0]).getBlock();
-            Block end2 = level().getBlockState(getPositions()[1]).getBlock();
-            if (end1 instanceof FenceBlock && end2 instanceof FenceBlock) {
+        Block end1 = level().getBlockState(getPositions()[0]).getBlock();
+        Block end2 = level().getBlockState(getPositions()[1]).getBlock();
 
-            } else {
-                kill();
-            }
+        if (isStructural()) {
+            if (!(end1 instanceof FenceBlock && end2 instanceof FenceBlock)) drop();
         }
+
+        if (getPositions()[0].getY() != getPositions()[1].getY()) {
+            if (!(end1 instanceof FarmBlock || end2 instanceof FarmBlock)) drop();
+        }
+
 
     }
 

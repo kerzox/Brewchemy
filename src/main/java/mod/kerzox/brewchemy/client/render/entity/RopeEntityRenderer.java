@@ -1,39 +1,29 @@
 package mod.kerzox.brewchemy.client.render.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import mod.kerzox.brewchemy.Brewchemy;
-import mod.kerzox.brewchemy.client.render.types.BrewchemyRenderTypes;
 import mod.kerzox.brewchemy.client.render.util.RenderingUtil;
 import mod.kerzox.brewchemy.client.render.util.WrappedPose;
 import mod.kerzox.brewchemy.common.entity.RopeEntity;
-import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.registries.ForgeRegistries;
-
-import java.util.List;
 
 public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
 
+    public static ResourceLocation KNOT = new ResourceLocation(Brewchemy.MODID, "block/rope_knot");
     private EntityRendererProvider.Context context;
 
     public RopeEntityRenderer(EntityRendererProvider.Context p_174008_) {
@@ -46,7 +36,7 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
         super.render(entity, p_114486_, partialTicks, poseStack, bufferSource, combinedLight);
 
         int packedLight = LightTexture.pack(Minecraft.getInstance().level.getBrightness(LightLayer.BLOCK, entity.getOnPos()), Minecraft.getInstance().level.getBrightness(LightLayer.SKY, entity.getOnPos()));
-        BakedModel model = context.getBlockRenderDispatcher().getBlockModel(BrewchemyRegistry.Blocks.ROPE_TIED_POST_BLOCK.get().defaultBlockState());
+        BakedModel knot = Minecraft.getInstance().getModelManager().getModel(KNOT);
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(new ResourceLocation(Brewchemy.MODID, "block/rope_block"));
 
         WrappedPose wp = new WrappedPose(poseStack);
@@ -57,6 +47,27 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
         BlockPos normalized = positions[1].subtract(positions[0]);
         Direction direction = Direction.fromDelta(normalized.getX(), normalized.getY(), normalized.getZ());
 
+        int minX = Math.min(positions[0].getX(), positions[1].getX());
+        int maxX = Math.max(positions[0].getX(), positions[1].getX());
+
+        int minZ = Math.min(positions[0].getZ(), positions[1].getZ());
+        int maxZ = Math.max(positions[0].getZ(), positions[1].getZ());
+
+        int minY = Math.min(positions[0].getY(), positions[1].getY());
+        int maxY = Math.max(positions[0].getY(), positions[1].getY());
+
+        if (minY == maxY) {
+            wp.push();
+            wp.translate((float) (minX - entity.position().x), -6/16f, (float) (minZ - entity.position().z));
+            RenderingUtil.renderModel(wp.asStack(), knot, bufferSource, packedLight);
+            wp.pop();
+
+            wp.push();
+            wp.translate( (float) (maxX - entity.position().x), -6/16f,  (float) (maxZ - entity.position().z));
+            RenderingUtil.renderModel(wp.asStack(), knot, bufferSource, packedLight);
+            wp.pop();
+        }
+
         if (direction.getAxis() == Direction.Axis.Z) {
             wp.rotateY(90);
             wp.translate(1f, 0, 0);
@@ -66,10 +77,8 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
 
             if (direction.getAxis() == Direction.Axis.X) {
 
-                int min = Math.min(positions[0].getX(), positions[1].getX());
-                int max = Math.max(positions[0].getX(), positions[1].getX());
 
-                for (int i = min; i < max; i++) {
+                for (int i = minX; i < maxX; i++) {
                     wp.enclosedTranslate((float) (i - entity.position().x), 0, 0, () -> drawRope(poseStack, bufferSource, wp, sprite, packedLight));
                 }
                 return;
@@ -77,22 +86,16 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
 
             if (direction.getAxis() == Direction.Axis.Z) {
 
-                int min = Math.min(positions[0].getZ(), positions[1].getZ());
-                int max = Math.max(positions[0].getZ(), positions[1].getZ());
-
-                for (int i = min; i < max; i++) {
+                for (int i = minZ; i < maxZ; i++) {
                     wp.enclosedTranslate((float) (i - entity.position().z), 0, 0, () -> drawRope(poseStack, bufferSource, wp, sprite, packedLight));
                 }
                 return;
             }
 
-            int min = Math.min(positions[0].getY(), positions[1].getY());
-            int max = Math.max(positions[0].getY(), positions[1].getY());
-
             wp.translate(-1, 14 / 16f, 0);
             wp.rotateZ(90);
 
-            for (int i = min; i < max; i++) {
+            for (int i = minY; i < maxY; i++) {
                 wp.enclosedTranslate((float) (i - entity.position().y), 0, 0, () -> drawRope(poseStack, bufferSource, wp, sprite, packedLight));
             }
 
@@ -100,12 +103,6 @@ public class RopeEntityRenderer extends EntityRenderer<RopeEntity> {
         });
 
         wp.pop();
-
-        for (AABB intersection : entity.getIntersections().keySet()) {
-            for (RopeEntity ropeEntity : entity.getIntersections().get(intersection)) {
-                LevelRenderer.renderLineBox(wp.asStack(), Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.LINES), intersection.minX - entity.position().x, intersection.minY - entity.position().y, intersection.minZ - entity.position().z, intersection.maxX - entity.position().x, intersection.maxY - entity.position().y, intersection.maxZ - entity.position().z, direction.getAxis() == Direction.Axis.Z ? 1f : 0, direction.getAxis() == Direction.Axis.X ? 1f : 0, direction.getAxis() == Direction.Axis.Y ? 1f : 0, 1.0F);
-            }
-        }
 
 
     }

@@ -5,23 +5,14 @@ import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.render.util.RenderingUtil;
 import mod.kerzox.brewchemy.client.render.util.WrappedPose;
 import mod.kerzox.brewchemy.common.blockentity.FermentationBarrelBlockEntity;
-import mod.kerzox.brewchemy.common.network.RequestDataPacket;
-import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.client.model.data.ModelData;
-
-import javax.naming.ldap.Control;
-import java.util.HashMap;
 
 public class FermentationBarrelBlockEntityRenderer implements BlockEntityRenderer<FermentationBarrelBlockEntity> {
 
@@ -82,7 +73,7 @@ public class FermentationBarrelBlockEntityRenderer implements BlockEntityRendere
         } else pose.rotateByDirection(facing);
 
         if (formed) {
-            RenderingUtil.renderSolidBlockEntityNoAO(pose.asStack(), multi, pBlockEntity, pBufferSource, pPackedLight);
+            RenderingUtil.renderModel(pose.asStack(), multi, pBufferSource, pPackedLight);
             pose.translate(-1f, 0, -0.5f);
             if (pBlockEntity.isTapped()) RenderingUtil.renderSolidBlockEntity(pose.asStack(), tap, pBlockEntity, pBufferSource, pPackedLight);
         } else {

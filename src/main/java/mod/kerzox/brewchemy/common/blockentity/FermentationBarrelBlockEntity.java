@@ -116,6 +116,12 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
                     }
                     this.controller = temp;
                     this.controller.sync();
+
+                    // if this barrel was working previously we might need to reapply the working recipe
+                    if (this.working && this.catalystRemaining > 0 && this.currentRecipe.isEmpty()) {
+                        this.currentRecipe = findValidRecipe();
+                    }
+
                 }
             }
             else {
@@ -170,7 +176,10 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
 
     public void setTapped(boolean bool) {
         this.tapped = bool;
-        if (tapped) fluidInventory.addOutput(controller.formingDirection != null ? controller.formingDirection : getBlockState().getValue(HorizontalDirectionalBlock.FACING));
+        if (tapped) {
+            fluidInventory.addOutput(controller.formingDirection != null ? controller.formingDirection : getBlockState().getValue(HorizontalDirectionalBlock.FACING));
+            finishRecipe();
+        }
         else fluidInventory.removeOutputs(Direction.values());
     }
 
@@ -217,7 +226,6 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         super.startRecipe(recipeToWork);
         catalystRemaining = TickUtils.minecraftDaysToTicks(1) * itemInventory.getInputHandler().getStackInSlot(0).getCount();
         fermentationStartingTick = tick;
-        inputFluid = new AgeableAlcoholStack(fluidInventory.getFluidInTank());
         if (level instanceof ServerLevel serverLevel) {
             for (int i = 0; i < 5; i++) {
                 particleSpawnQueue.add(new FermentationParticleType.Options(FermentationParticleType.PARTICLE_COLOURS[0]));
@@ -228,9 +236,10 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
     @Override
     protected void onRecipeFinish(FermentationRecipe workingRecipe) {
         if (tapped) return;
-        if (inputFluid == null) return;
-        if (inputFluid.getFluidStack() == null) return;
-
+        if (fluidInventory.getFluidInTank() == null) return;
+        if (inputFluid == null) {
+            inputFluid = new AgeableAlcoholStack(fluidInventory.getFluidInTank());
+        }
         inputFluid.ageAlcohol(1);
 
         int age = inputFluid.getAge();

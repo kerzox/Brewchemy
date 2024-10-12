@@ -43,8 +43,6 @@ public class GenerateItemModels extends ItemModelProvider {
                 new ResourceLocation(Brewchemy.MODID, "block/millstone_side"),
                 new ResourceLocation(Brewchemy.MODID, "block/millstone_bottom"),
                 new ResourceLocation(Brewchemy.MODID, "block/millstone_top"));
-        withExistingParent("bench_seat_block", new ResourceLocation(Brewchemy.MODID, "bench_seat_block"));
-        withExistingParent("table_block", new ResourceLocation(Brewchemy.MODID, "table_block"));
 
     }
 

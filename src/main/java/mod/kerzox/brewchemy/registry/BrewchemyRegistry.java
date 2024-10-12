@@ -135,6 +135,7 @@ public class BrewchemyRegistry {
 
         public static final TagKey<Item> BLOCKS = ItemTags.create(new ResourceLocation("forge", "blocks"));
         public static final TagKey<Item> YEAST = ItemTags.create(new ResourceLocation("forge", "yeast"));
+        public static final TagKey<Item> MILLED_BARLEY = ItemTags.create(new ResourceLocation("forge", "dusts/barley"));
 
         public static void init() {
         }
@@ -314,14 +315,6 @@ public class BrewchemyRegistry {
                         .sound(SoundType.CROP)
                         .pushReaction(PushReaction.DESTROY)), true);
 
-        public static final makeBlock<RopeTiedPostBlock> ROPE_TIED_POST_BLOCK
-                = makeBlock.build("rope_tied_post_block",
-                RopeTiedPostBlock::new,
-                (BlockBehaviour.Properties.of()
-                        .mapColor(MapColor.WOOD)
-                        .sound(SoundType.WOOD)
-                        .pushReaction(PushReaction.DESTROY)), false);
-
         public static final makeBlock<MillingBlock> MILLING_BLOCK
                 = makeBlock.build("milling_block",
                 p -> new MillingBlock(BlockEntities.MILLING_BLOCK_ENTITY.getType(), p),
@@ -486,9 +479,6 @@ public class BrewchemyRegistry {
 
     public static class BlockEntities {
 
-        public static final makeBlockEntity<RopeTiedPostBlockEntity> ROPE_TIED_POST_BLOCK_ENTITY
-                = makeBlockEntity.build("rope_tied_post_block_entity", RopeTiedPostBlockEntity::new, Blocks.ROPE_TIED_POST_BLOCK);
-
         public static final makeBlockEntity<MillingBlockEntity> MILLING_BLOCK_ENTITY
                 = makeBlockEntity.build("milling_block_entity", MillingBlockEntity::new, Blocks.MILLING_BLOCK);
 
@@ -627,7 +617,6 @@ public class BrewchemyRegistry {
                 ALL_FLUIDS.put(name, tmakeFluid);
                 return tmakeFluid;
             }
-
 
             private RegistryObject<Fluid> makeSource(String name) {
                 this.fluid = FLUIDS.register(name, () -> new ForgeFlowingFluid.Source(this.properties));

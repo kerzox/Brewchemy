@@ -422,7 +422,7 @@ public class RenderingUtil {
                         RenderType.solid());
     }
 
-    public static void renderSolidBlockEntityNoAO(PoseStack pPoseStack, BakedModel model, BlockEntity pBlockEntity, MultiBufferSource pBufferSource, int pPackedLight) {
+    public static void renderModel(PoseStack pPoseStack, BakedModel model, MultiBufferSource pBufferSource, int pPackedLight) {
         Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(
                 pPoseStack.last(),
                 pBufferSource.getBuffer(RenderType.solid()),

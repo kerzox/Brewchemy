@@ -18,7 +18,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class GenerateItemTags extends ItemTagsProvider {
 
-
     public GenerateItemTags(PackOutput p_275343_,
                             CompletableFuture<HolderLookup.Provider> p_275729_,
                             CompletableFuture<TagsProvider.TagLookup<Block>> p_275322_,
@@ -37,6 +36,7 @@ public class GenerateItemTags extends ItemTagsProvider {
         this.tag(BrewchemyRegistry.Tags.YEAST).add(BrewchemyRegistry.Items.BREWERS_YEAST_ITEM.get(), BrewchemyRegistry.Items.LAGER_YEAST_ITEM.get(), BrewchemyRegistry.Items.WILD_YEAST_ITEM.get());
         forgeTag("hops", BrewchemyRegistry.Items.HOPS_ITEM.get());
         forgeTag("barley", BrewchemyRegistry.Items.BARLEY_ITEM.get());
+        this.tag(BrewchemyRegistry.Tags.MILLED_BARLEY).add(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get());
 
     }
 

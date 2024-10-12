@@ -90,7 +90,8 @@ public class Brewchemy
             event.accept(BrewchemyRegistry.Items.ROPE_ITEM.get());
             event.accept(BrewchemyRegistry.Blocks.CULTURE_JAR_BLOCK.get());
             event.accept(BrewchemyRegistry.Blocks.FERMENTATION_BARREL_BLOCK.get());
-            event.accept(BrewchemyRegistry.Blocks.BREWING_KETTLE_BLOCK.get());
+            event.accept(BrewchemyRegistry.Items.BARREL_TAP.get());
+            event.accept(BrewchemyRegistry.Blocks.BARLEY_CROP_BLOCK.get());
             event.accept(BrewchemyRegistry.Blocks.MILLING_BLOCK.get());
             event.accept(BrewchemyRegistry.Blocks.TABLE_BLOCK.get());
             event.accept(BrewchemyRegistry.Blocks.BENCH_SEAT_BLOCK.get());

@@ -3,7 +3,6 @@ package mod.kerzox.brewchemy.client;
 
 import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.render.baked.PintGlassBakedModel;
-import mod.kerzox.brewchemy.client.render.baked.RopeTiedPostBakedModel;
 import mod.kerzox.brewchemy.client.render.blockentity.CultureJarBlockEntityRenderer;
 import mod.kerzox.brewchemy.client.render.blockentity.FermentationBarrelBlockEntityRenderer;
 import mod.kerzox.brewchemy.client.render.blockentity.PintGlassBlockEntityRenderer;
@@ -79,6 +78,7 @@ public class ClientSetup {
         event.register(FermentationBarrelBlockEntityRenderer.SINGLE);
         event.register(FermentationBarrelBlockEntityRenderer.MULTIBLOCK);
         event.register(FermentationBarrelBlockEntityRenderer.TAP);
+        event.register(RopeEntityRenderer.KNOT);
     }
 
     @SubscribeEvent
@@ -92,19 +92,6 @@ public class ClientSetup {
 
     @SubscribeEvent
     public static void onModelBakeEvent(ModelEvent.ModifyBakingResult event) {
-        for (BlockState blockState : BrewchemyRegistry.Blocks.ROPE_TIED_POST_BLOCK.get().getStateDefinition().getPossibleStates()) {
-            ModelResourceLocation variantMRL = BlockModelShaper.stateToModelLocation(blockState);
-            BakedModel existingModel = event.getModels().get(variantMRL);
-            if (existingModel == null) {
-                System.out.println("Did not find the expected vanilla baked model(s) for blockCamouflage in registry");
-            } else if (existingModel instanceof RopeTiedPostBakedModel) {
-                System.out.println("Tried to replace CamouflagedBakedModel twice");
-            } else {
-                RopeTiedPostBakedModel customModel = new RopeTiedPostBakedModel(existingModel);
-                event.getModels().put(variantMRL, customModel);
-            }
-        }
-
         ModelResourceLocation itemModelResourceLocation = PintGlassBakedModel.modelResourceLocation;
         BakedModel existingModel = event.getModels().get(itemModelResourceLocation);
         if (existingModel == null) {

@@ -1,17 +1,12 @@
 package mod.kerzox.brewchemy.common.item;
 
 import mod.kerzox.brewchemy.common.blockentity.PintGlassBlockEntity;
-import mod.kerzox.brewchemy.common.blockentity.RopeTiedPostBlockEntity;
-import mod.kerzox.brewchemy.common.capabilities.drunk.IntoxicationManager;
 import mod.kerzox.brewchemy.common.capabilities.fluid.FluidInventoryItem;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemInventory;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemStackHandlerUtils;
-import mod.kerzox.brewchemy.common.event.TickUtils;
 import mod.kerzox.brewchemy.common.fluid.alcohol.AgeableAlcoholStack;
 import mod.kerzox.brewchemy.common.fluid.alcohol.AlcoholicFluid;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
-import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -23,18 +18,14 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

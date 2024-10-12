@@ -12,7 +12,9 @@ import mod.kerzox.brewchemy.common.fluid.alcohol.AgeableAlcoholStack;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +32,11 @@ public class GenerateRecipes extends RecipeProvider {
 
     @Override
     protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
+        SimpleCookingRecipeBuilder.smoking(
+                Ingredient.of(BrewchemyRegistry.Tags.MILLED_BARLEY), RecipeCategory.FOOD,
+                BrewchemyRegistry.Items.ROASTED_BARLEY_ITEM.get(),
+                2f, 20 * 10).unlockedBy("has_milled_barley", has(BrewchemyRegistry.Tags.MILLED_BARLEY)).save(consumer,
+                new ResourceLocation(Brewchemy.MODID, "roasted_barley_from_milled_barley"));
         new MillingRecipe.RecipeBuilder(new ResourceLocation(Brewchemy.MODID, "milled_barley_from_barley"),
                 new ItemStack(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get()),
                 SizeSpecificIngredient.of(BrewchemyRegistry.Items.BARLEY_ITEM.get(), 1), 180)
@@ -100,6 +107,27 @@ public class GenerateRecipes extends RecipeProvider {
                 new FluidStack(BrewchemyRegistry.Fluids.BEER_ALE.getFluid().get(), 1),
                 SizeSpecificIngredient.of(BrewchemyRegistry.Items.BREWERS_YEAST_ITEM.get(), 1),
                 FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.BEER_ALE.getFluid().get(), 1)),
+                1).build(consumer);
+
+        new FermentationRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "fermenting_pale_ale"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER_PALE_ALE.getFluid().get(), 1),
+                SizeSpecificIngredient.of(BrewchemyRegistry.Items.BREWERS_YEAST_ITEM.get(), 1),
+                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.BEER_PALE_ALE.getFluid().get(), 1)),
+                1).build(consumer);
+
+        new FermentationRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "fermenting_lager"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER_LAGER.getFluid().get(), 1),
+                SizeSpecificIngredient.of(BrewchemyRegistry.Items.LAGER_YEAST_ITEM.get(), 1),
+                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.BEER_LAGER.getFluid().get(), 1)),
+                1).build(consumer);
+
+        new FermentationRecipe.RecipeBuilder(
+                new ResourceLocation(Brewchemy.MODID, "fermenting_stout"),
+                new FluidStack(BrewchemyRegistry.Fluids.BEER_STOUT.getFluid().get(), 1),
+                SizeSpecificIngredient.of(BrewchemyRegistry.Items.BREWERS_YEAST_ITEM.get(), 1),
+                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.BEER_STOUT.getFluid().get(), 1)),
                 1).build(consumer);
     }
 

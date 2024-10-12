@@ -1,0 +1,19 @@
+{
+  "type": "brewchemy:fermentation",
+  "duration": 1,
+  "group": "brewchemy",
+  "recipe_ingredients": {
+    "fluid_ingredient": {
+      "amount": 1,
+      "fluid": "brewchemy:beer_stout"
+    },
+    "ingredient": {
+      "item": "brewchemy:brewers_yeast_item",
+      "size": 1
+    }
+  },
+  "result": {
+    "amount": 1,
+    "fluid": "brewchemy:beer_stout"
+  }
+}
