@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "brewchemy",
+  "key": {
+    "C": {
+      "tag": "forge:ingots/copper"
+    }
+  },
+  "pattern": [
+    " C ",
+    "CCC",
+    "   "
+  ],
+  "result": {
+    "item": "brewchemy:barrel_tap_item"
+  },
+  "show_notification": true
+}

@@ -4,6 +4,7 @@ import mod.kerzox.brewchemy.client.sounds.LoopingSoundInstance;
 import mod.kerzox.brewchemy.common.block.base.IClientTickable;
 import mod.kerzox.brewchemy.common.blockentity.base.RecipeBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.ICompoundSerializer;
+import mod.kerzox.brewchemy.common.capabilities.fluid.FluidInventoryItem;
 import mod.kerzox.brewchemy.common.capabilities.fluid.SingleFluidInventory;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemInventory;
 import mod.kerzox.brewchemy.common.capabilities.item.ItemStackHandlerUtils;
@@ -122,6 +123,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
                         this.currentRecipe = findValidRecipe();
                     }
 
+                    this.fluidInventory.setCapacity(16000 * 8);
                 }
             }
             else {
@@ -137,7 +139,11 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
             super.tick();
             if (!particleSpawnQueue.isEmpty()) {
                 if (level instanceof ServerLevel serverLevel) {
-                    serverLevel.sendParticles(particleSpawnQueue.poll(), getBlockPos().getX() + 0.5f, getBlockPos().getY() + 0.5d, getBlockPos().getZ() + 0.5f, 12,.5d, .25d, .5d, 0);
+                    ParticleOptions part = particleSpawnQueue.poll();
+                    for (FermentationBarrelBlockEntity barrel : controller.barrels) {
+                        BlockPos pos = barrel.getBlockPos();
+                        serverLevel.sendParticles(part, pos.getX() + 0.5f, pos.getY() + 0.5d, pos.getZ() + 0.5f, 12,.5d, .25d, .5d, 0);
+                    }
                 }
             }
         }
@@ -145,9 +151,22 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
 
     @Override
     public void clientTick(SoundHandler soundHandler) {
-        if (isWorking()) {
+        if (isWorking() && catalystRemaining != 0) {
             soundHandler.play(LoopingSoundInstance.create(worldPosition, BrewchemyRegistry.Sounds.FERMENTING_BUBBLES.get(), SoundSource.BLOCKS, 0.5f));
         }
+    }
+
+    @Override
+    public void loadFromItem(CompoundTag fromBlockEntity, CompoundTag copyOfBlockEntityTag, CompoundTag mergedFromItemStack, ItemStack itemStack) {
+
+        // we have placed this onto a block that is formed
+        ItemInventory tempItem = ItemInventory.of(1, 1).addInput(Direction.values());
+        SingleFluidInventory.Simple tempFluidInventory = (SingleFluidInventory.Simple) SingleFluidInventory.simple(16000).addInput(Direction.values());
+        deserializeCapabilityHolders(mergedFromItemStack, List.of(tempItem, tempFluidInventory));
+
+        getCapability(ForgeCapabilities.ITEM_HANDLER).map(h->h.insertItem(0, tempItem.getStackInSlot(0), false));
+        getCapability(ForgeCapabilities.FLUID_HANDLER).map(h->h.fill(tempFluidInventory.getFluidInTank(), IFluidHandler.FluidAction.EXECUTE));
+
     }
 
     @Override
@@ -192,12 +211,12 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
 
                 SingleFluidInventory.Simple simpleFluidInv = (SingleFluidInventory.Simple) getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().get();
 
-                pPlayer.sendSystemMessage(Component.literal("Capacity: " + simpleFluidInv.getTankCapacity(0)));
+/*                pPlayer.sendSystemMessage(Component.literal("Capacity: " + simpleFluidInv.getTankCapacity(0)));
                 pPlayer.sendSystemMessage(Component.literal("Fluid Stored: " + simpleFluidInv.getFluidInTank().getAmount() + " ").append(simpleFluidInv.getFluidInTank().getDisplayName()));
 
                 if (!simpleFluidInv.getFluidInTank().isEmpty()) {
                     pPlayer.sendSystemMessage(Component.literal("Age: " + new AgeableAlcoholStack(simpleFluidInv.getFluidInTank()).getAge()));
-                }
+                }*/
 
                 if (held.is(BrewchemyRegistry.Items.BARREL_TAP.get()) && !controller.masterBlock.tapped) {
                     controller.masterBlock.setTapped(true);
@@ -208,6 +227,16 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
                     controller.masterBlock.setTapped(false);
                     pPlayer.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BrewchemyRegistry.Items.BARREL_TAP.get()));
                     controller.sync();
+                }
+                else if (held.isEmpty()) {
+                    if (level instanceof ServerLevel serverLevel) {
+                        int day = new AgeableAlcoholStack(simpleFluidInv.getFluidInTank(0)).getAge() / TickUtils.minecraftDaysToTicks(1);
+                        int[] colours = FermentationParticleType.PARTICLE_COLOURS;
+                        int color = (day >= colours.length) ? 0xFF542d18 : colours[day];
+                        for (int i = 0; i < 1; i++) {
+                            controller.masterBlock.particleSpawnQueue.add(new FermentationParticleType.Options(FermentationParticleType.PARTICLE_COLOURS[day]));
+                        }
+                    }
                 }
 
             }
@@ -237,9 +266,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
     protected void onRecipeFinish(FermentationRecipe workingRecipe) {
         if (tapped) return;
         if (fluidInventory.getFluidInTank() == null) return;
-        if (inputFluid == null) {
-            inputFluid = new AgeableAlcoholStack(fluidInventory.getFluidInTank());
-        }
+        inputFluid = new AgeableAlcoholStack(fluidInventory.getFluidInTank());
         inputFluid.ageAlcohol(1);
 
         int age = inputFluid.getAge();
@@ -312,6 +339,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
 
     public void setController(Controller controller) {
         this.controller = controller;
+        finishRecipe();
     }
 
     @Override
@@ -417,7 +445,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
 
             HashSet<FermentationBarrelBlockEntity> temp = new HashSet<>();
 
-            List<FluidStack> toEmpty = new ArrayList<>();
+            List<FluidStack> fluidsToEmpty = new ArrayList<>();
             FluidStack fluidInTank = masterBlock.fluidInventory.getFluidInTank();
 
             for (int x = minX; x <= maxX; x++) {
@@ -430,6 +458,8 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
 
                             // if our barrel connecting has a fluid we need to either merge it into the master or fail the validation if conflicts
                             FluidStack conflictingStack = block.fluidInventory.getFluidInTank();
+
+                            ItemStack conflictingCatalyst = block.itemInventory.getStackInSlot(0);
 
                             if (!conflictingStack.isEmpty()) {
 
@@ -447,9 +477,11 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
                                     fluidInTank.grow(conflictingStack.copy().getAmount());
                                 }
 
-                                toEmpty.add(conflictingStack);
+                                fluidsToEmpty.add(conflictingStack);
 
                             }
+
+                            if (!conflictingCatalyst.isEmpty()) return false;
 
                             // add to our temp
                             temp.add(block);
@@ -458,18 +490,17 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
                 }
             }
 
-            this.masterBlock.fluidInventory.setCapacity(16000 * 8);
-
-            for (FluidStack stack : toEmpty) {
-                stack.shrink(stack.getAmount());
-            }
-
-            masterBlock.fluidInventory.fill(fluidInTank, IFluidHandler.FluidAction.EXECUTE);
-
             // set each entity to this controller
             for (FermentationBarrelBlockEntity entity : temp) {
                 entity.setController(this);
             }
+
+            this.masterBlock.fluidInventory.setCapacity(16000 * 8);
+
+            for (FluidStack stack : fluidsToEmpty) {
+                stack.shrink(stack.getAmount());
+            }
+            masterBlock.fluidInventory.fill(fluidInTank, IFluidHandler.FluidAction.EXECUTE);
 
             // add our barrels for easy access
             this.barrels = new ArrayList<>(temp);
@@ -481,19 +512,23 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
             this.formed = false;
 
             FluidStack fluid = masterBlock.fluidInventory.getFluidInTank().copy();
-            if (!fluid.isEmpty()) masterBlock.fluidInventory.getFluidInTank().shrink(fluid.getAmount());
 
             for (FermentationBarrelBlockEntity barrel : barrels) {
                 if (block == barrel) continue;
                 barrel.setController(new Controller(barrel));
                 barrel.fluidInventory.setCapacity(16000);
-                FluidStack copied = new FluidStack(fluid.getFluid(), Math.min(fluid.getAmount(), 16000));
-                if (!copied.isEmpty()) {
-                    barrel.fluidInventory.fill(copied, IFluidHandler.FluidAction.EXECUTE);
-                    fluid.shrink(copied.getAmount());
+                if (!fluid.isEmpty() && fluid.getAmount() > 16000) {
+                    FluidStack copied = new FluidStack(fluid.getFluid(), Math.min(fluid.getAmount(), 16000));
+                    if (!copied.isEmpty()) {
+                        barrel.fluidInventory.fill(copied, IFluidHandler.FluidAction.EXECUTE);
+                        fluid.shrink(copied.getAmount());
+                    }
                 }
                 barrel.syncBlockEntity();
             }
+
+            masterBlock.fluidInventory.setFluidStack(fluid);
+
         }
 
         public boolean isFormed() {

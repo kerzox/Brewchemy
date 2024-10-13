@@ -76,8 +76,6 @@ public class CombinedFluidInv implements IFluidHandler {
         return handler.getFluidInTank(tank);
     }
 
-
-
     @Override
     public int getTankCapacity(int tank) {
         int index = getIndexForSlot(tank);

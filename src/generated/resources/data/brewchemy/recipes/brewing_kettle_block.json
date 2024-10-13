@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "brewchemy",
+  "key": {
+    "C": {
+      "tag": "forge:ingots/copper"
+    },
+    "W": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "CCC",
+    "C C",
+    "WCW"
+  ],
+  "result": {
+    "item": "brewchemy:brewing_kettle_block"
+  },
+  "show_notification": true
+}

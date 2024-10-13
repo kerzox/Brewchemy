@@ -90,6 +90,8 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
         return LazyOptional.empty();
     }
 
+
+
     @Override
     public void invalidate() {
 
@@ -103,6 +105,14 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
         tag.put("io", serializeInputAndOutput());
         return tag;
     }
+
+//    public CompoundTag serializeIgnoreCapacity() {
+//        CompoundTag tag = new CompoundTag();
+//        tag.put("input", this.inputWrapper.serializeIgnoreCapacity());
+//        tag.put("output", this.outputWrapper.serializeIgnoreCapacity());
+//        tag.put("io", serializeInputAndOutput());
+//        return tag;
+//    }
 
     @Override
     public void deserialize(CompoundTag tag) {
@@ -174,6 +184,9 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
             return input ? tank.fill(resource, action) : 0;
         }
 
+        public CompoundTag serializeIgnoreCapacity() {
+            return tank.serialize();
+        }
 
         @Override
         public CompoundTag serialize() {
@@ -191,6 +204,10 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
 
         public void setCapacity(int tank, int amount) {
             this.tank.setCapacity(tank, amount);
+        }
+
+        public void setFluidInTank(int tank, FluidStack fluid) {
+            this.tank.setFluidInTank(tank, fluid);
         }
     }
 }

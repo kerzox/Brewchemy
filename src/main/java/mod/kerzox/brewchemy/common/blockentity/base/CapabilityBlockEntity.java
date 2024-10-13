@@ -53,17 +53,25 @@ public abstract class CapabilityBlockEntity extends SyncedBlockEntity {
         ListTag list = pkt.getTag().getList(MACHINE_CAPABILITY_LIST_TAG, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag tag = list.getCompound(i);
-            if (capabilities.get(i) instanceof ICompoundSerializer serializer) serializer.deserialize(tag);
+            if (capabilities.get(i) instanceof ICompoundSerializer serializer) {
+                serializer.deserialize(tag);
+            }
         }
     }
 
     @Override
     public void load(CompoundTag pTag) {
         super.load(pTag);
+        deserializeCapabilityHolders(pTag, this.capabilities);
+    }
+
+    protected void deserializeCapabilityHolders(CompoundTag pTag, List<CapabilityHolder<?>> capabilities) {
         ListTag list = pTag.getList(MACHINE_CAPABILITY_LIST_TAG, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag tag = list.getCompound(i);
-            if (capabilities.get(i) instanceof ICompoundSerializer serializer) serializer.deserialize(tag);
+            if (capabilities.get(i) instanceof ICompoundSerializer serializer) {
+                serializer.deserialize(tag);
+            }
         }
     }
 

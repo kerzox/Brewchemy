@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -112,5 +113,9 @@ public class SyncedBlockEntity extends BlockEntity {
 
     public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
         return false;
+    }
+
+    public void loadFromItem(CompoundTag fromBlockEntity, CompoundTag copyOfBlockEntityTag, CompoundTag mergedFromItemStack, ItemStack itemStack) {
+        load(mergedFromItemStack);
     }
 }

@@ -80,6 +80,10 @@ public class SingleFluidInventory extends MultifluidInventory {
         public void setCapacity(int amount) {
             outputWrapper.setCapacity(0, amount);
         }
+
+        public void setFluidStack(FluidStack fluid) {
+            outputWrapper.setFluidInTank(0, fluid);
+        }
     }
 
 }

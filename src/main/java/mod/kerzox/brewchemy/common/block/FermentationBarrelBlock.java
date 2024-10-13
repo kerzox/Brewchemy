@@ -31,9 +31,25 @@ public class FermentationBarrelBlock extends BrewchemyEntityBlock<FermentationBa
                                           BlockPos blockPos, Direction direction) {
 
         if (pLevel.getBlockEntity(blockPos) instanceof FermentationBarrelBlockEntity block) {
-            if (block.isTapped()) {
-                FluidActionResult fluidActionResult = FluidUtil.getFluidHandler(pLevel, blockPos, direction).map(handler ->
-                        FluidUtil.tryFillContainerAndStow(
+            if (!itemInHand.isEmpty()) {
+                if (block.getController().getMasterBlock().isTapped()) {
+                    FluidActionResult fluidActionResult = FluidUtil.getFluidHandler(pLevel, blockPos, direction).map(handler ->
+                            FluidUtil.tryFillContainerAndStow(
+                                    itemInHand,
+                                    handler,
+                                    pPlayer.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve().get(),
+                                    Integer.MAX_VALUE,
+                                    pPlayer,
+                                    true)).get();
+
+                    if (fluidActionResult.isSuccess()) {
+                        pPlayer.setItemInHand(pHand, fluidActionResult.getResult());
+                    }
+
+                    return true;
+                }
+                FluidActionResult fluidActionResult =  FluidUtil.getFluidHandler(pLevel, blockPos, direction).map(handler ->
+                        FluidUtil.tryEmptyContainerAndStow(
                                 itemInHand,
                                 handler,
                                 pPlayer.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve().get(),
@@ -47,20 +63,6 @@ public class FermentationBarrelBlock extends BrewchemyEntityBlock<FermentationBa
 
                 return true;
             }
-            FluidActionResult fluidActionResult =  FluidUtil.getFluidHandler(pLevel, blockPos, direction).map(handler ->
-                    FluidUtil.tryEmptyContainerAndStow(
-                            itemInHand,
-                            handler,
-                            pPlayer.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve().get(),
-                            Integer.MAX_VALUE,
-                            pPlayer,
-                            true)).get();
-
-            if (fluidActionResult.isSuccess()) {
-                pPlayer.setItemInHand(pHand, fluidActionResult.getResult());
-            }
-
-            return true;
         }
         return false;
     }

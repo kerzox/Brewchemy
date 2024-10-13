@@ -274,6 +274,10 @@ public class BrewchemyRegistry {
                 false,
                 "pint_item", () -> new PintItem(new Item.Properties().stacksTo(1)));
 
+        public static final RegistryObject<Item> FERMENTATION_BARREL_ITEM = register(
+                false,
+                "fermentation_barrel_item", () -> new BrewchemyBlockItem(BrewchemyRegistry.Blocks.FERMENTATION_BARREL_BLOCK.get(), new Item.Properties()));
+
         public static void init() {
 
         }
@@ -407,7 +411,7 @@ public class BrewchemyRegistry {
                 (BlockBehaviour.Properties.of()
                         .mapColor(MapColor.WOOD)
                         .sound(SoundType.WOOD)
-                        .noOcclusion()), true);
+                        .noOcclusion()), false);
 
         public static final makeBlock<BenchSeatBlock> BENCH_SEAT_BLOCK
                 = makeBlock.build("bench_seat_block",
@@ -444,7 +448,7 @@ public class BrewchemyRegistry {
             public static <T extends Block> makeBlock<T> build(String name, Function<BlockBehaviour.Properties, T> block, BlockBehaviour.Properties prop, boolean asItem) {
                 RegistryObject<T> ret = BLOCKS.register(name, () -> block.apply(prop));
                 if (asItem) {
-                    RegistryObject<Item> item = ITEMS.register(name, () -> new BlockItem(ret.get(), new Item.Properties()));
+                    RegistryObject<Item> item = ITEMS.register(name, () -> new BrewchemyBlockItem(ret.get(), new Item.Properties()));
                     Items.ALL_ITEMS.put(name, item);
                 }
                 ALL_BLOCKS.put(name, (RegistryObject<Block>) ret);

@@ -62,8 +62,9 @@ public class GenerateLootTables extends VanillaBlockLoot {
                 BrewchemyRegistry.BlockEntities.CULTURE_JAR_BLOCK_ENTITY.get(),
                 CapabilityBlockEntity.MACHINE_CAPABILITY_LIST_TAG
         );
-        createStandardTable(
+        createStandardTableWithOtherDrop(
                 BrewchemyRegistry.Blocks.FERMENTATION_BARREL_BLOCK.get(),
+                BrewchemyRegistry.Items.FERMENTATION_BARREL_ITEM.get(),
                 BrewchemyRegistry.BlockEntities.FERMENTATION_BARREL_BLOCK_ENTITY.get(),
                 CapabilityBlockEntity.MACHINE_CAPABILITY_LIST_TAG
         );

@@ -163,7 +163,18 @@ public class MultifluidTank implements IFluidHandler, ICompoundSerializer {
         ListTag list = new ListTag();
         for (FluidTank tank : this.fluidTanks) {
             CompoundTag tankTag = new CompoundTag();
-            tankTag.putInt("capacity", tank.getCapacity());
+            //tankTag.putInt("capacity", tank.getCapacity());
+            list.add(tank.writeToNBT(tankTag));
+        }
+        nbt.put("tanks", list);
+        return nbt;
+    }
+
+    public CompoundTag serializeIgnoreCapacity() {
+        CompoundTag nbt = new CompoundTag();
+        ListTag list = new ListTag();
+        for (FluidTank tank : this.fluidTanks) {
+            CompoundTag tankTag = new CompoundTag();
             list.add(tank.writeToNBT(tankTag));
         }
         nbt.put("tanks", list);
@@ -176,7 +187,7 @@ public class MultifluidTank implements IFluidHandler, ICompoundSerializer {
             ListTag list = tag.getList("tanks", Tag.TAG_COMPOUND);
             for (int i = 0; i < list.size(); i++) {
                 this.fluidTanks[i].readFromNBT(list.getCompound(i));
-                this.fluidTanks[i].setCapacity(list.getCompound(i).getInt("capacity"));
+                if (list.getCompound(i).contains("capacity")) this.fluidTanks[i].setCapacity(list.getCompound(i).getInt("capacity"));
             }
         }
     }
@@ -191,4 +202,7 @@ public class MultifluidTank implements IFluidHandler, ICompoundSerializer {
     }
 
 
+    public void setFluidInTank(int tank, FluidStack fluid) {
+        this.fluidTanks[tank].setFluid(fluid);
+    }
 }

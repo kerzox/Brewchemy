@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "brewchemy",
+  "key": {
+    "i": {
+      "tag": "forge:ingots/copper"
+    },
+    "p": {
+      "tag": "minecraft:planks"
+    },
+    "s": {
+      "tag": "minecraft:wooden_slabs"
+    }
+  },
+  "pattern": [
+    "psp",
+    "pip",
+    "psp"
+  ],
+  "result": {
+    "item": "brewchemy:fermentation_barrel_item"
+  },
+  "show_notification": true
+}

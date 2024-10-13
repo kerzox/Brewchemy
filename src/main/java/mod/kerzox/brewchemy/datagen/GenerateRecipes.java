@@ -10,15 +10,19 @@ import mod.kerzox.brewchemy.common.crafting.recipe.MillingRecipe;
 import mod.kerzox.brewchemy.common.fluid.BrewchemyFluid;
 import mod.kerzox.brewchemy.common.fluid.alcohol.AgeableAlcoholStack;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
+import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
+import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.fluids.FluidStack;
@@ -32,6 +36,94 @@ public class GenerateRecipes extends RecipeProvider {
 
     @Override
     protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
+
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, BrewchemyRegistry.Items.ROPE_ITEM.get(), 2)
+                .requires(Tags.Items.STRING)
+                .requires(Tags.Items.STRING)
+                .requires(Tags.Items.STRING)
+                .group("brewchemy")
+                .unlockedBy("has_string", has(Tags.Items.STRING))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BREWING, BrewchemyRegistry.Items.FERMENTATION_BARREL_ITEM.get())
+                .pattern("psp")
+                .pattern("pip")
+                .pattern("psp")
+                .define('p', ItemTags.PLANKS)
+                .define('i', Tags.Items.INGOTS_COPPER)
+                .define('s', ItemTags.WOODEN_SLABS)
+                .group("brewchemy")
+                .unlockedBy("has_planks", has(ItemTags.PLANKS))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, BrewchemyRegistry.Blocks.TABLE_BLOCK.get())
+                .pattern("www")
+                .pattern("s s")
+                .pattern("s s")
+                .define('w', ItemTags.WOODEN_SLABS)
+                .define('s', Tags.Items.RODS_WOODEN)
+                .group("brewchemy")
+                .unlockedBy("has_sticks", has(Tags.Items.RODS))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, BrewchemyRegistry.Blocks.BENCH_SEAT_BLOCK.get())
+                .pattern("   ")
+                .pattern(" w ")
+                .pattern("s s")
+                .define('s', Tags.Items.RODS_WOODEN)
+                .define('w', ItemTags.WOODEN_SLABS)
+                .group("brewchemy")
+                .unlockedBy("has_sticks", has(Tags.Items.RODS))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BrewchemyRegistry.Blocks.MILLING_BLOCK.get())
+                .pattern("sss")
+                .pattern("wiw")
+                .pattern("sss")
+                .define('w', ItemTags.PLANKS)
+                .define('i', Tags.Items.INGOTS_IRON)
+                .define('s', Blocks.SMOOTH_STONE_SLAB)
+                .group("brewchemy")
+                .unlockedBy("has_iron", has(Tags.Items.INGOTS_IRON))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BREWING, BrewchemyRegistry.Blocks.CULTURE_JAR_BLOCK.get())
+                .define('G', Tags.Items.GLASS)
+                .define('S', ItemTags.WOODEN_SLABS)
+                .pattern(" S ")
+                .pattern("G G")
+                .pattern("GGG")
+                .group("brewchemy")
+                .unlockedBy("has_glass", has(Tags.Items.GLASS)).save(consumer);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BREWING, BrewchemyRegistry.Blocks.BREWING_KETTLE_BLOCK.get())
+                .pattern("CCC")
+                .pattern("C C")
+                .pattern("WCW")
+                .define('C', Tags.Items.INGOTS_COPPER)
+                .define('W', ItemTags.PLANKS)
+                .group("brewchemy")
+                .unlockedBy("has_copper", has(Tags.Items.INGOTS_COPPER))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BREWING, BrewchemyRegistry.Items.BARREL_TAP.get())
+                .pattern(" C ")
+                .pattern("CCC")
+                .pattern("   ")
+                .define('C', Tags.Items.INGOTS_COPPER)
+                .group("brewchemy")
+                .unlockedBy("has_copper", has(Tags.Items.INGOTS_COPPER))
+                .save(consumer);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BREWING, BrewchemyRegistry.Items.PINT_ITEM.get())
+                .pattern("   ")
+                .pattern("g g")
+                .pattern("ggg")
+                .define('g', Tags.Items.GLASS)
+                .group("brewchemy")
+                .unlockedBy("has_glass", has(Tags.Items.GLASS))
+                .save(consumer);
+
         SimpleCookingRecipeBuilder.smoking(
                 Ingredient.of(BrewchemyRegistry.Tags.MILLED_BARLEY), RecipeCategory.FOOD,
                 BrewchemyRegistry.Items.ROASTED_BARLEY_ITEM.get(),

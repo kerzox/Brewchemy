@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "brewchemy",
+  "key": {
+    "i": {
+      "tag": "forge:ingots/iron"
+    },
+    "s": {
+      "item": "minecraft:smooth_stone_slab"
+    },
+    "w": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "sss",
+    "wiw",
+    "sss"
+  ],
+  "result": {
+    "item": "brewchemy:milling_block"
+  },
+  "show_notification": true
+}

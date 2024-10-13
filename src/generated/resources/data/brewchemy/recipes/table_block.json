@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "brewchemy",
+  "key": {
+    "s": {
+      "tag": "forge:rods/wooden"
+    },
+    "w": {
+      "tag": "minecraft:wooden_slabs"
+    }
+  },
+  "pattern": [
+    "www",
+    "s s",
+    "s s"
+  ],
+  "result": {
+    "item": "brewchemy:table_block"
+  },
+  "show_notification": true
+}

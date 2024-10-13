@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "brewchemy",
+  "key": {
+    "g": {
+      "tag": "forge:glass"
+    }
+  },
+  "pattern": [
+    "   ",
+    "g g",
+    "ggg"
+  ],
+  "result": {
+    "item": "brewchemy:pint_item"
+  },
+  "show_notification": true
+}

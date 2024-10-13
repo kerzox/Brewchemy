@@ -33,7 +33,7 @@
               "function": "minecraft:set_contents"
             }
           ],
-          "name": "brewchemy:fermentation_barrel_block"
+          "name": "brewchemy:fermentation_barrel_item"
         }
       ],
       "rolls": 1.0
