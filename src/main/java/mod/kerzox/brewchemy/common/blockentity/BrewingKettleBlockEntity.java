@@ -100,7 +100,7 @@ public class BrewingKettleBlockEntity extends RecipeBlockEntity<BrewingRecipe> i
 
     @Override
     public RecipeInventory getRecipeInventory() {
-        return new RecipeInventory(itemHandler, fluidHandler);
+        return new RecipeInventory(itemHandler, fluidHandler, (r) -> canProgress((BrewingRecipe) r));
     }
 
     @Override

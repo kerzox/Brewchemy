@@ -68,6 +68,8 @@ public class BrewingRecipe extends AbstractFluidRecipe<RecipeInventory> {
         this.ingredients.forEach(i -> matching.put(i, false));
         this.fluidIngredients.forEach(i -> matchingFluids.put(i, false));
 
+        if (!pContainer.getValidator().isValid(this)) return false;
+
         if (!pContainer.canStorageFluid()) throw new IllegalStateException("You can't have recipe inventory for this recipe without fluid");
 
         getFluidIngredients().forEach(((ingredient) -> {

@@ -11,9 +11,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 public class CultureJarBlockEntity extends RecipeBlockEntity<CultureJarRecipe> {
 
@@ -23,6 +28,16 @@ public class CultureJarBlockEntity extends RecipeBlockEntity<CultureJarRecipe> {
     public CultureJarBlockEntity(BlockPos pos, BlockState state) {
         super(BrewchemyRegistry.BlockEntities.CULTURE_JAR_BLOCK_ENTITY.get(), BrewchemyRegistry.Recipes.CULTURE_JAR_RECIPE.get(), pos, state);
         addCapabilities(itemHandler, fluidHandler);
+    }
+
+    @Override
+    public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
+
+        if (!pLevel.isClientSide && pHand == InteractionHand.MAIN_HAND) {
+            ItemHandlerHelper.giveItemToPlayer(pPlayer, itemHandler.getOutputHandler().internalExtractItem(0, 1, false));
+        }
+
+        return super.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit);
     }
 
     @Override

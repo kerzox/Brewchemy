@@ -88,6 +88,7 @@ public class Brewchemy
             event.accept(BrewchemyRegistry.Items.WILD_YEAST_ITEM.get());
             event.accept(BrewchemyRegistry.Items.LAGER_YEAST_ITEM.get());
             event.accept(BrewchemyRegistry.Items.ROPE_ITEM.get());
+            event.accept(BrewchemyRegistry.Blocks.BREWING_KETTLE_BLOCK.get());
             event.accept(BrewchemyRegistry.Blocks.CULTURE_JAR_BLOCK.get());
             event.accept(BrewchemyRegistry.Blocks.FERMENTATION_BARREL_BLOCK.get());
             event.accept(BrewchemyRegistry.Items.BARREL_TAP.get());
