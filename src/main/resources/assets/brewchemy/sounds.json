@@ -4,5 +4,17 @@
       "brewchemy:bubbling"
     ],
     "subtitle": "sound_event.brewchemy.bubbling"
+  },
+  "boiling_loop": {
+    "sounds": [
+      "brewchemy:boiling_loop"
+    ],
+    "subtitle": "sound_event.brewchemy.boiling_loop"
+  },
+  "ding": {
+    "sounds": [
+      "brewchemy:ding"
+    ],
+    "subtitle": "sound_event.brewchemy.ding"
   }
 }

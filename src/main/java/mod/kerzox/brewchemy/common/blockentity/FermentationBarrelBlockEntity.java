@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.common.blockentity;
 
+import mod.kerzox.brewchemy.client.sounds.BlockEntitySoundInstance;
 import mod.kerzox.brewchemy.client.sounds.LoopingSoundInstance;
 import mod.kerzox.brewchemy.common.block.base.IClientTickable;
 import mod.kerzox.brewchemy.common.blockentity.base.RecipeBlockEntity;
@@ -39,6 +40,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +55,6 @@ import java.util.*;
  */
 
 /*
-    TODO
     The user is blind to the fermentation process they will not have any clue on how far it is besides the time they put it in.
 
     Opting to provide the client with a visual confirmation of each stage of the process
@@ -82,6 +83,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
 
     private int fermentationStartingTick = 0;
     private int catalystRemaining = 0;
+    private int workingCatalyst;
 
     private FermentationState state = FermentationState.NONE;
     private AgeableAlcoholStack inputFluid;
@@ -149,10 +151,13 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         }
     }
 
+
     @Override
     public void clientTick(SoundHandler soundHandler) {
-        if (isWorking() && catalystRemaining != 0) {
-            soundHandler.play(LoopingSoundInstance.create(worldPosition, BrewchemyRegistry.Sounds.FERMENTING_BUBBLES.get(), SoundSource.BLOCKS, 0.5f));
+        if (isWorking() && catalystRemaining != 0 && !isTapped()) {
+            soundHandler.play(BlockEntitySoundInstance.from(this, BrewchemyRegistry.Sounds.FERMENTING_BUBBLES.get(), 0.8f));
+        } else {
+            SoundHandler.removeSoundAt(worldPosition);
         }
     }
 
@@ -208,41 +213,41 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         if (!pLevel.isClientSide) {
             ItemStack held = pPlayer.getItemInHand(pHand);
             if (pHand == InteractionHand.MAIN_HAND) {
-
                 SingleFluidInventory.Simple simpleFluidInv = (SingleFluidInventory.Simple) getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().get();
-
-/*                pPlayer.sendSystemMessage(Component.literal("Capacity: " + simpleFluidInv.getTankCapacity(0)));
-                pPlayer.sendSystemMessage(Component.literal("Fluid Stored: " + simpleFluidInv.getFluidInTank().getAmount() + " ").append(simpleFluidInv.getFluidInTank().getDisplayName()));
-
-                if (!simpleFluidInv.getFluidInTank().isEmpty()) {
-                    pPlayer.sendSystemMessage(Component.literal("Age: " + new AgeableAlcoholStack(simpleFluidInv.getFluidInTank()).getAge()));
-                }*/
-
-                if (held.is(BrewchemyRegistry.Items.BARREL_TAP.get()) && !controller.masterBlock.tapped) {
-                    controller.masterBlock.setTapped(true);
-                    held.shrink(1);
-                    controller.sync();
-                }
-                else if (held.isEmpty() && pPlayer.isShiftKeyDown() && controller.masterBlock.tapped) {
-                    controller.masterBlock.setTapped(false);
-                    pPlayer.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BrewchemyRegistry.Items.BARREL_TAP.get()));
-                    controller.sync();
-                }
-                else if (held.isEmpty()) {
-                    if (level instanceof ServerLevel serverLevel) {
-                        int day = new AgeableAlcoholStack(simpleFluidInv.getFluidInTank(0)).getAge() / TickUtils.minecraftDaysToTicks(1);
-                        int[] colours = FermentationParticleType.PARTICLE_COLOURS;
-                        int color = (day >= colours.length) ? 0xFF542d18 : colours[day];
-                        for (int i = 0; i < 1; i++) {
-                            controller.masterBlock.particleSpawnQueue.add(new FermentationParticleType.Options(FermentationParticleType.PARTICLE_COLOURS[day]));
+                if (held.isEmpty()) {
+                    if (pPlayer.isShiftKeyDown() && controller.masterBlock.tapped) {
+                        controller.masterBlock.setTapped(false);
+                        pPlayer.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(BrewchemyRegistry.Items.BARREL_TAP.get()));
+                        controller.sync();
+                    }
+                    else if (!itemInventory.getStackInSlot(0).isEmpty() && !this.isWorking()) {
+                        ItemStack itemStack = itemInventory.getStackInSlot(0);
+                        if (!itemStack.isEmpty()) {
+                            ItemHandlerHelper.giveItemToPlayer(pPlayer,
+                                    itemInventory.extractItem(0, itemStack.getCount(), false));
                         }
+                    }
+                    else if (!simpleFluidInv.getFluidInTank().isEmpty()) {
+                        if (level instanceof ServerLevel serverLevel) {
+                            int day = new AgeableAlcoholStack(simpleFluidInv.getFluidInTank(0)).getAge() / TickUtils.minecraftDaysToTicks(1);
+                            int[] colours = FermentationParticleType.PARTICLE_COLOURS;
+                            int color = (day >= colours.length) ? 0xFF542d18 : colours[day];
+                            for (int i = 0; i < 1; i++) {
+                                controller.masterBlock.particleSpawnQueue.add(new FermentationParticleType.Options(FermentationParticleType.PARTICLE_COLOURS[day]));
+                            }
+                        }
+                    }
+                } else {
+                    if (held.is(BrewchemyRegistry.Tags.YEAST)) {
+                        ItemStackHandlerUtils.insertAndModifyStack(controller.masterBlock.itemInventory.getInputHandler(), held, 1);
+                    }
+                    else if (held.is(BrewchemyRegistry.Items.BARREL_TAP.get()) && !controller.masterBlock.tapped) {
+                        controller.masterBlock.setTapped(true);
+                        held.shrink(1);
+                        controller.sync();
                     }
                 }
 
-            }
-
-            if (held.is(BrewchemyRegistry.Tags.YEAST)) {
-                ItemStackHandlerUtils.insertAndModifyStack(controller.masterBlock.itemInventory.getInputHandler(), held, 1);
             }
 
         }
@@ -253,12 +258,9 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
     @Override
     public void startRecipe(FermentationRecipe recipeToWork) {
         super.startRecipe(recipeToWork);
-        catalystRemaining = TickUtils.minecraftDaysToTicks(1) * itemInventory.getInputHandler().getStackInSlot(0).getCount();
-        fermentationStartingTick = tick;
-        if (level instanceof ServerLevel serverLevel) {
-            for (int i = 0; i < 5; i++) {
-                particleSpawnQueue.add(new FermentationParticleType.Options(FermentationParticleType.PARTICLE_COLOURS[0]));
-            }
+        if (catalystRemaining <= 0) {
+            ItemStack cat = itemInventory.getInputHandler().getStackInSlot(0);
+            catalystRemaining = TickUtils.minecraftDaysToTicks(1);
         }
     }
 
@@ -267,19 +269,20 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         if (tapped) return;
         if (fluidInventory.getFluidInTank() == null) return;
         inputFluid = new AgeableAlcoholStack(fluidInventory.getFluidInTank());
-        inputFluid.ageAlcohol(1);
+
+        if (fermentationStartingTick <= 0) {
+            fermentationStartingTick = tick + inputFluid.getAge();
+        }
 
         int age = inputFluid.getAge();
         int maturationStart = inputFluid.getAsType().getMatureTick();
         int spoilStart = inputFluid.getAsType().getSpoilTick();
         int[] perfectionWindow = inputFluid.getAsType().getPerfectionRange();
 
-        int ticksPast = tick - fermentationStartingTick;
-        int daysPast = ticksPast / TickUtils.minecraftDaysToTicks(1);
         int ticksPerDay = TickUtils.minecraftDaysToTicks(1);
 
-        if (ticksPast % ticksPerDay == 0) {
-            int day = ticksPast / ticksPerDay;
+        if (age % ticksPerDay == 0) {
+            int day = age / ticksPerDay;
             int[] colours = FermentationParticleType.PARTICLE_COLOURS;
             if (level instanceof ServerLevel serverLevel) {
                 int color = (day >= colours.length) ? 0xFF542d18 : colours[day];
@@ -315,13 +318,20 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
             case SPOILT:
                 break;
         }
-
         catalystRemaining--;
+        inputFluid.ageAlcohol(1);
+
+        if (catalystRemaining < 0) {
+            itemInventory.getStackInSlot(0).shrink(workingCatalyst);
+        }
 
     }
 
     private void transitionTo(FermentationState newState) {
         state = newState;
+        if (newState == FermentationState.PERFECT) {
+            level.playSound(null, worldPosition, BrewchemyRegistry.Sounds.DING.get(), SoundSource.BLOCKS);
+        }
     }
 
     public boolean isTapped() {
@@ -352,6 +362,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         this.catalystRemaining = pTag.getInt("catalyst_remaining");
         this.state = FermentationState.valueOf(pTag.getString("fermentation.json").toUpperCase());
         this.working = pTag.getBoolean("working");
+        this.workingCatalyst = pTag.getInt("catalystWorking");
         tag = pTag.getCompound("controller");
     }
 
@@ -365,6 +376,7 @@ public class FermentationBarrelBlockEntity extends RecipeBlockEntity<Fermentatio
         pTag.putInt("catalyst_remaining", this.catalystRemaining);
         pTag.putString("fermentation.json", state.toString().toLowerCase());
         pTag.putBoolean("working", this.working);
+        pTag.putInt("catalystWorking", this.workingCatalyst);
     }
 
     @Override

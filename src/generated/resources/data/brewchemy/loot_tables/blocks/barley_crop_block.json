@@ -27,7 +27,7 @@
             },
             {
               "type": "minecraft:item",
-              "name": "brewchemy:barley_crop_block"
+              "name": "brewchemy:barley_seed_item"
             }
           ]
         }
@@ -59,7 +59,7 @@
               }
             }
           ],
-          "name": "brewchemy:barley_crop_block"
+          "name": "brewchemy:barley_seed_item"
         }
       ],
       "rolls": 1.0

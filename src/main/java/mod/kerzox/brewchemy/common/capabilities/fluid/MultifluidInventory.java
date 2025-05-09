@@ -27,6 +27,8 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
 
     protected MultifluidInventory(InternalWrapper... tank) {
         super(tank);
+        tank[0].tank.setChangedCallback((c) -> onContentsChanged());
+        tank[1].tank.setChangedCallback((c) -> onContentsChanged());
         this.inputWrapper = tank[0];
         this.outputWrapper = tank[1];
         this.input = LazyOptional.of(() -> this.inputWrapper);
@@ -35,6 +37,8 @@ public class MultifluidInventory extends CombinedFluidInv implements IStrictInve
 
     public MultifluidInventory(InternalWrapper input, InternalWrapper output) {
         super(input, output);
+        input.tank.setChangedCallback((c) -> onContentsChanged());
+        output.tank.setChangedCallback((c) -> onContentsChanged());
         this.inputWrapper = input;
         this.outputWrapper = output;
         this.input = LazyOptional.of(() -> this.inputWrapper);

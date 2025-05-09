@@ -37,7 +37,6 @@ public class DynamicMultifluidTank extends MultifluidTank {
         return remaining;
     }
 
-
     public int getTotalCapacity() {
         return totalCapacity;
     }

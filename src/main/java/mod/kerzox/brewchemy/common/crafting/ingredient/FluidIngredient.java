@@ -73,7 +73,7 @@ public class FluidIngredient extends AbstractIngredient  {
     }
 
     public List<FluidStack> getFluidStacks() {
-        if (tag != null) {
+        if (tag != null && fluidStacks.isEmpty()) {
             for (Fluid fluid : ForgeRegistries.FLUIDS.tags().getTag(tag)) {
                 this.fluidStacks.add(new FluidStack(fluid, amount));
             }
@@ -89,18 +89,20 @@ public class FluidIngredient extends AbstractIngredient  {
 
     public boolean testFluid(@Nullable FluidStack fluidStack) {
         if (fluidStack == null) return false;
-        return fluidStacks.stream().anyMatch(f -> f.isFluidEqual(fluidStack));
+        return getFluidStacks().stream().anyMatch(f -> f.isFluidEqual(fluidStack));
     }
 
     public boolean testFluidWithAmount(@Nullable FluidStack fluidStack, boolean ignoreTag) {
         if (fluidStack == null) return false;
 
-        return fluidStacks.stream().allMatch(f -> ignoreTag ? f.getFluid() == fluidStack.getFluid() && f.getAmount() <= fluidStack.getAmount() : f.isFluidEqual(fluidStack) && f.getAmount() <= fluidStack.getAmount());
+        return getFluidStacks().stream().anyMatch(f -> ignoreTag ?
+                f.getFluid() == fluidStack.getFluid() && f.getAmount() <= fluidStack.getAmount() :
+                f.isFluidEqual(fluidStack) && f.getAmount() <= fluidStack.getAmount());
     }
 
     public boolean testExactMatch(@Nullable FluidStack fluidStack) {
         if (fluidStack == null) return false;
-        return fluidStacks.stream().allMatch(f -> f.isFluidStackIdentical(fluidStack));
+        return getFluidStacks().stream().anyMatch(f -> f.isFluidStackIdentical(fluidStack));
     }
 
 

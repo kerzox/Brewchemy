@@ -16,10 +16,10 @@ import java.util.stream.Stream;
 public class MultifluidTank implements IFluidHandler, ICompoundSerializer {
 
     private FluidStorage[] fluidTanks;
-
     public MultifluidTank(FluidStorage... tanks) {
         this.fluidTanks = tanks;
     }
+    private IChanged callbackOnChanged;
 
     public MultifluidTank(Stream<FluidStorage> uStream) {
         List<FluidStorage> tanks = uStream.toList();
@@ -27,6 +27,11 @@ public class MultifluidTank implements IFluidHandler, ICompoundSerializer {
         for (int i = 0; i < tanks.size(); i++) {
             fluidTanks[i] = tanks.get(i);
         }
+    }
+
+    public MultifluidTank setChangedCallback(IChanged callFunction) {
+        this.callbackOnChanged = callFunction;
+        return this;
     }
 
     public static MultifluidTank of(int tanks, int capacity) {
@@ -108,7 +113,7 @@ public class MultifluidTank implements IFluidHandler, ICompoundSerializer {
     }
 
     protected void onContentsChanged() {
-
+        if (callbackOnChanged != null) callbackOnChanged.onChanged(this);
     }
 
     @NotNull
@@ -201,8 +206,12 @@ public class MultifluidTank implements IFluidHandler, ICompoundSerializer {
         return new MultifluidTank(storage);
     }
 
-
     public void setFluidInTank(int tank, FluidStack fluid) {
         this.fluidTanks[tank].setFluid(fluid);
     }
+
+    public interface IChanged {
+        void onChanged(MultifluidTank tankChanged);
+    }
+
 }

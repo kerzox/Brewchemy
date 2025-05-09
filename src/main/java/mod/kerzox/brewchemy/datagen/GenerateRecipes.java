@@ -221,6 +221,13 @@ public class GenerateRecipes extends RecipeProvider {
                 SizeSpecificIngredient.of(BrewchemyRegistry.Items.BREWERS_YEAST_ITEM.get(), 1),
                 FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.BEER_STOUT.getFluid().get(), 1)),
                 1).build(consumer);
+
+//        new FermentationRecipe.RecipeBuilder(
+//                new ResourceLocation(Brewchemy.MODID, "fermenting_test"),
+//                new FluidStack(BrewchemyRegistry.Fluids.TEST_AGEABLE.getFluid().get(), 1),
+//                SizeSpecificIngredient.of(BrewchemyRegistry.Items.BREWERS_YEAST_ITEM.get(), 1),
+//                FluidIngredient.of(new FluidStack(BrewchemyRegistry.Fluids.TEST_AGEABLE.getFluid().get(), 1)),
+//                1).build(consumer);
     }
 
 }

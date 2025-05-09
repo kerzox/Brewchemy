@@ -16,6 +16,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -74,8 +75,11 @@ public class BrewingKettleGuiClick {
                                                 inventory.getInputWrapper(),
                                                 iFluidHandlerItem.getTankCapacity(i), player, true);
                                 if (result.success) {
-                                    brewingMenu.setCarried(result.result);
-                                    return;
+                                    if (brewingMenu.getCarried().getCount() == 1) {
+                                        brewingMenu.setCarried(result.result);
+                                    } else {
+                                        ItemHandlerHelper.giveItemToPlayer(player, result.result);
+                                    }
                                 }
                             } else {
                                 for (int i1 = 0; i1 < inventory.getTanks(); i1++) {
@@ -84,7 +88,12 @@ public class BrewingKettleGuiClick {
 
                                     FluidActionResult result = FluidUtil.tryFillContainer(packet.itemStack, temp, iFluidHandlerItem.getTankCapacity(i), player, true);
                                     if (result.success) {
-                                        brewingMenu.setCarried(result.result);
+                                        if (brewingMenu.getCarried().isEmpty()) {
+                                            brewingMenu.setCarried(result.result);
+                                        } else {
+                                            ItemHandlerHelper.giveItemToPlayer(player, result.result);
+                                            brewingMenu.getCarried().shrink(1);
+                                        }
                                         inventory.getFluidInTank(i1).shrink(inventory.getFluidInTank(i1).getAmount() - temp.getFluidInTank(0).getAmount());
                                         return;
                                     }

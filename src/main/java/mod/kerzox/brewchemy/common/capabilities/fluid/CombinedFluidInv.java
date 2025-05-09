@@ -2,7 +2,6 @@ package mod.kerzox.brewchemy.common.capabilities.fluid;
 
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.NotNull;
 
 public class CombinedFluidInv implements IFluidHandler {
@@ -111,7 +110,8 @@ public class CombinedFluidInv implements IFluidHandler {
     {
         int ret = 0;
         for (int i = 0; i < slotCount; i++) {
-            ret = getHandlerFromSlot(i).fill(resource, action);
+            IFluidHandler handler = getHandlerFromSlot(i);
+            ret = handler.fill(resource, action);
             if (ret != 0) {
                 onContentsChanged();
                 return ret;

@@ -1,8 +1,10 @@
 package mod.kerzox.brewchemy.common.blockentity;
 
 import com.mojang.datafixers.util.Pair;
+import mod.kerzox.brewchemy.client.sounds.BrewingKettleSoundInstance;
 import mod.kerzox.brewchemy.client.ui.animation.brewing.BrewingKettleAnimationHandler;
 import mod.kerzox.brewchemy.client.ui.menu.BrewingMenu;
+import mod.kerzox.brewchemy.common.block.base.IClientTickable;
 import mod.kerzox.brewchemy.common.blockentity.base.RecipeBlockEntity;
 import mod.kerzox.brewchemy.common.capabilities.fluid.DynamicMultifluidTank;
 import mod.kerzox.brewchemy.common.capabilities.fluid.MultifluidInventory;
@@ -14,6 +16,7 @@ import mod.kerzox.brewchemy.common.data.BrewingKettleHeating;
 import mod.kerzox.brewchemy.common.event.TickUtils;
 import mod.kerzox.brewchemy.common.network.CompoundTagPacket;
 import mod.kerzox.brewchemy.common.network.PacketHandler;
+import mod.kerzox.brewchemy.common.util.SoundHandler;
 import mod.kerzox.brewchemy.registry.BrewchemyRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,7 +42,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Stack;
 
-public class BrewingKettleBlockEntity extends RecipeBlockEntity<BrewingRecipe> implements MenuProvider {
+public class BrewingKettleBlockEntity extends RecipeBlockEntity<BrewingRecipe> implements MenuProvider, IClientTickable {
 
     /**
      * Modified fluid inventory from base
@@ -61,8 +64,12 @@ public class BrewingKettleBlockEntity extends RecipeBlockEntity<BrewingRecipe> i
                             return ((DynamicMultifluidTank)fluidHandler.getInputWrapper().get()).getRemainingCapacity(tank);
                         }
 
-                    })
-                    .addInput(Direction.values()).removeInputs(Direction.DOWN).addOutput(Direction.DOWN);
+                    }){
+                @Override
+                protected void onContentsChanged() {
+                    checkRecipe();
+                }
+            }.addInput(Direction.values()).removeInputs(Direction.DOWN).addOutput(Direction.DOWN);
     private final ItemInventory itemHandler = new ItemInventory(new ItemInventory.InternalWrapper(2, true), new ItemInventory.InternalWrapper(1, false)) {
         @Override
         public void onContentsChanged(int slot, boolean input) {
@@ -90,11 +97,6 @@ public class BrewingKettleBlockEntity extends RecipeBlockEntity<BrewingRecipe> i
 
     @Override
     public boolean onPlayerClick(Level pLevel, Player pPlayer, BlockPos pPos, InteractionHand pHand, BlockHitResult pHit) {
-
-        if (!pLevel.isClientSide) {
-            pPlayer.sendSystemMessage(Component.literal("Heat value: " + this.heat));
-        }
-
         return super.onPlayerClick(pLevel, pPlayer, pPos, pHand, pHit);
     }
 
@@ -105,6 +107,7 @@ public class BrewingKettleBlockEntity extends RecipeBlockEntity<BrewingRecipe> i
 
     @Override
     protected boolean hasAResult(BrewingRecipe workingRecipe) {
+        if (getRecipeInventory() == null) return false;
         return workingRecipe.assembleResultItems(getRecipeInventory(), RegistryAccess.EMPTY).length > 0;
     }
 
@@ -131,6 +134,11 @@ public class BrewingKettleBlockEntity extends RecipeBlockEntity<BrewingRecipe> i
     }
 
     @Override
+    public void clientTick(SoundHandler soundHandler) {
+        soundHandler.play(new BrewingKettleSoundInstance(this));
+    }
+
+    @Override
     public void tick() {
         super.tick();
 
@@ -148,6 +156,8 @@ public class BrewingKettleBlockEntity extends RecipeBlockEntity<BrewingRecipe> i
                 this.heat = this.heat < maxHeatFromSource ? Math.min(maxHeatFromSource, this.heat + temperatureValue) : Math.max(maxHeatFromSource, this.heat - temperatureValue);
             }
         }
+
+        syncBlockEntity();
 
     }
 
@@ -228,6 +238,7 @@ public class BrewingKettleBlockEntity extends RecipeBlockEntity<BrewingRecipe> i
     public ScreenData getScreenData() {
         return screenData;
     }
+
 
     public class ScreenData {
 

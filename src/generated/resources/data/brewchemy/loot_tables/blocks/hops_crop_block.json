@@ -27,7 +27,7 @@
             },
             {
               "type": "minecraft:item",
-              "name": "brewchemy:hops_crop_block"
+              "name": "brewchemy:hops_seed_item"
             }
           ]
         }
@@ -59,7 +59,7 @@
               }
             }
           ],
-          "name": "brewchemy:hops_crop_block"
+          "name": "brewchemy:hops_seed_item"
         }
       ],
       "rolls": 1.0

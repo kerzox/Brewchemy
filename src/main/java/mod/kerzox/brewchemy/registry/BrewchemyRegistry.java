@@ -1,10 +1,12 @@
 package mod.kerzox.brewchemy.registry;
 
+import mod.kerzox.brewchemy.Brewchemy;
 import mod.kerzox.brewchemy.client.ui.menu.BrewingMenu;
 import mod.kerzox.brewchemy.client.ui.menu.MillingMenu;
 import mod.kerzox.brewchemy.common.block.*;
 import mod.kerzox.brewchemy.common.block.base.BrewchemyEntityBlock;
 import mod.kerzox.brewchemy.common.blockentity.*;
+import mod.kerzox.brewchemy.common.capabilities.fluid.FluidInventoryItem;
 import mod.kerzox.brewchemy.common.crafting.recipe.BrewingRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.CultureJarRecipe;
 import mod.kerzox.brewchemy.common.crafting.recipe.FermentationRecipe;
@@ -64,10 +66,12 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -75,6 +79,7 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -156,6 +161,16 @@ public class BrewchemyRegistry {
         public static final Supplier<SoundEvent> FERMENTING_BUBBLES = SOUND_EVENTS.register(
                 "bubbling",
                 () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MODID, "bubbling"))
+        );
+
+        public static final Supplier<SoundEvent> BOILING_LOOP = SOUND_EVENTS.register(
+                "boiling_loop",
+                () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MODID, "boiling_loop"))
+        );
+
+        public static final Supplier<SoundEvent> DING = SOUND_EVENTS.register(
+                "ding",
+                () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MODID, "ding"))
         );
 
         public static void init() {
@@ -254,6 +269,14 @@ public class BrewchemyRegistry {
                 true,
                 "hops_item", () -> new Item(new Item.Properties()));
 
+        public static final RegistryObject<Item> HOPS_SEED_ITEM = register(
+                true,
+                "hops_seed_item", () -> new PlantItem.Seed(Blocks.HOPS_CROP_BLOCK, new Item.Properties()));
+
+        public static final RegistryObject<Item> BARLEY_SEED_ITEM = register(
+                true,
+                "barley_seed_item", () -> new PlantItem.Seed(Blocks.BARLEY_CROP_BLOCK, new Item.Properties()));
+
         public static final RegistryObject<Item> BARREL_TAP = register(
                 true,
                 "barrel_tap_item", () -> new Item(new Item.Properties()));
@@ -270,13 +293,18 @@ public class BrewchemyRegistry {
                 true,
                 "wild_yeast_item", () -> new Item(new Item.Properties()));
 
+        public static final RegistryObject<Item> SOFT_MALLET = register(
+                true,
+                "soft_mallet_item", () -> new Item(new Item.Properties()));
+
         public static final RegistryObject<Item> PINT_ITEM = register(
                 false,
                 "pint_item", () -> new PintItem(new Item.Properties().stacksTo(1)));
 
         public static final RegistryObject<Item> FERMENTATION_BARREL_ITEM = register(
                 false,
-                "fermentation_barrel_item", () -> new BrewchemyBlockItem(BrewchemyRegistry.Blocks.FERMENTATION_BARREL_BLOCK.get(), new Item.Properties()));
+                "fermentation_barrel_item",
+                () -> new BrewchemyBlockItem(BrewchemyRegistry.Blocks.FERMENTATION_BARREL_BLOCK.get(), new Item.Properties()));
 
         public static void init() {
 
@@ -298,7 +326,7 @@ public class BrewchemyRegistry {
         public static final HashMap<String, RegistryObject<Block>> ALL_BLOCKS = new HashMap<>();
 
         public static final makeBlock<BarleyCropBlock> BARLEY_CROP_BLOCK
-                = makeBlock.buildCustomSuppliedItem("barley_crop_block",
+                = makeBlock.build("barley_crop_block",
                 BarleyCropBlock::new,
                 (BlockBehaviour.Properties.of()
                         .mapColor(MapColor.PLANT)
@@ -306,7 +334,7 @@ public class BrewchemyRegistry {
                         .randomTicks()
                         .instabreak()
                         .sound(SoundType.CROP)
-                        .pushReaction(PushReaction.DESTROY)), () -> new BarleyItem.Seed(new Item.Properties()));
+                        .pushReaction(PushReaction.DESTROY)), false);
 
         public static final makeBlock<HopsCropBlock> HOPS_CROP_BLOCK
                 = makeBlock.build("hops_crop_block",
@@ -317,13 +345,14 @@ public class BrewchemyRegistry {
                         .randomTicks()
                         .instabreak()
                         .sound(SoundType.CROP)
-                        .pushReaction(PushReaction.DESTROY)), true);
+                        .pushReaction(PushReaction.DESTROY)), false);
 
         public static final makeBlock<MillingBlock> MILLING_BLOCK
                 = makeBlock.build("milling_block",
                 p -> new MillingBlock(BlockEntities.MILLING_BLOCK_ENTITY.getType(), p),
                 (BlockBehaviour.Properties.of()
                         .mapColor(MapColor.STONE)
+                        .strength(2.0F)
                         .sound(SoundType.STONE)
                         .requiresCorrectToolForDrops().strength(1.5F, 3.0F)
                         .pushReaction(PushReaction.NORMAL)), true);
@@ -334,6 +363,7 @@ public class BrewchemyRegistry {
                 (BlockBehaviour.Properties.of()
                         .mapColor(MapColor.COLOR_ORANGE)
                         .sound(SoundType.NETHERITE_BLOCK)
+                        .strength(3.0F)
                         .noOcclusion()
                         .requiresCorrectToolForDrops().strength(1.5F, 3.0F)
                         .pushReaction(PushReaction.DESTROY)), () -> new BrewingKettleItem(new Item.Properties()));
@@ -344,6 +374,7 @@ public class BrewchemyRegistry {
                 (BlockBehaviour.Properties.of()
                         .mapColor(MapColor.COLOR_ORANGE)
                         .sound(SoundType.NETHERITE_BLOCK)
+                        .strength(3.0F)
                         .noOcclusion()
                         .requiresCorrectToolForDrops().strength(1.5F, 3.0F)
                         .pushReaction(PushReaction.DESTROY)), false);
@@ -354,6 +385,7 @@ public class BrewchemyRegistry {
                 (BlockBehaviour.Properties.of()
                         .mapColor(MapColor.WOOD)
                         .sound(SoundType.DECORATED_POT)
+                        .strength(1.0F)
                         .noOcclusion()
                         .pushReaction(PushReaction.DESTROY)), true);
 
@@ -402,6 +434,7 @@ public class BrewchemyRegistry {
                 (BlockBehaviour.Properties.of()
                         .mapColor(MapColor.WOOD)
                         .sound(SoundType.DECORATED_POT)
+                        .strength(1.0F)
                         .noOcclusion()
                         .pushReaction(PushReaction.DESTROY)), false);
 
@@ -410,6 +443,7 @@ public class BrewchemyRegistry {
                 FermentationBarrelBlock::new,
                 (BlockBehaviour.Properties.of()
                         .mapColor(MapColor.WOOD)
+                        .strength(2.0F)
                         .sound(SoundType.WOOD)
                         .noOcclusion()), false);
 
@@ -418,6 +452,7 @@ public class BrewchemyRegistry {
                 BenchSeatBlock::new,
                 (BlockBehaviour.Properties.of()
                         .mapColor(MapColor.WOOD)
+                        .strength(2.0F)
                         .sound(SoundType.WOOD)
                         .noOcclusion()), true);
 
@@ -426,6 +461,7 @@ public class BrewchemyRegistry {
                 TableBlock::new,
                 (BlockBehaviour.Properties.of()
                         .mapColor(MapColor.WOOD)
+                        .strength(2.0F)
                         .sound(SoundType.WOOD)
                         .noOcclusion()), true);
 
@@ -569,6 +605,11 @@ public class BrewchemyRegistry {
 
         public static final makeFluid<BrewchemyFluid> WORT = makeFluid.build("wort",
                 false, true, () -> BrewchemyFluid.createColoured(0xFF92791e, false));
+
+//        public static final makeFluid<BrewchemyFluid> TEST_AGEABLE = makeFluid.build("test_ageable",
+//                false, true, () -> AlcoholicFluid.create(0xFFf99100,
+//                        new int[] { 400, 600 },
+//                        300, 600));
 
         public static final makeFluid<BrewchemyFluid> BEER_ALE = makeFluid.build("beer_ale",
                 false, true, () -> AlcoholicFluid.create(0xFFf99100,

@@ -1,5 +1,6 @@
 package mod.kerzox.brewchemy.common.util;
 
+import mod.kerzox.brewchemy.client.sounds.LoopingSoundInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -28,7 +29,15 @@ public class SoundHandler {
     }
 
     public static boolean isSoundPlayingAtPos(BlockPos pos) {
-        return SOUNDS_AT_POS.get(pos) != null;
+
+        if (SOUNDS_AT_POS.get(pos) != null) {
+            SoundInstance instance = SOUNDS_AT_POS.get(pos);
+            if (instance instanceof LoopingSoundInstance loopingSoundInstance) {
+                return !loopingSoundInstance.isStopped();
+            }
+        }
+
+        return false;
     }
 
     public static void removeSoundAt(BlockPos pos) {
@@ -41,19 +50,21 @@ public class SoundHandler {
     public void play(SoundInstance instance) {
         BlockPos pos = BlockPos.containing(instance.getX(), instance.getY(), instance.getZ());
 
-        // remove our sound at position if client is not near it
-        if (!isClientPlayerInRange(pos)) {
-            if (isSoundPlayingAtPos(pos)) {
-                removeSoundAt(pos);
-                return;
-            }
-        }
         if (isClientPlayerInRange(pos)) {
             if (!isSoundPlayingAtPos(pos)) {
                 SOUNDS_AT_POS.put(pos, instance);
                 Minecraft.getInstance().getSoundManager().play(SOUNDS_AT_POS.get(pos));
             }
         }
+
+        // remove our sound at position if client is not near it
+        if (!isClientPlayerInRange(pos)) {
+            if (isSoundPlayingAtPos(pos)) {
+               // removeSoundAt(pos);
+                return;
+            }
+        }
+
     }
 
     public static boolean isClientPlayerInRange(BlockPos pos) {
@@ -70,7 +81,7 @@ public class SoundHandler {
             return dist < (double)(f1 * f1);
         }
 
-        return true;
+        return dist < 32;
 
     }
 

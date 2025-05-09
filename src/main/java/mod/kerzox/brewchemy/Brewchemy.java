@@ -78,16 +78,17 @@ public class Brewchemy
                     event.accept(value.getBucket());
                 }
             }
-            event.accept(BrewchemyRegistry.Blocks.BARLEY_CROP_BLOCK.get());
+            event.accept(BrewchemyRegistry.Items.BARLEY_SEED_ITEM.get());
             event.accept(BrewchemyRegistry.Items.BARLEY_ITEM.get());
             event.accept(BrewchemyRegistry.Items.ROASTED_BARLEY_ITEM.get());
             event.accept(BrewchemyRegistry.Items.MILLED_BARLEY_ITEM.get());
-            event.accept(BrewchemyRegistry.Blocks.HOPS_CROP_BLOCK.get());
+            event.accept(BrewchemyRegistry.Items.HOPS_SEED_ITEM.get());
             event.accept(BrewchemyRegistry.Items.HOPS_ITEM.get());
             event.accept(BrewchemyRegistry.Items.BREWERS_YEAST_ITEM.get());
             event.accept(BrewchemyRegistry.Items.WILD_YEAST_ITEM.get());
             event.accept(BrewchemyRegistry.Items.LAGER_YEAST_ITEM.get());
             event.accept(BrewchemyRegistry.Items.ROPE_ITEM.get());
+            event.accept(BrewchemyRegistry.Items.SOFT_MALLET.get());
             event.accept(BrewchemyRegistry.Blocks.BREWING_KETTLE_BLOCK.get());
             event.accept(BrewchemyRegistry.Blocks.CULTURE_JAR_BLOCK.get());
             event.accept(BrewchemyRegistry.Items.FERMENTATION_BARREL_ITEM.get());

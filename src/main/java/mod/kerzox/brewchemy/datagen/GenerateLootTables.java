@@ -39,19 +39,19 @@ public class GenerateLootTables extends VanillaBlockLoot {
     protected void generate() {
         dropNothing(BrewchemyRegistry.Blocks.PINT_GLASS_BLOCK.get());
         //dropNothing(BrewchemyRegistry.Blocks.BREWING_KETTLE_TOP_BLOCK.get());
-
+        dropNothing(BrewchemyRegistry.Blocks.BREWING_KETTLE_TOP_BLOCK.get());
         dropSelf(BrewchemyRegistry.Blocks.BENCH_SEAT_BLOCK.get());
         dropSelf(BrewchemyRegistry.Blocks.TABLE_BLOCK.get());
 
         createCrop(BarleyCropBlock.growthStages, 5,
                 BrewchemyRegistry.Blocks.BARLEY_CROP_BLOCK.get(),
                 BrewchemyRegistry.Items.BARLEY_ITEM.get(),
-                BrewchemyRegistry.Blocks.BARLEY_CROP_BLOCK.get().asItem());
+                BrewchemyRegistry.Items.BARLEY_SEED_ITEM.get());
         createCrop(HopsCropBlock.growthStages, 5,
                 BrewchemyRegistry.Blocks.HOPS_CROP_BLOCK.get(),
                 BrewchemyRegistry.Items.HOPS_ITEM.get(),
-                BrewchemyRegistry.Blocks.HOPS_CROP_BLOCK.get().asItem());
-        dropOther(BrewchemyRegistry.Blocks.BREWING_KETTLE_TOP_BLOCK.get(), BrewchemyRegistry.Blocks.BREWING_KETTLE_BLOCK.get());
+                BrewchemyRegistry.Items.HOPS_SEED_ITEM.get());
+
         createStandardTable(
                 BrewchemyRegistry.Blocks.BREWING_KETTLE_BLOCK.get(),
                 BrewchemyRegistry.BlockEntities.BREWING_KETTLE_BLOCK_ENTITY.get(),
